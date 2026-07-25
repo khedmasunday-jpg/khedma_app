@@ -1,0 +1,47 @@
+{
+  "cli": {
+    "version": ">= 5.0.0",
+    "requireCommitMessage": true
+  },
+  "build": {
+    "development": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:5000/api"
+      },
+      "web": {
+        "buildType": "development"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:5000/api"
+      },
+      "web": {
+        "buildType": "preview"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.yourschool.edu/api"
+      },
+      "distribution": "store",
+      "releaseChannel": "prod",
+      "android": {
+        "buildType": "aab",
+        "withoutNativeDebugging": true,
+        "enableProguardInReleaseBuilds": true
+      },
+      "ios": {
+        "distribution": "app-store",
+        "withoutNativeDebugging": true
+      },
+      "web": {
+        "buildType": "web"
+      }
+    }
+  }
+}
+

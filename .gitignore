@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+server/node_modules/
+mobile/node_modules/
+package-lock.json
+!package.json
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+server/.env
+mobile/.env
+server/config/drive-service-account.json
+server/config/*.json
+*.pem
+*.key
+
+# Backups & Data Dumps
+server/backups/
+*.json.gz
+*.gz
+*.sql
+*.dump
+
+# Logs & Process Files
+*.log
+server.log
+expo.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.services.pid
+*.pid
+
+# Expo & Build Output
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+.expo/
+dist/
+build/
+*.apk
+*.aab
+*.ipa
+
+# System & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

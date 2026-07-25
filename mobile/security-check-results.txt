@@ -1,0 +1,73 @@
+Security Check Results - 09 يول, 2026 EEST 01:35:31 م
+==============================
+
+1. Checking for hardcoded URLs...
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/screens/WhatsAppTestScreen.js:            placeholder="e.g. 201000000000"
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/utils/LanguageContext.js:    phonePlaceholder: "e.g. 01000000000",
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/utils/LanguageContext.js:    phonePlaceholder: "مثال: 01000000000",
+⚠️  WARNING: Hardcoded URLs found in source code!
+   These should use environment variables (EXPO_PUBLIC_API_URL)
+
+2. Checking for console statements...
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/screens/AddStaffScreen.js:      console.log('Submitting with token:', token ? 'Token exists' : 'No token');
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/screens/AddStaffScreen.js:      console.log('API Base:', API_URL);
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/screens/WhatsAppTestScreen.js:      console.error('Failed to fetch staff:', err);
+
+⚠️  WARNING: Console statements found that don't use logger utility!
+   These should be replaced with: import { logger } from '../utils/logger';
+   Then use: logger.log(), logger.warn(), etc.
+
+3. Checking for tokens in navigation params...
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/screens/AssignStudentsScreen1.js:              onPress={() => navigation.navigate('AssignStudentsScreen2', { token, teacher })}
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/screens/ClassDisplayScreen.js:          onPress={() => navigation.navigate('AttendanceSheet', { token, role })}
+/run/media/georgehany/New Volume/New folder (4)/New folder (2)/New Folder/work/khedma_app/mobile/src/screens/EditStaffListScreen.js:      onPress={() => navigation.navigate('EditStaffDetailScreen', { token, role, userId: item._id })}
+
+⚠️  WARNING: Tokens may be passed via navigation!
+   Store tokens in secure storage instead (expo-secure-store)
+
+4. Checking for hardcoded secrets/API keys...
+
+⚠️  WARNING: Potential hardcoded secrets found!
+   Move these to environment variables
+
+5. Checking for debug flags...
+✅ No debug flags set to true
+
+6. Running npm audit...
+
+xlsx  *
+Severity: high
+Prototype Pollution in sheetJS - https://github.com/advisories/GHSA-4r6h-8v6p-xvw6
+SheetJS Regular Expression Denial of Service (ReDoS) - https://github.com/advisories/GHSA-5pgg-2g8v-p4x9
+No fix available
+node_modules/xlsx
+
+yaml  2.0.0 - 2.8.2
+Severity: moderate
+yaml is vulnerable to Stack Overflow via deeply nested YAML collections - https://github.com/advisories/GHSA-48c2-rrv3-qjmp
+fix available via `npm audit fix`
+node_modules/yaml
+
+29 vulnerabilities (1 low, 14 moderate, 13 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+Some issues need review, and may require choosing
+a different dependency.
+
+⚠️  WARNING: High or critical vulnerabilities found!
+   Run: npm audit fix
+
+7. Checking for source map configuration...
+✅ Source maps disabled in metro.config.js
+
+8. Checking app.json security settings...
+✅ Android debugging disabled
+
+9. Checking for committed .env files...
+⚠️  WARNING: .env files should not be committed to git!
+   These should be in .gitignore
+
+==============================
+Security check completed at 09 يول, 2026 EEST 01:35:42 م

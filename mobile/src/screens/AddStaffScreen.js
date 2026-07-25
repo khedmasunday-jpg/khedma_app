@@ -1,0 +1,1300 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, ScrollView, Alert, Modal, TouchableOpacity, Platform, StyleSheet, Switch } from 'react-native';
+import axios from 'axios';
+import { logger } from '../utils/logger';
+import { API_URL } from '../config/api';
+import { getAuthToken } from '../config/authSession';
+import { useLanguage } from '../utils/LanguageContext';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { loadContactsForPicker } from '../utils/contactPicker';
+import { formatDateDDMMYYYY } from '../utils/dateFormatter';
+let Clipboard = null;
+if (typeof Platform !== 'undefined' && Platform.OS !== 'web') {
+  try {
+    Clipboard = require('expo-clipboard');
+  } catch (e) {
+    Clipboard = null;
+  }
+}
+// we'll use Facebook-style pickers for birthdate (day/month/year)
+import Constants from 'expo-constants';
+import * as Device from 'expo-device';
+import { Picker } from '@react-native-picker/picker';
+
+// Dynamically require the modal datetime picker only on native platforms
+let DateTimePickerModal = null;
+if (Platform.OS !== 'web') {
+  try {
+    DateTimePickerModal = require('react-native-modal-datetime-picker').default;
+  } catch (e) {
+    DateTimePickerModal = null;
+  }
+}
+
+// Use centralized API_URL from config instead of hardcoded values
+const initialStaff = {
+  fullName: '',
+  username: '',
+  password: '',
+  role: '',
+  isActive: true,
+  googleCode: '',
+  address: '',
+  phonenumber: '',
+  birthdate: '',
+  studentsassigned: [],
+  assignedclass: '',
+  deviceId: '',
+  lockedDeviceId: '',
+  assignedlevel: '',
+  isClassLeader: false,
+};
+
+// Classes per level
+// Use string keys so web <select> and native Picker keep values consistent
+const CLASS_OPTIONS = {
+  '1': ['فصل السيرافيم', 'فصل الشاروبيم'],
+  '2': ['الملاك رفائيل', 'الملاك ميخائيل'],
+  '3': ['الملاك سوريال', 'الملاك غبريال'],
+};
+
+const classTranslations = {
+  'فصل السيرافيم': 'classSeraphim',
+  'فصل الشاروبيم': 'classCherubim',
+  'الملاك رفائيل': 'classRaphael',
+  'الملاك ميخائيل': 'classMichael',
+  'الملاك سوريال': 'classSuriel',
+  'الملاك غبريال': 'classGabriel',
+};
+
+export default function AddStaffScreen({ route, navigation }) {
+  const { token: routeToken, role: requesterRole } = route?.params || {};
+  const token = routeToken || getAuthToken();
+  const { t, locale } = useLanguage();
+  const isRtl = locale === 'ar';
+  const [stats, setStats] = useState({ principalCount: 0, coPrincipalCount: 0 });
+  const [staff, setStaff] = useState(initialStaff);
+  const [staffList, setStaffList] = useState([]);
+  const [credModalVisible, setCredModalVisible] = useState(false);
+  const [generatedCreds, setGeneratedCreds] = useState(null);
+  const [studentQuery, setStudentQuery] = useState('');
+  const [studentResults, setStudentResults] = useState([]);
+  const [selectedStudents, setSelectedStudents] = useState([]); // kept but not shown
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [inlineMessage, setInlineMessage] = useState('');
+
+  // Contact picker state
+  const [contactsList, setContactsList] = useState([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [contactPickerVisible, setContactPickerVisible] = useState(false);
+
+  const [customAlertVisible, setCustomAlertVisible] = useState(false);
+  const [customAlertTitle, setCustomAlertTitle] = useState('');
+  const [customAlertMessage, setCustomAlertMessage] = useState('');
+
+  // modernized overlay alert helper
+  const showAlert = (title, message) => {
+    setCustomAlertTitle(title);
+    setCustomAlertMessage(message || '');
+    setCustomAlertVisible(true);
+  };
+
+  const pickContactForStaff = async () => {
+    setLoadingContacts(true);
+    try {
+      const contacts = await loadContactsForPicker(showAlert);
+      if (contacts) {
+        setContactsList(contacts);
+        setContactPickerVisible(true);
+      }
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
+  const handleChange = (key, value) => setStaff({ ...staff, [key]: value });
+
+  // specialized role change handler: principal => no level/class, co-principal => level only
+  const handleRoleChange = (roleVal) => {
+    setStaff(prev => {
+      // normalize ar -> en roles
+      const normalized = String(roleVal).trim().replace(/\s+/g, '');
+      if (['امينالخدمة', 'أمينالخدمة', 'امينالخدمه', 'أمينالخدمه'].includes(normalized) || roleVal === 'principal') {
+        roleVal = 'principal';
+      } else if (['امينهالمرحله', 'امينهالمرحلة', 'امينهالمرحله', 'امینهالمرحله'].includes(normalized) || roleVal === 'co-principal') {
+        roleVal = 'co-principal';
+      } else if (['خادمفصل', 'خادم'].includes(normalized) || roleVal === 'teacher') {
+        roleVal = 'teacher';
+      }
+
+      if (roleVal === 'principal') {
+        // principal does not have level or class
+        return { ...prev, role: roleVal, assignedlevel: '', assignedclass: '' };
+      }
+      if (roleVal === 'co-principal') {
+        // co-principal has level but not class
+        const assignedLevels = stats.assignedCoPrincipalLevels || [];
+        const available = [1, 2, 3].filter(lvl => !assignedLevels.includes(lvl));
+        const defaultLvl = available.length > 0 ? String(available[0]) : '';
+        return { ...prev, role: roleVal, assignedlevel: defaultLvl, assignedclass: '' };
+      }
+      return { ...prev, role: roleVal };
+    });
+  };
+
+  const handleLevelChange = (lvl) => {
+    // lvl should be string key like '1','2','3' or ''
+    setStaff(prev => {
+      const next = { ...prev, assignedlevel: String(lvl || '') };
+      // only auto-set class when role is teacher (not co-principal)
+      if (prev.role !== 'co-principal') {
+        const opts = CLASS_OPTIONS[String(lvl)] || [];
+        next.assignedclass = opts.length ? opts[0] : '';
+      }
+      return next;
+    });
+  };
+
+  const handleClassChange = (cls) => {
+    setStaff(prev => ({ ...prev, assignedclass: cls }));
+  };
+
+  // generate username on demand (sparkles button)
+  const generateUsernameOnDemand = () => {
+    const name = staff.fullName;
+    // Get the first word from the name (works with Arabic or English)
+    const cleanName = (name || '').trim();
+    const parts = cleanName.split(/\s+/).filter(Boolean);
+    let base = 'user';
+    if (parts.length > 0) {
+      base = parts[0];
+    }
+    // Keep original characters (including Arabic) but remove spaces and special chars
+    base = base.replace(/[\s\-_\.]/g, '');
+    if (!base) base = 'user';
+    // Generate a 5 digit random number
+    const suffix = Math.floor(Math.random() * 90000 + 10000);
+    const username = `${base}${suffix}`;
+    
+    handleChange('username', username);
+  };
+
+  // Generate a complex password on demand (refresh button)
+  const generatePasswordOnDemand = () => {
+    const length = 16;
+    const uppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowers = 'abcdefghijklmnopqrstuvwxyz';
+    const digits = '0123456789';
+    const symbols = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+    const all = uppers + lowers + digits + symbols;
+    const rand = (chars) => chars.charAt(Math.floor(Math.random() * chars.length));
+    let pw = '';
+    // ensure at least two of each category
+    pw += rand(uppers) + rand(uppers);
+    pw += rand(lowers) + rand(lowers);
+    pw += rand(digits) + rand(digits);
+    pw += rand(symbols) + rand(symbols);
+    // fill remaining with random chars
+    for (let i = pw.length; i < length; i++) pw += rand(all);
+    // shuffle multiple times for better randomization
+    for (let i = 0; i < 3; i++) {
+      pw = pw.split('').sort(() => 0.5 - Math.random()).join('');
+    }
+    handleChange('password', pw);
+  };
+
+  React.useEffect(() => {
+    // Check if token exists
+    if (!token) {
+      const msg = 'No authentication token found. Please login again.';
+      setInlineMessage(msg);
+      showAlert('Authentication Error', msg);
+      return;
+    }
+
+    // fetch staff stats for role choices
+    (async () => {
+      try {
+        const res = await axios.get(`${API_URL}/users/staff-stats`, { 
+          headers: { Authorization: `Bearer ${token}` } 
+        });
+        setStats(res.data || {});
+      } catch (err) {
+        logger.error('Failed to fetch staff stats:', err);
+        if (err.response?.status === 401) {
+          const msg = 'Your session has expired. Please login again.';
+          setInlineMessage(msg);
+          showAlert('Session Expired', msg);
+        }
+      }
+    })();
+    
+    // populate device ids
+    try {
+      const devId = Device.osInternalBuildId || Device.deviceName || Constants.installationId || '';
+      handleChange('deviceId', devId);
+      handleChange('lockedDeviceId', devId);
+    } catch (e) {}
+  }, [token]);
+
+  const formatDateNoYear = (dateStr) => {
+    return formatDateDDMMYYYY(dateStr);
+  };
+
+  // Use a canonical year so the picker is used only for day+month
+  const PICKER_YEAR = 2000;
+  const toPickerDateObj = (dateStr) => {
+    try {
+      const d = dateStr ? new Date(dateStr) : new Date();
+      d.setFullYear(PICKER_YEAR);
+      return d;
+    } catch (e) {
+      const d = new Date(); d.setFullYear(PICKER_YEAR); return d;
+    }
+  };
+  const toStoredIsoWithPickerYear = (dateObj) => {
+    try {
+      const d = new Date(dateObj);
+      d.setFullYear(PICKER_YEAR);
+      return d.toISOString();
+    } catch (e) {
+      const d = new Date(); d.setFullYear(PICKER_YEAR); return d.toISOString();
+    }
+  };
+
+  const handleAddOne = () => {
+    // Validate required fields and show which are missing
+    const missing = [];
+    if (!staff.fullName || String(staff.fullName).trim() === '') missing.push('fullName');
+    if (!staff.username || String(staff.username).trim() === '') missing.push('username');
+    if (!staff.password || String(staff.password).trim() === '') missing.push('password');
+    if (!staff.role || String(staff.role).trim() === '') missing.push('role');
+    if (missing.length) {
+      const labels = {
+        fullName: 'الاسم',
+        username: 'اسم المستخدم',
+        password: 'كلمة المرور',
+        role: 'المنصب',
+      };
+      const human = missing.map(k => labels[k] || k).join(', ');
+      const msg = `من فضلك أدخل: ${human}`;
+      setInlineMessage(msg);
+      showAlert('حقول مفقودة', msg);
+      return;
+    }
+
+    // Prepare a sanitized copy to add to the list
+    const toAdd = {
+      fullName: String(staff.fullName).trim(),
+      username: String(staff.username).trim(),
+      password: String(staff.password),
+      role: String(staff.role),
+      isActive: staff.isActive === undefined ? true : !!staff.isActive,
+      googleCode: staff.googleCode || '',
+      address: staff.address || '',
+      phonenumber: staff.phonenumber || '',
+      birthdate: staff.birthdate || '',
+      studentsassigned: [], // FIXED: Always send empty array instead of string
+      assignedclass: staff.assignedclass || '',
+      deviceId: staff.deviceId || '',
+      lockedDeviceId: staff.lockedDeviceId || '',
+      // don't send empty string for assignedlevel ('' -> Number('') === 0 which fails enum validation server-side)
+      assignedlevel: (staff.assignedlevel !== undefined && staff.assignedlevel !== '') ? staff.assignedlevel : undefined,
+    };
+
+    setStaffList(prev => [...prev, toAdd]);
+    setStaff(initialStaff);
+    setInlineMessage(locale === 'ar' ? 'تمت الإضافة إلى قائمة الانتظار' : 'Added to queue list');
+    // modal is only shown on submit all
+    showAlert(locale === 'ar' ? 'تمت الإضافة' : 'Added', locale === 'ar' ? 'العنصر أُضيف إلى قائمة الانتظار' : 'Item added to queue list.');
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Validate token first
+      if (!token) {
+        const msg = 'No authentication token. Please login again.';
+        setInlineMessage(msg);
+        showAlert('Authentication Error', msg);
+        return;
+      }
+
+      let toProcess = [...staffList];
+      let directFormSubmission = false;
+      if (toProcess.length === 0) {
+        if (staff.fullName || staff.username || staff.role) {
+          const missing = [];
+          if (!staff.fullName || String(staff.fullName).trim() === '') missing.push('fullName');
+          if (!staff.username || String(staff.username).trim() === '') missing.push('username');
+          if (!staff.password || String(staff.password).trim() === '') missing.push('password');
+          if (!staff.role || String(staff.role).trim() === '') missing.push('role');
+          if (missing.length) {
+            const labels = {
+              fullName: t('fullNameLabel') || 'الاسم',
+              username: t('usernameLabel') || 'اسم المستخدم',
+              password: t('passwordLabel') || 'كلمة المرور',
+              role: t('roleLabel') || 'المنصب',
+            };
+            const human = missing.map(k => labels[k] || k).join(', ');
+            const msg = locale === 'ar' ? `من فضلك أدخل: ${human}` : `Please fill out: ${human}`;
+            setInlineMessage(msg);
+            showAlert(locale === 'ar' ? 'حقول مفقودة' : 'Missing fields', msg);
+            return;
+          }
+          const toAdd = {
+            fullName: String(staff.fullName).trim(),
+            username: String(staff.username).trim(),
+            password: String(staff.password),
+            role: String(staff.role),
+            isActive: staff.isActive === undefined ? true : !!staff.isActive,
+            googleCode: staff.googleCode || '',
+            address: staff.address || '',
+            phonenumber: staff.phonenumber || '',
+            birthdate: staff.birthdate || '',
+            studentsassigned: [],
+            assignedclass: staff.assignedclass || '',
+            deviceId: staff.deviceId || '',
+            lockedDeviceId: staff.lockedDeviceId || '',
+            assignedlevel: (staff.assignedlevel !== undefined && staff.assignedlevel !== '') ? staff.assignedlevel : undefined,
+          };
+          toProcess = [toAdd];
+          directFormSubmission = true;
+        } else {
+          const msgEmpty = locale === 'ar' ? 'لا توجد عناصر للإرسال' : 'No items to submit';
+          setInlineMessage(msgEmpty);
+          showAlert(locale === 'ar' ? 'تنبيه' : 'Alert', msgEmpty);
+          return;
+        }
+      }
+
+      const created = [];
+      const failed = [];
+      let remaining = [...staffList];
+      
+      for (const s of toProcess) {
+        // normalize s
+        const payload = { ...s };
+        if (typeof payload.isActive === 'string') payload.isActive = payload.isActive === 'true' || payload.isActive === '1';
+        // assignedlevel should be a number only when provided and not empty
+        if (payload.assignedlevel !== undefined && payload.assignedlevel !== '' && payload.assignedlevel !== null) {
+          const n = Number(payload.assignedlevel);
+          payload.assignedlevel = isNaN(n) ? undefined : n;
+        } else {
+          delete payload.assignedlevel;
+        }
+
+        // Ensure studentsassigned is always an array
+        payload.studentsassigned = [];
+
+        try {
+          const res = await axios.post(`${API_URL}/users/staff`, payload, { 
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            } 
+          });
+          const creds = {
+            fullName: payload.fullName || s.fullName,
+            username: res.data?.credentials?.username || payload.username || s.username,
+            password: res.data?.credentials?.password || payload.password || s.password
+          };
+          created.push(creds);
+          // remove the first matching item from remaining
+          const idx = remaining.findIndex(item => item.username === s.username && item.fullName === s.fullName);
+          if (idx !== -1) remaining.splice(idx, 1);
+          // update UI so pending item disappears immediately
+          setStaffList([...remaining]);
+        } catch (err) {
+          logger.error('Failed to add staff:', err.response?.data || err.message);
+          
+          // Handle 401 specifically
+          if (err.response?.status === 401) {
+            const authMsg = 'Session expired or invalid token. Please login again.';
+            setInlineMessage(authMsg);
+            showAlert('Authentication Error', authMsg);
+            // Stop processing remaining items
+            break;
+          }
+          
+          failed.push({ item: s, err: err.response?.data?.msg || err.message || 'Unknown error' });
+          // leave the item in remaining so user can retry
+        }
+      }
+      
+      if (created.length) {
+        setGeneratedCreds(created);
+        setCredModalVisible(true);
+      }
+      
+      let msg = '';
+      let alertTitle = '';
+      if (locale === 'ar') {
+        if (failed.length === 0) {
+          alertTitle = 'تم الإرسال بنجاح';
+          msg = created.length === 1 
+            ? 'تمت إضافة خادم واحد بنجاح.' 
+            : `تمت إضافة ${created.length} من الخدام بنجاح.`;
+        } else {
+          alertTitle = 'تم الإرسال مع أخطاء';
+          msg = `تمت إضافة ${created.length} من الخدام. فشل: ${failed.length}`;
+        }
+      } else {
+        if (failed.length === 0) {
+          alertTitle = 'Submitted Successfully';
+          msg = created.length === 1 
+            ? 'Successfully added 1 servant.' 
+            : `Successfully added ${created.length} servants.`;
+        } else {
+          alertTitle = 'Submitted with Errors';
+          msg = `Successfully added ${created.length} servant(s). Failed: ${failed.length}`;
+        }
+      }
+      setInlineMessage(msg);
+      
+      if (failed.length > 0) {
+        const failedDetails = failed.map(f => `${f.item.fullName}: ${f.err}`).join('\n');
+        const detailHeader = locale === 'ar' ? 'التفاصيل:' : 'Details:';
+        showAlert(alertTitle, `${msg}\n\n${detailHeader}\n${failedDetails}`);
+      } else {
+        showAlert(alertTitle, msg);
+        if (directFormSubmission) {
+          setStaff(initialStaff);
+        }
+      }
+    } catch (err) {
+      logger.error('Submit error:', err);
+      const defaultErr = locale === 'ar' ? 'فشل إضافة الخادم' : 'Failed to add servant';
+      const errMsg = err.response?.data?.msg || err.message || defaultErr;
+      const errorTitle = locale === 'ar' ? 'خطأ' : 'Error';
+      setInlineMessage(errMsg);
+      showAlert(errorTitle, errMsg);
+    }
+  };
+
+  const copyToClipboard = async (text) => {
+    if (Clipboard && Clipboard.setStringAsync) {
+      await Clipboard.setStringAsync(text);
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+    }
+    setInlineMessage(locale === 'ar' ? 'تم النسخ إلى الحافظة' : 'Copied to clipboard');
+    showAlert(locale === 'ar' ? 'تم النسخ' : 'Copied', locale === 'ar' ? 'تم النسخ إلى الحافظة' : 'Copied to clipboard');
+  };
+
+  // Show warning if no token
+  if (!token) {
+    return (
+      <View style={{ padding: 16 }}>
+        <Text style={{ color: 'red', fontWeight: 'bold', fontSize: 18 }}>
+          Authentication Error
+        </Text>
+        <Text style={{ marginTop: 8 }}>
+          No authentication token found. Please login again.
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <Text style={styles.headerText}>{t('addStaff')}</Text>
+
+      <View style={styles.formCard}>
+        {/* Full Name Input */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('fullNameLabel')}</Text>
+          <View style={styles.inputWrapper}>
+            <Ionicons name="person-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <TextInput 
+              value={staff.fullName} 
+              onChangeText={val => handleChange('fullName', val)} 
+              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              placeholder={t('fullNameLabel')}
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+        </View>
+        
+        {/* Role Select */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('roleLabel')}</Text>
+          <View style={styles.pickerWrapper}>
+            <Ionicons name="ribbon-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            {Platform && Platform.OS === 'web' ? (
+              <select
+                value={staff.role}
+                onChange={(e) => handleRoleChange(e.target.value)}
+                style={{
+                  ...styles.webSelect,
+                  textAlign: 'right',
+                  direction: 'rtl',
+                  fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
+                }}
+              >
+                <option value="">-- اختر المنصب --</option>
+                {requesterRole === 'admin' && stats.principalCount === 0 && <option value="principal">أمين الخدمة</option>}
+                {stats.coPrincipalCount < 3 && (requesterRole === 'admin' || requesterRole === 'principal') && <option value="co-principal">أمين مرحلة</option>}
+                <option value="teacher">خادم فصل</option>
+              </select>
+            ) : (
+              <Picker 
+                selectedValue={staff.role} 
+                onValueChange={val => handleRoleChange(val)}
+                style={styles.nativePicker}
+                dropdownIconColor="#2f4360"
+              >
+                <Picker.Item label="-- اختر المنصب --" value="" />
+                {requesterRole === 'admin' && stats.principalCount === 0 && <Picker.Item label="أمين الخدمة" value="principal" />}
+                {stats.coPrincipalCount < 3 && (requesterRole === 'admin' || requesterRole === 'principal') && <Picker.Item label="أمين مرحلة" value="co-principal" />}
+                <Picker.Item label="خادم فصل" value="teacher" />
+              </Picker>
+            )}
+          </View>
+        </View>
+
+        {/* Phone Number Input */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('phoneLabel')}</Text>
+          <View style={styles.inputWrapper}>
+            <TouchableOpacity
+              onPress={pickContactForStaff}
+              style={styles.inputIcon}
+              activeOpacity={0.6}
+            >
+              <Ionicons name="call-outline" size={20} color="#2f4360" />
+            </TouchableOpacity>
+            <TextInput 
+              value={staff.phonenumber} 
+              onChangeText={val => handleChange('phonenumber', val)} 
+              keyboardType="phone-pad"
+              style={[styles.input, { flex: 1, textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              placeholder={t('phonePlaceholder')}
+              placeholderTextColor="#a0a0a0"
+            />
+          </View>
+          <Text style={styles.contactHint}>
+            {locale === 'ar' ? '📞 اضغط على أيقونة الهاتف لاستيراد رقم من جهات الاتصال' : '📞 Tap the phone icon to pick from contacts'}
+          </Text>
+        </View>
+        
+        {/* Birthdate Input */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('birthdate')}</Text>
+          <View style={styles.pickerWrapper}>
+            <Ionicons name="calendar-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            {Platform.OS === 'web' ? (
+              <>
+                <View style={{ flex: 1, minHeight: 40, justifyContent: 'center', paddingLeft: 12 }} pointerEvents="none">
+                  <Text style={{ color: staff.birthdate ? '#333333' : '#a0a0a0', fontSize: 15 }}>
+                    {staff.birthdate ? formatDateDDMMYYYY(staff.birthdate) : 'dd/mm/yyyy'}
+                  </Text>
+                </View>
+                <input
+                  type="date"
+                  value={staff.birthdate ? staff.birthdate.split('T')[0] : ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v) {
+                      const d = new Date(v);
+                      d.setFullYear(PICKER_YEAR);
+                      handleChange('birthdate', d.toISOString());
+                    } else {
+                      handleChange('birthdate', '');
+                    }
+                  }}
+                  onClick={(e) => {
+                    try { e.target.showPicker(); } catch (err) {}
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    cursor: 'pointer',
+                    zIndex: 2,
+                  }}
+                />
+              </>
+            ) : (
+              <TouchableOpacity
+                style={styles.nativeDatePickerBtn}
+                onPress={() => setShowCalendar(true)}
+              >
+                <Text style={styles.datePickerBtnText}>
+                  {staff.birthdate ? formatDateNoYear(staff.birthdate) : t('pickBirthdate')}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          {DateTimePickerModal && (
+            <DateTimePickerModal
+              isVisible={showCalendar}
+              mode="date"
+              date={toPickerDateObj(staff.birthdate)}
+              onConfirm={(date) => { setShowCalendar(false); handleChange('birthdate', toStoredIsoWithPickerYear(date)); }}
+              onCancel={() => setShowCalendar(false)}
+            />
+          )}
+        </View>
+        
+        {/* Level / Class selection block */}
+        {!staff.role ? (
+          <View style={styles.promptBox}>
+            <Ionicons name="information-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
+            <Text style={styles.promptText}>{t('chooseRoleFirstPrompt')}</Text>
+          </View>
+        ) : (staff.role === 'teacher' || staff.role === 'co-principal') ? (
+          <>
+            {/* Level Selector */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gradeLevel')}</Text>
+              <View style={styles.pickerWrapper}>
+                <Ionicons name="school-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+                {(() => {
+                  const levelOptions = [
+                    { label: locale === 'ar' ? 'سنة أولى' : 'Year 1', value: 1 },
+                    { label: locale === 'ar' ? 'سنة ثانية' : 'Year 2', value: 2 },
+                    { label: locale === 'ar' ? 'سنة ثالثة' : 'Year 3', value: 3 }
+                  ].filter(opt => {
+                    if (staff.role === 'co-principal') {
+                      const assignedLevels = stats.assignedCoPrincipalLevels || [];
+                      return !assignedLevels.includes(opt.value);
+                    }
+                    return true;
+                  });
+
+                  return Platform.OS === 'web' ? (
+                    <select
+                      value={staff.assignedlevel}
+                      onChange={(e) => {
+                        const lvl = e.target.value || '';
+                        handleLevelChange(lvl);
+                      }}
+                      style={{
+                        ...styles.webSelect,
+                        textAlign: 'right',
+                        direction: 'rtl',
+                        fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
+                      }}
+                    >
+                      <option value="">{locale === 'ar' ? '-- اختر المرحلة --' : '-- Choose Level --'}</option>
+                      {levelOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Picker 
+                      selectedValue={staff.assignedlevel} 
+                      onValueChange={val => {
+                        const lvl = String(val || '');
+                        handleLevelChange(lvl);
+                      }}
+                      style={styles.nativePicker}
+                      dropdownIconColor="#2f4360"
+                    >
+                      <Picker.Item label={locale === 'ar' ? '-- اختر المرحلة --' : '-- Choose Level --'} value="" />
+                      {levelOptions.map(opt => (
+                        <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+                      ))}
+                    </Picker>
+                  );
+                })()}
+              </View>
+            </View>
+
+            {/* Class Selector (Teachers only) */}
+            {/* Class Selector (Teachers only) */}
+            {staff.role === 'teacher' && (
+              <>
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('selectClass')}</Text>
+                  <View style={styles.pickerWrapper}>
+                    <Ionicons name="people-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+                    {staff.assignedlevel ? (
+                      Platform.OS === 'web' ? (
+                        <select
+                          value={staff.assignedclass}
+                          onChange={(e) => handleClassChange(e.target.value)}
+                          style={{
+                            ...styles.webSelect,
+                            textAlign: 'right',
+                            direction: 'rtl',
+                            fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
+                          }}
+                        >
+                          <option value="">-- اختر الفصل --</option>
+                          {(CLASS_OPTIONS[staff.assignedlevel] || []).map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Picker
+                          selectedValue={staff.assignedclass}
+                          onValueChange={val => handleClassChange(val)}
+                          style={styles.nativePicker}
+                          dropdownIconColor="#2f4360"
+                        >
+                          <Picker.Item label="-- اختر الفصل --" value="" />
+                          {(CLASS_OPTIONS[staff.assignedlevel] || []).map(opt => (
+                            <Picker.Item key={opt} label={opt} value={opt} />
+                          ))}
+                        </Picker>
+                      )
+                    ) : (
+                      <View style={styles.promptBoxInside}>
+                        <Text style={styles.promptText}>{t('chooseLevelFirstPrompt')}</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+
+                {/* Class Leader Switch */}
+                <View style={[styles.inputGroup, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#f0f0f0', marginTop: 10 }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Ionicons name="star-outline" size={20} color="#2f4360" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+                    <Text style={[styles.label, { marginBottom: 0 }]}>
+                      {locale === 'ar' ? 'أمين الفصل' : 'Class Leader'}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={staff.isClassLeader}
+                    onValueChange={(val) => handleChange('isClassLeader', val)}
+                    trackColor={{ false: '#d1d1d1', true: '#2f4360' }}
+                    thumbColor={staff.isClassLeader ? '#ffffff' : '#f4f3f4'}
+                  />
+                </View>
+              </>
+            )}
+          </>
+        ) : staff.role === 'principal' ? (
+          <View style={styles.promptBox}>
+            <Ionicons name="information-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
+            <Text style={styles.promptText}>{t('principalNoLevelPrompt')}</Text>
+          </View>
+        ) : null}
+        
+        {/* Username Input */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('usernameLabel')}</Text>
+          <View style={styles.inputWrapper}>
+            <Ionicons name="keypad-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <TextInput 
+              value={staff.username} 
+              onChangeText={val => handleChange('username', val)} 
+              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              placeholder={t('usernameLabel')}
+              placeholderTextColor="#a0a0a0"
+            />
+            <TouchableOpacity 
+              onPress={generateUsernameOnDemand} 
+              style={styles.inlineActionBtn}
+            >
+              <Ionicons name="sparkles-outline" size={18} color="#2f4360" />
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+        {/* Password Input */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('passwordLabel')}</Text>
+          <View style={styles.inputWrapper}>
+            <Ionicons name="lock-closed-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <TextInput 
+              value={staff.password} 
+              onChangeText={val => handleChange('password', val)} 
+              secureTextEntry 
+              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              placeholder={t('passwordLabel')}
+              placeholderTextColor="#a0a0a0"
+            />
+            <TouchableOpacity 
+              onPress={generatePasswordOnDemand} 
+              style={styles.inlineActionBtn}
+            >
+              <Ionicons name="refresh-outline" size={18} color="#2f4360" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Buttons Row */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.secondaryButton} onPress={handleAddOne}>
+            <Ionicons name="add-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
+            <Text style={styles.secondaryButtonText}>{t('addToQueue')}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
+            <Ionicons name="cloud-upload-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={styles.primaryButtonText}>{t('submitAll')}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {inlineMessage ? (
+          <Text style={styles.statusText}>{inlineMessage}</Text>
+        ) : null}
+      </View>
+
+      {/* Credentials Modal */}
+      <Modal visible={credModalVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="key-outline" size={24} color="#2f4360" />
+              <Text style={styles.modalTitle}>{t('credentialsTitle')}</Text>
+            </View>
+            <View style={styles.modalBody}>
+              {generatedCreds && generatedCreds.length > 1 ? (
+                <View style={{ width: '100%' }}>
+                  <Text style={[styles.credInstruction, { textAlign: isRtl ? 'right' : 'left' }]}>
+                    {isRtl 
+                      ? 'تم إنشاء الحسابات التالية بنجاح. يمكنك نسخها بالكامل أدناه:' 
+                      : 'The following accounts were created successfully. You can copy them in bulk below:'}
+                  </Text>
+                  <TextInput
+                    style={styles.bulkTextArea}
+                    value={(() => {
+                      if (!generatedCreds || !generatedCreds.length) return '';
+                      return generatedCreds.map(c => `${c.username || ''}, ${c.password || ''}`).join('\n');
+                    })()}
+                    multiline
+                    editable={false}
+                    selectTextOnFocus
+                  />
+                </View>
+              ) : (
+                <View style={{ width: '100%' }}>
+                  <View style={styles.credRow}>
+                    <Text style={styles.credLabel}>{isRtl ? 'الاسم' : 'Name'}:</Text>
+                    <Text style={styles.credValue}>{generatedCreds?.[0]?.fullName}</Text>
+                  </View>
+                  <View style={styles.credRow}>
+                    <Text style={styles.credLabel}>{t('usernameLabel')}:</Text>
+                    <Text style={styles.credValue}>{generatedCreds?.[0]?.username}</Text>
+                  </View>
+                  <View style={styles.credRow}>
+                    <Text style={styles.credLabel}>{t('passwordLabel')}:</Text>
+                    <Text style={styles.credValue}>{generatedCreds?.[0]?.password}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.modalPrimaryBtn} 
+                onPress={() => {
+                  if (!generatedCreds || !generatedCreds.length) return;
+                  if (generatedCreds.length === 1) {
+                    copyToClipboard(`${generatedCreds[0].username}, ${generatedCreds[0].password}`);
+                  } else {
+                    const text = generatedCreds.map(c => `${c.username || ''}, ${c.password || ''}`).join('\n');
+                    copyToClipboard(text);
+                  }
+                }}
+              >
+                <Ionicons name="copy-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+                <Text style={styles.modalPrimaryBtnText}>{t('copyClipboard')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalSecondaryBtn} onPress={() => setCredModalVisible(false)}>
+                <Text style={styles.modalSecondaryBtnText}>{t('close')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Custom Alert Modal */}
+      <Modal visible={customAlertVisible} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Ionicons 
+                name={customAlertTitle.includes('نجاح') || customAlertTitle.includes('Success') || customAlertTitle.includes('تم') ? 'checkmark-circle-outline' : 'information-circle-outline'} 
+                size={24} 
+                color="#2f4360" 
+              />
+              <Text style={styles.modalTitle}>{customAlertTitle}</Text>
+            </View>
+            <View style={styles.modalBody}>
+              <Text style={{ fontSize: 15, color: '#333333', lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
+            </View>
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={styles.modalPrimaryBtn} 
+                onPress={() => setCustomAlertVisible(false)}
+              >
+                <Text style={styles.modalPrimaryBtnText}>{t('ok')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Contact Picker Modal */}
+      <Modal visible={contactPickerVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '80%', padding: 0 }]}>
+            <View style={[styles.modalHeader, { paddingHorizontal: 16, paddingTop: 16 }]}>
+              <Ionicons name="people-outline" size={22} color="#2f4360" />
+              <Text style={styles.modalTitle}>
+                {locale === 'ar' ? 'اختر جهة اتصال' : 'Pick a Contact'}
+              </Text>
+              <TouchableOpacity onPress={() => setContactPickerVisible(false)} style={{ marginLeft: 'auto' }}>
+                <Ionicons name="close-circle-outline" size={24} color="#2f4360" />
+              </TouchableOpacity>
+            </View>
+            {loadingContacts ? (
+              <View style={{ padding: 32, alignItems: 'center' }}>
+                <Text style={{ color: '#2f4360' }}>{locale === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}</Text>
+              </View>
+            ) : (
+              <View style={{ flex: 1 }}>
+                {contactsList.map((contact, ci) => (
+                  <View key={ci} style={styles.contactRow}>
+                    <Text style={styles.contactName}>{contact.name}</Text>
+                    {contact.phones.map((p, pi) => (
+                      <TouchableOpacity
+                        key={pi}
+                        style={styles.contactPhone}
+                        onPress={() => {
+                          handleChange('phonenumber', p.number);
+                          setContactPickerVisible(false);
+                        }}
+                      >
+                        <Ionicons name="call-outline" size={14} color="#2f4360" style={{ marginRight: 6 }} />
+                        <Text style={styles.contactPhoneText}>{p.number}</Text>
+                        <Text style={styles.contactPhoneLabel}> ({p.label})</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#f8f5ee',
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  headerText: {
+    fontWeight: 'bold',
+    fontSize: 24,
+    color: '#2f4360',
+    marginBottom: 24,
+    textAlign: 'center',
+    fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
+  },
+  formCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.1)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#2f4360',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 6px 12px rgba(47, 67, 96, 0.06)',
+      }
+    }),
+  },
+  inputGroup: {
+    marginBottom: 18,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2f4360',
+    marginBottom: 8,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.16)',
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+  },
+  pickerWrapper: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.16)',
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    overflow: 'hidden',
+    height: 45,
+  },
+  inputIcon: {
+    paddingHorizontal: 12,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingRight: 12,
+    paddingLeft: 12,
+    fontSize: 15,
+    color: '#333333',
+    borderWidth: 0,
+    outlineStyle: 'none',
+  },
+  webSelect: {
+    flex: 1,
+    padding: 10,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    fontSize: 15,
+    color: '#333333',
+    outlineStyle: 'none',
+    height: '100%',
+  },
+  nativePicker: {
+    flex: 1,
+    height: 44,
+  },
+  webDateInput: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 0,
+    outlineStyle: 'none',
+    cursor: 'pointer',
+    zIndex: 2,
+    padding: 0,
+    margin: 0,
+    borderWidth: 0,
+  },
+  nativeDatePickerBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  datePickerBtnText: {
+    fontSize: 15,
+    color: '#333333',
+  },
+  promptBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(47, 67, 96, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.08)',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 18,
+  },
+  promptBoxInside: {
+    flex: 1,
+    padding: 12,
+  },
+  promptText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#666666',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    gap: 12,
+  },
+  primaryButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2f4360',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  primaryButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  secondaryButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(47, 67, 96, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.16)',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  secondaryButtonText: {
+    color: '#2f4360',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  inlineActionBtn: {
+    paddingHorizontal: 12,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  statusText: {
+    textAlign: 'center',
+    color: '#666666',
+    marginTop: 16,
+    fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+    gap: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2f4360',
+  },
+  modalBody: {
+    marginBottom: 20,
+  },
+  credRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eeeeee',
+  },
+  credLabel: {
+    fontSize: 14,
+    color: '#666666',
+    fontWeight: '500',
+  },
+  credValue: {
+    fontSize: 14,
+    color: '#2f4360',
+    fontWeight: 'bold',
+  },
+  modalFooter: {
+    flexDirection: 'column',
+    gap: 10,
+  },
+  modalPrimaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2f4360',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  modalPrimaryBtnText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  modalSecondaryBtn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  modalSecondaryBtnText: {
+    color: '#666666',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  bulkTextArea: {
+    width: '100%',
+    height: 180,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    borderRadius: 8,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontSize: 13,
+    color: '#333333',
+    textAlign: 'left',
+    textAlignVertical: 'top',
+    marginTop: 10,
+  },
+  credInstruction: {
+    fontSize: 13,
+    color: '#666666',
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  contactImportBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(47, 67, 96, 0.15)',
+  },
+  contactHint: {
+    fontSize: 11,
+    color: '#888888',
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  contactRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(47, 67, 96, 0.08)',
+  },
+  contactName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2f4360',
+    marginBottom: 4,
+  },
+  contactPhone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: '#f0f4f9',
+    borderRadius: 8,
+    marginTop: 3,
+  },
+  contactPhoneText: {
+    fontSize: 13,
+    color: '#2f4360',
+    fontWeight: '600',
+  },
+  contactPhoneLabel: {
+    fontSize: 12,
+    color: '#888888',
+  },
+});

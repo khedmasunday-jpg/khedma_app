@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "mongo-backup-469113",
+  "private_key_id": "f524120371ff32735bb9a6dadb786f0c31a6a8c7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDImCRaS63biTAM\nyh/flwUztovnOrTcwdwgTgctphzfE7V1o67JBodopYx3FvyMfuiG0SdDtZWz1bTB\n9D6oSUkSwjhimh/XYWbC+gO4On6dStxy0GKYu1NMZUaFFsTLXgu3dPCVDO0KRxxQ\nm8xqU/59ogpgs42ve8v2mThLmY99+5ap42tWbxleYdzHCkExwh0NJ/UEDGrhhe9/\nUF+IdvBOn1mQjTFSmtwnMs9jZNsf6ab2FF0Fiz2NZZ9qvGZBUov8wo4D+B3QjPfC\nuNxOik9lqKIElqGsfhSm1ecEogCZwlu2RyHqjw26SQTkOl/w5TJrgsGbIP9LN8JH\nWh5A/p99AgMBAAECggEACqeSHr2wUV3bEILX6I9j9lg23CRRIPynDYw3c2REWlD4\nrXPxP7o6DQPmDxlIdsny3d5UIJOPjQrH3Bl2Dog9+mIYjpwzHsSMqcSP2AQ7X21v\ngiWxZv1kMkWa1kzcTRUEuEzczn3uRUJ7rYho9ijZ9qBZvsMqvmxr7AA9bj6M0Zso\nUXIL3By23qa8U1MMn7cZO4gS+VNAlDW3qn5ymueyDxVn4jwcD3xwZ1ywc2dHw8G4\nc6yT8btEuu1U8KQ0bfCTOeZWx6wRrCwFzRtn4/0VUgGNnzDGHnpr7GynGguAXRYH\nM4bMScFQiq6ixwZhQ3yIuXGEWNhm0jlx66CVdK1jQQKBgQDrRaw93Krr4eNdcpIz\n3ts5t/Y0HXddCp9q+gU0cGnQXxgOvd2PjX0bL8z5sjqKz6pIib3oI/4sLD6kFDA0\njZ85l3lgptLNyjVNMyPyEVkXYVvSEQYqkes3o8jJJxyfwqCU2M5cR2eghiJTXjUY\nf1fN2ddwrRiGbz9S8UUk9VbpcQKBgQDaRFhSmk2hEUx9j37lL+qRp5zLKtAKt3nn\ntqHLK0wUVQ5RZQkJkU5MtgMU255sn9uhZBlMMIUEkZyorcIFkOosC5izItaGD3vs\nqmjKOB6p2nbCN8hCy/2wwDuOewD49KrDvE3pHhJx+/Ox6oqEICf2emmC6Wsd13b9\nfOAEdGiwzQKBgB+c3wX47qZ/VbOqv2Zk3YQl6dka1H0V/lG7gpOHP1CWVn80l97A\nHj1W8O3kOuWH/dN9Xp0gqPh6gXg+ljOZi/mLFu4bvFuWfg7/fib6mcQAevwA+Zki\nvj5drY8JyFjXKAiYETJpDc2N+HLHR88g3UV1rfMf7xmxPQsCDE5pAOKhAoGBAKnC\nVl+Im7AWYEOYA74Fko9Oqehql/x9z1ak+RmnxzhZHxW3W1wRo7COL79dQM6DVrMj\nw3k6k3qGNi4LVsg1eaxgKJfLFMaX7G6Z6368Pz0kKRHNiPhK6Dk8ihW7HXqD8Pzj\nzETvmrEEoPlTzgANcoeFleK34RQIrQdixGkykOpRAoGAJyvZVaAgbQ60nDcTpfc3\nh9ciDYAXUT+ugA7vDXQu5cphKb1Da9t/FgZh2+evD/0/+8T5hMqU0O30qoAJhExm\nviDbK9wQEZaTdTRmfA3nPNB/f3o4FFgSmNCOq0qHtTy5wEC0tvZlAHcdajjtCJ1d\na+YtCQpkp8+EagYQjXtmhrc=\n-----END PRIVATE KEY-----\n",
+  "client_email": "mongo-backp@mongo-backup-469113.iam.gserviceaccount.com",
+  "client_id": "105810247209362279626",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/mongo-backp%40mongo-backup-469113.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

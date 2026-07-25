@@ -1,0 +1,13 @@
+{
+  "watch": ["."],
+  "ext": "js,json",
+  "ignore": [
+    "_IGNORE_khedma-session/*",
+    "_IGNORE_khedma-session",
+    "_IGNORE_khedma-session_backup/*",
+    "_IGNORE_khedma-session_backup",
+    "logs/*",
+    "*.log",
+    "node_modules/*"
+  ]
+}
