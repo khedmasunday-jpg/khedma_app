@@ -98,11 +98,8 @@ async function loadAzureSecrets() {
   }
 }
 
-let isConnected = false;
-
 async function connectDB() {
-  if (isConnected || mongoose.connection.readyState === 1) {
-    isConnected = true;
+  if (mongoose.connection.readyState === 1) {
     return;
   }
   await loadAzureSecrets();
@@ -116,7 +113,6 @@ async function connectDB() {
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
     });
-    isConnected = true;
     console.log('MongoDB connected successfully');
     
     if (!process.env.VERCEL) {
