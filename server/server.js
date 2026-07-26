@@ -1,7 +1,9 @@
 require('dotenv').config();
-require('./jobs/backupJob');
-require('./jobs/promotionJob');
-require('./jobs/weeklyreminder');
+if (!process.env.VERCEL) {
+  require('./jobs/backupJob');
+  require('./jobs/promotionJob');
+  require('./jobs/weeklyreminder');
+}
 const { runBirthdayJob } = require('./jobs/birthdayJob');
 
 const express = require('express');
@@ -33,6 +35,7 @@ app.use(express.urlencoded({ limit: '2mb', extended: true }));
 const sanitizeInput = require('./middleware/sanitize');
 app.use(sanitizeInput);
 
+const rateLimit = require('express-rate-limit');
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 300, 
@@ -111,9 +114,11 @@ async function startServer() {
         const { initializeScheduler } = require('./services/schedulerService');
         const { initializeTelegram } = require('./services/telegramClient');
         
-        await initializeTelegram();
-        triggerQueueWorker();
-        await initializeScheduler();      } catch (err) {
+        if (!process.env.VERCEL) {
+          await initializeTelegram();
+          triggerQueueWorker();
+          await initializeScheduler();
+        }      } catch (err) {
         console.error('❌ Failed to initialize WhatsApp/Scheduler Services:', err);
       }
 
