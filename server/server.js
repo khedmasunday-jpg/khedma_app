@@ -113,11 +113,13 @@ async function startServer() {
         
         await initializeTelegram();
         triggerQueueWorker();
-        await initializeScheduler();      } catch (err) {
+        await initializeScheduler();      } catch (err) {
         console.error('❌ Failed to initialize WhatsApp/Scheduler Services:', err);
       }
 
-      app.listen(PORT, '0.0.0.0', () => {      });
+      if (!process.env.VERCEL) {
+        app.listen(PORT, '0.0.0.0', () => {      });
+      }
     })
     .catch((err) => {
       console.error('MongoDB connection error:', err); 
