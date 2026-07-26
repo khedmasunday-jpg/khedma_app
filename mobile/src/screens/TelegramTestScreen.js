@@ -36,6 +36,9 @@ export default function TelegramTestScreen({ route, navigation }) {
       setStatus(res.data.status);
       setTelegramMode(res.data.mode);
       setQrCode(res.data.qr || null);
+
+      // Auto-register Webhook with Telegram API so /start messages receive instant replies
+      axios.post(`${API_URL}/telegram/setup-webhook`, {}, { headers: getHeaders() }).catch(() => {});
     } catch (err) {
       setStatus('error');
       setQrCode(null);
