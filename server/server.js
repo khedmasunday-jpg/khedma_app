@@ -94,44 +94,66 @@ async function loadAzureSecrets() {
         console.warn('ℹ️ [Secrets] JWT-SECRET not found in Key Vault, using local environment value.');
       }
     } catch (err) {
-      console.error('❌ [Secrets] Failed to fetch secrets from Azure Key Vault:', err.message);    }
+      console.error('❌ [Secrets] Failed to fetch secrets from Azure Key Vault:', err.message);    }
   }
 }
 
-async function startServer() {
-  
-  await loadAzureSecrets();
+let isConnected = false;
 
-  mongoose
-    .connect(process.env.MONGO_URI, {
+async function connectDB() {
+  if (isConnected || mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return;
+  }
+  await loadAzureSecrets();
+  if (!process.env.MONGO_URI) {
+    throw new Error('MONGO_URI is undefined in environment variables');
+  }
+  
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    })
-    .then(async () => { 
-
+      serverSelectionTimeoutMS: 5000,
+    });
+    isConnected = true;
+    console.log('MongoDB connected successfully');
+    
+    if (!process.env.VERCEL) {
+      const { triggerQueueWorker } = require('./services/notificationService');
+      const { initializeScheduler } = require('./services/schedulerService');
+      const { initializeTelegram } = require('./services/telegramClient');
+      
       try {
-        const { triggerQueueWorker } = require('./services/notificationService');
-        const { initializeScheduler } = require('./services/schedulerService');
-        const { initializeTelegram } = require('./services/telegramClient');
-        
-        if (!process.env.VERCEL) {
-          await initializeTelegram();
-          triggerQueueWorker();
-          await initializeScheduler();
-        }      } catch (err) {
+        await initializeTelegram();
+        triggerQueueWorker();
+        await initializeScheduler();
+      } catch (err) {
         console.error('❌ Failed to initialize WhatsApp/Scheduler Services:', err);
       }
-
-      if (!process.env.VERCEL) {
-        app.listen(PORT, '0.0.0.0', () => {      });
-      }
-    })
-    .catch((err) => {
-      console.error('MongoDB connection error:', err); 
-    });
+    }
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    throw err;
+  }
 }
 
-startServer();
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+if (!process.env.VERCEL) {
+  connectDB().then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }).catch(console.error);
+}
 
 const { translateMessage } = require('./utils/translations');
 app.use((err, req, res, next) => {
