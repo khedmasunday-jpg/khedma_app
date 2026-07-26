@@ -6,6 +6,7 @@ import { LanguageProvider, useLanguage } from './src/utils/LanguageContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 import { ActivityIndicator } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
   const style = document.createElement('style');
@@ -267,21 +268,25 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <LanguageProvider>
-        <View style={styles.rootView}>
-          <ImageBackground 
-            source={require('./assets/pattern.webp')} 
-            style={styles.backgroundImage}
-            resizeMode="cover"
-          >
-            <NavigationContainer theme={MyTheme}>
-              <AppNavigator />
-            </NavigationContainer>
-          </ImageBackground>
-        </View>
-      </LanguageProvider>
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <LanguageProvider>
+          <View style={styles.rootView}>
+            <ImageBackground 
+              source={require('./assets/pattern.webp')} 
+              style={styles.backgroundImage}
+              resizeMode="cover"
+            >
+              <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
+                <NavigationContainer theme={MyTheme}>
+                  <AppNavigator />
+                </NavigationContainer>
+              </SafeAreaView>
+            </ImageBackground>
+          </View>
+        </LanguageProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
 
