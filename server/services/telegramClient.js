@@ -1,64 +1,57 @@
 
 const TelegramBot = require('node-telegram-bot-api').default || require('node-telegram-bot-api');
+const axios = require('axios');
 
-const token = process.env.TELEGRAM_BOT_TOKEN || '';
 let bot = null;
-
 let botStatus = 'disconnected';
 
 function initializeTelegram() {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
-    console.warn('⚠️ [Telegram] No TELEGRAM_BOT_TOKEN provided in .env. Bot will not initialize.');
-    botStatus = 'error';
+    console.warn('⚠️ [Telegram] No TELEGRAM_BOT_TOKEN provided in environment variables.');
+    botStatus = 'disconnected';
     return false;
   }
 
   try {
-    bot = new TelegramBot(token, { polling: true });
-    
-    bot.on('polling_error', (error) => {
-      console.error(`❌ [Telegram Polling Error]: ${error.code} - ${error.message}`);
-    });
-
-    bot.on('message', (msg) => {
-      const chatId = msg.chat.id;
-      if (msg.text && msg.text.startsWith('/start')) {
-        const welcomeText = `🎉 أهلاً بك في خدمة إشعارات تطبيق الخدمة (Khedma App)!\n\n` +
-          `🆔 رمز المعرف الخاص بك (Chat ID):\n` +
-          `\`${chatId}\`\n\n` +
-          `قم بنسخ هذا الرقم وإدخاله في التطبيق تحت قائمة "الملف الشخصي" (Profile) أو إعطائه للمسؤول لتلقي التنبيهات والإشعارات فوراً على تليجرام.\n\n` +
-          `-----------------------------------\n` +
-          `Welcome to Khedma Notifications!\n` +
-          `Your Telegram Chat ID is: \`${chatId}\`\n` +
-          `Please copy this ID into your Khedma App profile settings to receive notifications.`;
-
-        bot.sendMessage(chatId, welcomeText, { parse_mode: 'Markdown' });
-      }
-    });
+    if (!bot) {
+      bot = new TelegramBot(token, { polling: false });
+    }
     botStatus = 'connected';
     return true;
   } catch (err) {
-    console.error('❌ [Telegram] Failed to initialize bot:', err);
+    console.error('❌ [Telegram] Failed to initialize bot:', err.message);
     botStatus = 'error';
     return false;
   }
 }
 
 async function sendTelegramMessage(to, message) {
-  if (!bot || botStatus !== 'connected') {
-    return { success: false, error: 'Telegram bot is not connected' };
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    return { success: false, error: 'TELEGRAM_BOT_TOKEN is missing in environment variables' };
   }
 
   try {
-    const result = await bot.sendMessage(to, message);
-    return { success: true, messageId: String(result.message_id) };
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const response = await axios.post(url, {
+      chat_id: to,
+      text: message,
+      parse_mode: 'Markdown'
+    });
+    botStatus = 'connected';
+    return { success: true, messageId: String(response.data?.result?.message_id) };
   } catch (err) {
-    console.error(`❌ [Telegram Send Error]:`, err.message);
-    return { success: false, error: err.message };
+    const errorDetails = err.response?.data?.description || err.message;
+    console.error(`❌ [Telegram Send Error]:`, errorDetails);
+    return { success: false, error: errorDetails };
   }
 }
 
 function getTelegramStatus() {
+  if (process.env.TELEGRAM_BOT_TOKEN) {
+    return 'connected';
+  }
   return botStatus;
 }
 
@@ -72,7 +65,9 @@ async function reconnectTelegram() {
 
 async function logoutTelegram() {
   botStatus = 'disconnected';
-  if (bot) bot.stopPolling();
+  if (bot) {
+    try { bot.stopPolling(); } catch (e) {}
+  }
   bot = null;
   return true;
 }
