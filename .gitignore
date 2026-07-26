@@ -36,10 +36,8 @@ yarn-error.log*
 
 # Expo & Build Output
 mobile/.expo/
-mobile/dist/
 mobile/web-build/
 .expo/
-dist/
 build/
 *.apk
 *.aab
