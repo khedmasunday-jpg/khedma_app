@@ -5,6 +5,25 @@ const axios = require('axios');
 let bot = null;
 let botStatus = 'disconnected';
 
+let isWebhookSet = false;
+async function autoRegisterWebhook(host) {
+  if (isWebhookSet) return;
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return;
+
+  const targetHost = host || process.env.VERCEL_URL || 'khedma-app-one.vercel.app';
+  let cleanHost = targetHost.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const webhookUrl = `https://${cleanHost}/api/telegram/webhook`;
+
+  try {
+    await axios.post(`https://api.telegram.org/bot${token}/setWebhook`, { url: webhookUrl });
+    console.log('✅ Auto-registered Telegram Webhook to:', webhookUrl);
+    isWebhookSet = true;
+  } catch (err) {
+    console.error('❌ Auto-register Telegram Webhook failed:', err.response?.data?.description || err.message);
+  }
+}
+
 function initializeTelegram() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
@@ -18,6 +37,7 @@ function initializeTelegram() {
       bot = new TelegramBot(token, { polling: false });
     }
     botStatus = 'connected';
+    autoRegisterWebhook();
     return true;
   } catch (err) {
     console.error('❌ [Telegram] Failed to initialize bot:', err.message);
