@@ -1,15 +1,14 @@
 require('dotenv').config();
-if (!process.env.VERCEL) {
-  require('./jobs/backupJob');
-  require('./jobs/promotionJob');
-  require('./jobs/weeklyreminder');
-}
+require('./jobs/backupJob');
+require('./jobs/promotionJob');
+require('./jobs/weeklyreminder');
 const { runBirthdayJob } = require('./jobs/birthdayJob');
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); 
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/users');
 
@@ -17,13 +16,33 @@ const app = express();
 app.set('trust proxy', 1); 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connection.on('connected', () => {});
+mongoose.connection.on('connected', () => {});
 
 mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error:', err);
 });
 
-mongoose.connection.on('disconnected', () => {});
+mongoose.connection.on('disconnected', () => {});
+
+let dbConnectionPromise = null;
+async function connectDB() {
+  if (mongoose.connection.readyState >= 1) return;
+  if (!dbConnectionPromise) {
+    await loadAzureSecrets();
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MONGO_URI is missing in environment variables');
+    }
+    dbConnectionPromise = mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }).catch(err => {
+      dbConnectionPromise = null;
+      throw err;
+    });
+  }
+  await dbConnectionPromise;
+}
 
 // CORS: Paused strict origin check for local testing
 app.use(cors());
@@ -35,7 +54,6 @@ app.use(express.urlencoded({ limit: '2mb', extended: true }));
 const sanitizeInput = require('./middleware/sanitize');
 app.use(sanitizeInput);
 
-const rateLimit = require('express-rate-limit');
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 300, 
@@ -49,16 +67,19 @@ app.use(generalLimiter);
 const arabicResponse = require('./middleware/arabicResponse');
 app.use(arabicResponse);
 
+// Ensure DB is connected before processing any API route (crucial for Vercel serverless)
 app.use(async (req, res, next) => {
+  if (req.path === '/ping') return next();
   try {
     await connectDB();
     next();
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    console.error('❌ Database connection error on request:', err.message);
+    res.status(500).json({ msg: 'Database connection failed', error: err.message });
   }
 });
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes); 
 app.use('/api/users', userRoutes); 
 app.use('/api/classes', require('./routes/classRoutes')); 
 app.use('/api/attendance', require('./routes/attendanceRoutes')); 
@@ -86,7 +107,8 @@ app.use((err, req, res, next) => {
 
 async function loadAzureSecrets() {
   const vaultName = process.env.AZURE_KEYVAULT_NAME;
-  if (vaultName) {    try {
+  if (vaultName) {
+    try {
       const { DefaultAzureCredential } = require('@azure/identity');
       const { SecretClient } = require('@azure/keyvault-secrets');
       
@@ -95,63 +117,44 @@ async function loadAzureSecrets() {
       const client = new SecretClient(url, credential);
 
       const mongoUriSecret = await client.getSecret('MONGO-URI');
-      process.env.MONGO_URI = mongoUriSecret.value;      
+      process.env.MONGO_URI = mongoUriSecret.value;      
       
       try {
         const jwtSecret = await client.getSecret('JWT-SECRET');
-        process.env.JWT_SECRET = jwtSecret.value;      } catch (e) {
+        process.env.JWT_SECRET = jwtSecret.value;
+      } catch (e) {
         console.warn('ℹ️ [Secrets] JWT-SECRET not found in Key Vault, using local environment value.');
       }
     } catch (err) {
-      console.error('❌ [Secrets] Failed to fetch secrets from Azure Key Vault:', err.message);    }
+      console.error('❌ [Secrets] Failed to fetch secrets from Azure Key Vault:', err.message);
+    }
   }
 }
 
-async function connectDB() {
-  if (mongoose.connection.readyState === 1) {
-    return;
-  }
-  await loadAzureSecrets();
-  if (!process.env.MONGO_URI) {
-    throw new Error('MONGO_URI is undefined in environment variables');
-  }
-  
+async function startServer() {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
-    });
-    console.log('MongoDB connected successfully');
-    
-    if (!process.env.VERCEL) {
+    await connectDB();
+    try {
       const { triggerQueueWorker } = require('./services/notificationService');
       const { initializeScheduler } = require('./services/schedulerService');
       const { initializeTelegram } = require('./services/telegramClient');
       
-      try {
-        await initializeTelegram();
-        triggerQueueWorker();
-        await initializeScheduler();
-      } catch (err) {
-        console.error('❌ Failed to initialize WhatsApp/Scheduler Services:', err);
-      }
+      await initializeTelegram();
+      triggerQueueWorker();
+      await initializeScheduler();
+    } catch (err) {
+      console.error('❌ Failed to initialize WhatsApp/Scheduler Services:', err);
+    }
+
+    if (!process.env.VERCEL) {
+      app.listen(PORT, '0.0.0.0', () => {});
     }
   } catch (err) {
-    console.error('MongoDB connection error:', err);
-    throw err;
+    console.error('MongoDB connection error in startServer:', err);
   }
 }
 
-
-
-if (!process.env.VERCEL) {
-  connectDB().then(() => {
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  }).catch(console.error);
-}
+startServer();
 
 const { translateMessage } = require('./utils/translations');
 app.use((err, req, res, next) => {

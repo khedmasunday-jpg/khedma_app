@@ -7,16 +7,12 @@ const Log = require('../models/Log');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
-function getAesKey() {
-  const secret = process.env.AES_SECRET_KEY || process.env.ENCRYPTION_KEY;
-  if (!secret) throw new Error('Missing AES_SECRET_KEY in .env');
-  return crypto.createHash('sha256').update(secret).digest();
-}
-
+const AES_SECRET = process.env.AES_SECRET_KEY || process.env.ENCRYPTION_KEY || process.env.JWT_SECRET || 'khedma_fallback_secret_key_2026';
+const AES_KEY = crypto.createHash('sha256').update(AES_SECRET).digest();
 function encryptField(value) {
   if (value === undefined || value === null) return null;
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-gcm', getAesKey(), iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', AES_KEY, iv);
   const encrypted = Buffer.concat([
     cipher.update(JSON.stringify(value), 'utf8'),
     cipher.final(),
@@ -79,7 +75,7 @@ exports.markAttendance = async (req, res) => {
       if (foundClass.year !== year) {
         return res.status(403).json({ msg: 'Unauthorized (co-principal)' });
       }
-    } else if (user.role !== 'principal' && user.role !== 'teacher' && user.role !== 'co-principal' && user.role !== 'admin') {
+    } else if (user.role !== 'principal' && user.role !== 'teacher' && user.role !== 'co-principal') {
       return res.status(403).json({ msg: 'Unauthorized role' });
     }
 
@@ -318,7 +314,8 @@ exports.getAttendance = async (req, res) => {
 
     res.json(records);
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    console.error('❌ Error in getAttendance:', err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 };
 

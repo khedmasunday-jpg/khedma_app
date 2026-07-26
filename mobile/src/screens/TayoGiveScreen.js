@@ -161,7 +161,7 @@ export default function TayoGiveScreen({ navigation }) {
           keyExtractor={item => item._id}
           contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card} onPress={() => openGiveModal(item)}>
+            <TouchableOpacity style={styles.card} onPress={() => openModal(item)}>
               <View style={styles.cardLeft}>
                 <View style={styles.avatar}>
                   <Ionicons name="person" size={24} color="#f3ede0" />
