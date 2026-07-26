@@ -3,8 +3,10 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ImageBackground, View, Platform, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { LanguageProvider, useLanguage } from './src/utils/LanguageContext';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
-// Import screens
+import { ActivityIndicator } from 'react-native';
+
 import LoginScreen from './src/screens/LoginScreen';
 import PostLoginScreen from './src/screens/PostLoginScreen';
 import ClassDisplayScreen from './src/screens/ClassDisplayScreen';
@@ -42,7 +44,7 @@ try {
     }
   } catch (e) {}
 } catch (e) {
-  // ignore if cannot install
+  
 }
 
 const Stack = createStackNavigator();
@@ -58,7 +60,6 @@ const MyTheme = {
 function AppNavigator() {
   const { t, locale, toggleLanguage } = useLanguage();
 
-  // Custom back button rendered in header for all screens
   const CustomBackButton = ({ onPress, canGoBack }) => {
     if (!canGoBack) return null;
     return (
@@ -103,7 +104,7 @@ function AppNavigator() {
           fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
           fontWeight: 'bold',
         },
-        // Suppress the default back button — we draw our own
+        
         headerBackVisible: false,
         headerLeft: ({ canGoBack }) => (
           <CustomBackButton
@@ -256,19 +257,21 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <View style={styles.rootView}>
-        <ImageBackground 
-          source={require('./assets/pattern.jpg')} 
-          style={styles.backgroundImage}
-          resizeMode="cover"
-        >
-          <NavigationContainer theme={MyTheme}>
-            <AppNavigator />
-          </NavigationContainer>
-        </ImageBackground>
-      </View>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <View style={styles.rootView}>
+          <ImageBackground 
+            source={require('./assets/pattern.webp')} 
+            style={styles.backgroundImage}
+            resizeMode="cover"
+          >
+            <NavigationContainer theme={MyTheme}>
+              <AppNavigator />
+            </NavigationContainer>
+          </ImageBackground>
+        </View>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
 

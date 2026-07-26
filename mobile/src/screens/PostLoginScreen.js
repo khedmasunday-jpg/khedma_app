@@ -7,7 +7,6 @@ import { API_URL } from '../config/api';
 import { getAuthToken } from '../config/authSession';
 import { logger } from '../utils/logger';
 
-// Button configuration with keys for localization
 const BUTTONS = [
   { labelKey: 'takeAttendance', label: 'تسجيل حضور', minRank: 2 },
   { labelKey: 'birthdays', label: 'اعياد الميلاد', minRank: 2, excludeRanks: [4] },
@@ -23,10 +22,8 @@ const BUTTONS = [
   { labelKey: 'reset', label: 'Reset', exactRank: 1 },
   { labelKey: 'whatsappTest', label: 'Telegram Test', exactRank: 1 },
   { labelKey: 'backupData', label: 'النسخ الاحتياطي', exactRank: 1 },
-  { labelKey: 'importData', label: 'استيراد البيانات', maxRank: 3 },
 ];
 
-// Context-based icons mapping for the buttons
 const BUTTON_ICONS = {
   'notifications': { icon: 'notifications-outline', color: '#2f4360' },
   'takeAttendance': { icon: 'checkmark-done-circle-outline', color: '#2f4360' },
@@ -46,7 +43,6 @@ const BUTTON_ICONS = {
   'importData': { icon: 'cloud-download-outline', color: '#2f4360' },
 };
 
-// Role to rank mapping
 const roleToRank = {
   admin: 1,
   principal: 2,
@@ -62,10 +58,10 @@ export default function PostLoginScreen({ route, navigation }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const { t, locale, toggleLanguage } = useLanguage();
 
-  // Profile update modal states
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
   const [newUsername, setNewUsername] = useState('');
+  const [telegramChatId, setTelegramChatId] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [profileSubmitting, setProfileSubmitting] = useState(false);
@@ -77,7 +73,6 @@ export default function PostLoginScreen({ route, navigation }) {
     });
   };
 
-  // Fetch unread notification count
   useEffect(() => {
     if (token) {
       Axios.get(`${API_URL}/notifications`, {
@@ -89,11 +84,9 @@ export default function PostLoginScreen({ route, navigation }) {
     }
   }, [token]);
 
-  // Debug logging
   logger.log("🔍 PostLoginScreen params:", { token: !!token, role, fullName: initialFullName });
   logger.log("🔍 Route params:", route.params);
-  
-  // Fetch user data
+
   useEffect(() => {
     if (token) {
       const fetchUserData = async () => {
@@ -108,6 +101,9 @@ export default function PostLoginScreen({ route, navigation }) {
             if (response.data.username) {
               setCurrentUsername(response.data.username);
               setNewUsername(response.data.username);
+            }
+            if (response.data.telegramChatId) {
+              setTelegramChatId(response.data.telegramChatId);
             }
           }
         } catch (error) {
@@ -130,7 +126,7 @@ export default function PostLoginScreen({ route, navigation }) {
 
     setProfileSubmitting(true);
     try {
-      const payload = { username: newUsername };
+      const payload = { username: newUsername, telegramChatId };
       if (newPassword) payload.password = newPassword;
 
       await Axios.patch(`${API_URL}/users/me/update-credentials`, payload, {
@@ -157,7 +153,6 @@ export default function PostLoginScreen({ route, navigation }) {
     }
   };
 
-  // Handle missing or invalid role
   if (!role || !roleToRank.hasOwnProperty(role)) {
     return (
       <View style={styles.centerContainer}>
@@ -169,7 +164,6 @@ export default function PostLoginScreen({ route, navigation }) {
     );
   }
 
-  // Button Press Handler using key mapping
   const handleButtonPress = async (buttonKey) => {
     switch (buttonKey) {
       case 'notifications':
@@ -234,7 +228,6 @@ export default function PostLoginScreen({ route, navigation }) {
     }
   };
 
-  // Button Filtering Logic
   const availableButtons = BUTTONS.filter((btn) => {
     if (btn.labelKey === 'editVisitation' && isClassLeader) return true;
     if (btn.excludeRanks && btn.excludeRanks.includes(userRank)) return false;
@@ -346,6 +339,22 @@ export default function PostLoginScreen({ route, navigation }) {
               />
 
               <Text style={styles.inputLabel}>
+                {t('telegramChatIdLabel')}
+              </Text>
+              <TextInput
+                style={styles.textInput}
+                value={telegramChatId}
+                onChangeText={setTelegramChatId}
+                placeholder={t('telegramChatIdPlaceholder')}
+                placeholderTextColor="rgba(47, 67, 96, 0.4)"
+                keyboardType="numeric"
+                autoCapitalize="none"
+              />
+              <Text style={{ fontSize: 11, color: '#666', marginTop: -6, marginBottom: 10, textAlign: locale === 'ar' ? 'right' : 'left' }}>
+                💡 {t('telegramChatIdHint')}
+              </Text>
+
+              <Text style={styles.inputLabel}>
                 {locale === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}
               </Text>
               <TextInput
@@ -407,7 +416,6 @@ export default function PostLoginScreen({ route, navigation }) {
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,

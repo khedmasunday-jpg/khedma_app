@@ -1,9 +1,4 @@
-/**
- * 🔒 Universal Field Encryption Script (direct MongoDB version)
- * Encrypts ALL plaintext fields in every collection, skipping ObjectId references and already encrypted fields.
- * 
- * Usage: node server/scripts/encryptAll_universal.js
- */
+
 
 require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
@@ -38,24 +33,15 @@ function isEncryptable(value) {
 
 async function processCollection(db, colName) {
   const exists = await db.listCollections({ name: colName }).hasNext();
-  if (!exists) {
-    console.log(`⚠️  Collection "${colName}" not found, skipping.`);
-    return;
+  if (!exists) {    return;
   }
 
   const col = db.collection(colName);
 
-  // Drop potentially problematic unique indexes
   const indexes = await col.listIndexes().toArray().catch(() => []);
   for (const idx of indexes) {
-    if (idx.unique && !idx.name.startsWith('_id')) {
-      console.log(`⚙️ Dropping unique index "${idx.name}" on ${colName}...`);
-      try {
-        await col.dropIndex(idx.name);
-        console.log(`✅ Dropped index "${idx.name}"`);
-      } catch {
-        console.log(`ℹ️  Index "${idx.name}" already removed.`);
-      }
+    if (idx.unique && !idx.name.startsWith('_id')) {      try {
+        await col.dropIndex(idx.name);      } catch {      }
     }
   }
 
@@ -90,27 +76,16 @@ async function processCollection(db, colName) {
       await col.updateOne({ _id: doc._id }, update);
       count++;
     }
-  }
-
-  console.log(`🔐 ${colName}: encrypted ${count} documents`);
-}
+  }}
 
 async function main() {
   await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-  const db = mongoose.connection.db;
-  console.log('✅ Connected to MongoDB');
-
+  const db = mongoose.connection.db;
   const collections = await db.listCollections().toArray();
-  const names = collections.map(c => c.name);
-
-  console.log(`📁 Found ${names.length} collections: ${names.join(', ')}`);
-
+  const names = collections.map(c => c.name);
   for (const name of names) {
     await processCollection(db, name);
-  }
-
-  console.log('🎉 All encryption complete! You can safely recreate your indexes.');
-  await mongoose.disconnect();
+  }  await mongoose.disconnect();
   process.exit(0);
 }
 

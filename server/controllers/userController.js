@@ -3,13 +3,6 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Log = require('../models/Log');
 
-// -----------------------------------------------------------------
-// ALL MANUAL DECRYPTION FUNCTIONS HAVE BEEN REMOVED.
-// The Mongoose model will handle this automatically
-// by removing `.lean()` from our queries.
-// -----------------------------------------------------------------
-
-// Helper function to create enhanced logs
 async function createEnhancedLog(action, actor, targetUser = null, additionalDetails = '', ip = '', userAgent = '', deviceId = '') {
   try {
     
@@ -18,7 +11,6 @@ async function createEnhancedLog(action, actor, targetUser = null, additionalDet
       return String(v).replace(/^\s+|\s+$/g, '');
     };
 
-    // If actor is a lightweight object (e.g. req.user with id), fetch full user doc to get fullName/role
     let actorDoc = actor;
     if (actor && !(actor.fullName) && (actor._id || actor.id)) {
       try {
@@ -58,7 +50,6 @@ async function createEnhancedLog(action, actor, targetUser = null, additionalDet
   }
 }
 
-// helper: generate username
 async function generateUniqueUsername(fullName) {
   const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
   let base = parts[0] || 'user';
@@ -72,7 +63,6 @@ async function generateUniqueUsername(fullName) {
   return `${base}${Date.now().toString().slice(-4)}`;
 }
 
-// helper: generate password
 function generateRandomPassword(length = 10) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
   let out = '';
@@ -80,7 +70,6 @@ function generateRandomPassword(length = 10) {
   return out;
 }
 
-// Return counts/flags for staff creation UI
 exports.getStaffStats = async (req, res) => {
   try {
     if (!['admin', 'principal'].includes(req.user.role)) return res.status(403).json({ msg: 'Access denied' });
@@ -102,7 +91,6 @@ exports.getStaffStats = async (req, res) => {
   }
 };
 
-// Get all teachers and co-principals (safe data)
 exports.getStaffSafeData = async (req, res) => {
   try {
     if (req.user.role !== 'principal') {
@@ -121,7 +109,6 @@ exports.getStaffSafeData = async (req, res) => {
   }
 };
 
-// Get all teachers and co-principals (full data)
 exports.getStaffFullData = async (req, res) => {
   try {
     if (!['admin', 'principal'].includes(req.user.role)) {
@@ -151,10 +138,12 @@ exports.getStaffFullData = async (req, res) => {
   }
 };
 
-// Add staff - FIXED VERSION
 exports.addStaff = async (req, res) => {
   try {
     const requesterRole = req.user.role;
+    if (!['admin', 'principal'].includes(requesterRole)) {
+      return res.status(403).json({ msg: 'Unauthorized access' });
+    }
     const {
       fullName,
       username,
@@ -163,6 +152,7 @@ exports.addStaff = async (req, res) => {
       assignedclass,
       assignedlevel,
       phonenumber,
+      telegramChatId,
       birthdate,
       address,
       googleCode,
@@ -211,6 +201,7 @@ exports.addStaff = async (req, res) => {
       assignedclass,
       assignedlevel,
       phonenumber,
+      telegramChatId,
       birthdate,
       address,
       googleCode,
@@ -261,7 +252,6 @@ exports.addStaff = async (req, res) => {
   }
 };
 
-// Update user
 exports.updateUser = async (req, res) => {
   try {
     const requesterRole = req.user.role;
@@ -269,6 +259,11 @@ exports.updateUser = async (req, res) => {
 
     const user = await User.findById(targetId);
     if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    const isSelf = String(req.user.id) === String(targetId) || String(req.user._id) === String(targetId);
+    if (!isSelf && !['admin', 'principal'].includes(requesterRole)) {
+      return res.status(403).json({ msg: 'Unauthorized access' });
+    }
 
     if (requesterRole === 'principal' && user.role === 'admin') {
       return res.status(403).json({ msg: 'Unauthorized' });
@@ -278,6 +273,7 @@ exports.updateUser = async (req, res) => {
       'fullName',
       'address',
       'phonenumber',
+      'telegramChatId',
       'birthdate',
       'assignedclass',
       'assignedlevel',
@@ -293,7 +289,6 @@ exports.updateUser = async (req, res) => {
       }
     }
 
-    // Use document + .save() instead of findByIdAndUpdate so pre('save') hooks run (encryption/hashing)
     for (const [key, val] of Object.entries(updates)) {
       user[key] = val;
     }

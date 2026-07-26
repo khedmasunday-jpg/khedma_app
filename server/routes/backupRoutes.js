@@ -4,12 +4,8 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const JobLog = require('../models/JobLog');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
-const { runDatabaseBackup, getLastBackupInfo } = require('../utils/backupEngine');
+const { runDatabaseBackup, restoreDatabaseBackup, getLastBackupInfo } = require('../utils/backupEngine');
 
-/**
- * GET /api/backup/status
- * Get the last backup execution details and schedule info
- */
 router.get('/status', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     let lastJobLog = null;
@@ -37,15 +33,10 @@ router.get('/status', verifyToken, authorizeRoles('admin'), async (req, res) => 
   }
 });
 
-/**
- * POST /api/backup/run
- * Manually trigger a database backup with optional password verification
- */
 router.post('/run', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     const { password } = req.body || {};
 
-    // If password is provided, verify it against admin user
     if (password) {
       const user = await User.findById(req.user.id);
       if (!user) {
@@ -58,8 +49,6 @@ router.post('/run', verifyToken, authorizeRoles('admin'), async (req, res) => {
       }
     }
 
-    console.log(`👤 Admin ${req.user.fullName || req.user.username} triggered manual backup.`);
-
     const result = await runDatabaseBackup('manual', req.user);
 
     res.json({
@@ -71,7 +60,30 @@ router.post('/run', verifyToken, authorizeRoles('admin'), async (req, res) => {
     console.error('Manual backup error:', err);
     res.status(500).json({
       success: false,
-      msg: err.message || 'Database backup failed'
+      msg: 'Database backup failed'
+    });
+  }
+});
+
+router.post('/restore', verifyToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const backupData = req.body;
+    if (!backupData || !backupData.collections) {
+      return res.status(400).json({ success: false, msg: 'Invalid JSON backup format: missing "collections" object.' });
+    }
+
+    const result = await restoreDatabaseBackup(backupData, req.user);
+
+    res.json({
+      success: true,
+      msg: 'Database restored successfully!',
+      details: result
+    });
+  } catch (err) {
+    console.error('Database restore error:', err);
+    res.status(500).json({
+      success: false,
+      msg: 'Database restore failed'
     });
   }
 });

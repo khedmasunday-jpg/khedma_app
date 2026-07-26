@@ -1,4 +1,4 @@
-// models/Attendance.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
@@ -42,13 +42,16 @@ const attendanceSchema = new mongoose.Schema({
   student_enc: { data: String, iv: String, tag: String },
   date_enc: { data: String, iv: String, tag: String },
   status_enc: { data: String, iv: String, tag: String },
-  // Deterministic hashes for efficient lookups and upserts
+  
   class_hash: { type: String, index: true },
   student_hash: { type: String, index: true },
   date_hash: { type: String, index: true }
 });
 
-// Virtuals for decrypted fields
+attendanceSchema.index({ class_hash: 1, date_hash: 1, student_hash: 1 });
+attendanceSchema.index({ class_hash: 1, date_hash: 1 });
+attendanceSchema.index({ student_hash: 1, date_hash: 1 });
+
 attendanceSchema.virtual('class')
   .get(function () { return decryptField(this.class_enc); })
   .set(function (val) { this.class_enc = encryptField(val); });
@@ -65,7 +68,6 @@ attendanceSchema.virtual('status')
   .get(function () { return decryptField(this.status_enc); })
   .set(function (val) { this.status_enc = encryptField(val); });
 
-// Hide encrypted data when sending responses
 attendanceSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
   delete obj.class_enc;

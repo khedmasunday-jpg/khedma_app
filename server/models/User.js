@@ -12,7 +12,6 @@ const UserSchema = new mongoose.Schema(
   assignedclass: { type: String },
   isClassLeader: { type: Boolean, default: false },
 
-  // Fields with setters/getters - setting these will encrypt into *_enc immediately
   fullName: {
     type: String,
     set: function(v) {
@@ -22,7 +21,7 @@ const UserSchema = new mongoose.Schema(
         return undefined;
       }
       this.fullName_enc = encrypt(v);
-      return undefined; // don't store plain value
+      return undefined; 
     },
     get: function() {
       return decrypt(this.fullName_enc);
@@ -58,26 +57,26 @@ const UserSchema = new mongoose.Schema(
       return decrypt(this.googleCode_enc);
     }
   },
-  phonenumber: {
+
+  telegramChatId: {
     type: String,
     set: function(v) {
       if (v === undefined) return v;
       if (v === null || v === '') {
-        this.phonenumber_enc = undefined;
+        this.telegramChatId_enc = undefined;
         return undefined;
       }
-      this.phonenumber_enc = encrypt(v);
+      this.telegramChatId_enc = encrypt(v);
       return undefined;
     },
     get: function() {
-      return decrypt(this.phonenumber_enc);
+      return decrypt(this.telegramChatId_enc);
     }
   },
 
-  // Encrypted fields persisted in DB
   googleCode_enc: { type: Object },
   fullName_enc: { type: Object },
-  phonenumber_enc: { type: Object },
+  telegramChatId_enc: { type: Object },
   address_enc: { type: Object },
 
   birthdate: { type: Date },
@@ -85,11 +84,14 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-// Before save: hash password only (encryption of fields handled by path setters)
+UserSchema.index({ role: 1, isActive: 1 });
+UserSchema.index({ role: 1, assignedlevel: 1 });
+UserSchema.index({ role: 1, assignedclass: 1, assignedlevel: 1 });
+UserSchema.index({ isActive: 1 });
+
 UserSchema.pre('save', function(next) {
   const self = this;
 
-  // Hash password when modified
   if (self.isModified('password')) {
     const salt = bcrypt.genSaltSync(10);
     try {
@@ -102,14 +104,14 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
-// Hide _enc fields when sending JSON
 UserSchema.methods.toJSON = function() {
   const obj = this.toObject({ virtuals: true, getters: true });
   delete obj.fullName_enc;
   delete obj.address_enc;
   delete obj.googleCode_enc;
   delete obj.phonenumber_enc;
-  // Never expose password
+  delete obj.telegramChatId_enc;
+  
   if (obj.password) delete obj.password;
   return obj;
 };

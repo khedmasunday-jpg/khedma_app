@@ -1,4 +1,4 @@
-// services/schedulerService.js
+
 const cron = require('node-cron');
 const moment = require('moment-timezone');
 const ScheduledJob = require('../models/ScheduledJob');
@@ -8,15 +8,11 @@ const User = require('../models/User');
 const Student = require('../models/Student');
 const { queueNotification, hasBeenNotifiedToday } = require('./notificationService');
 
-// Keep track of active running cron tasks so we can clear/reload them dynamically
 const runningCronTasks = {};
 
-/**
- * Seed default jobs in the database if they do not exist
- */
 async function seedDefaultJobs() {
   try {
-    // 1. Seed Message Templates
+    
     let birthdayTemplate = await MessageTemplate.findOne({ name: 'Default Birthday Template' });
     if (!birthdayTemplate) {
       birthdayTemplate = new MessageTemplate({
@@ -26,7 +22,6 @@ async function seedDefaultJobs() {
         content: '🎉 كل سنة وحضرتك طيب بمناسبة عيد ميلادك! نتمنى لك سنة مباركة وسعيدة. 🎈'
       });
       await birthdayTemplate.save();
-      console.log('✅ Seeded Default Birthday Message Template.');
     }
 
     let fridayTemplate = await MessageTemplate.findOne({ name: 'Default Friday Follow-up Template' });
@@ -38,30 +33,26 @@ async function seedDefaultJobs() {
         content: '🕊️ سلام ونعمة. نفتقدكم في الخدمة ونتمنى الاطمئنان عليكم. نراكم الأحد القادم إن شاء الله. 📋'
       });
       await fridayTemplate.save();
-      console.log('✅ Seeded Default Friday Follow-up Message Template.');
     }
 
-    // 2. Seed Recipient Groups
     let defaultStaffGroup = await RecipientGroup.findOne({ name: 'All Staff' });
     if (!defaultStaffGroup) {
       defaultStaffGroup = new RecipientGroup({
         name: 'All Staff',
         description: 'All active teachers and co-principals',
         criteria: {
-          role: 'teacher' // can be customized/expanded later
+          role: 'teacher' 
         }
       });
       await defaultStaffGroup.save();
-      console.log('✅ Seeded Default Recipient Group: All Staff.');
     }
 
-    // 3. Seed Scheduled Jobs
     const birthdayJobCount = await ScheduledJob.countDocuments({ notificationType: 'birthday' });
     if (birthdayJobCount === 0) {
       const birthdayJob = new ScheduledJob({
         name: 'Daily Birthday Greeting',
         description: 'Sends automated birthday greetings at 11:00 AM Egypt Time',
-        cronExpression: '0 11 * * *', // 11:00 AM daily
+        cronExpression: '0 11 * * *', 
         timezone: 'Africa/Cairo',
         isActive: true,
         notificationType: 'birthday',
@@ -69,7 +60,6 @@ async function seedDefaultJobs() {
         recipientGroupId: defaultStaffGroup._id
       });
       await birthdayJob.save();
-      console.log('✅ Seeded Daily Birthday Greeting Job in Database.');
     }
 
     const fridayJobCount = await ScheduledJob.countDocuments({ notificationType: 'weekly_followup' });
@@ -77,7 +67,7 @@ async function seedDefaultJobs() {
       const fridayJob = new ScheduledJob({
         name: 'Weekly Friday Follow-up (افتقاد)',
         description: 'Sends weekly follow-up / absence check messages on Fridays at 11:00 AM Egypt Time',
-        cronExpression: '0 11 * * 5', // 11:00 AM on Fridays (5)
+        cronExpression: '0 11 * * 5', 
         timezone: 'Africa/Cairo',
         isActive: true,
         notificationType: 'weekly_followup',
@@ -85,7 +75,6 @@ async function seedDefaultJobs() {
         recipientGroupId: defaultStaffGroup._id
       });
       await fridayJob.save();
-      console.log('✅ Seeded Weekly Friday Follow-up Job in Database.');
     }
 
   } catch (err) {
@@ -93,15 +82,11 @@ async function seedDefaultJobs() {
   }
 }
 
-/**
- * Initialize and load all active scheduled jobs from the database
- */
 async function initializeScheduler() {
   await seedDefaultJobs();
   
   if (process.env.PAUSE_SCHEDULER === 'true') {
-    console.log('⏸️ [Scheduler] All jobs are paused via environment variable (PAUSE_SCHEDULER=true).');
-    // Stop any existing running cron tasks before returning
+    
     for (const jobName of Object.keys(runningCronTasks)) {
       runningCronTasks[jobName].stop();
       delete runningCronTasks[jobName];
@@ -111,9 +96,7 @@ async function initializeScheduler() {
   
   try {
     const activeJobs = await ScheduledJob.find({ isActive: true });
-    console.log(`⏰ [Scheduler] Found ${activeJobs.length} active scheduled jobs to register.`);
-    
-    // Stop any existing running cron tasks before reloading
+
     for (const jobName of Object.keys(runningCronTasks)) {
       runningCronTasks[jobName].stop();
       delete runningCronTasks[jobName];
@@ -127,22 +110,14 @@ async function initializeScheduler() {
   }
 }
 
-/**
- * Schedule a job in node-cron
- * @param {object} job ScheduledJob Mongoose Document
- */
 function scheduleJob(job) {
   const jobName = job.name;
   const cronExpr = job.cronExpression;
   const tz = job.timezone || 'Africa/Cairo';
 
-  console.log(`📅 [Scheduler] Registering job "${jobName}" with cron [${cronExpr}] in timezone [${tz}]`);
-
-  // Schedule using node-cron with timezone option
   const task = cron.schedule(
     cronExpr,
     async () => {
-      console.log(`🔔 [Scheduler] Executing scheduled job: "${jobName}"`);
       await runJobHandler(job._id);
     },
     {
@@ -154,10 +129,6 @@ function scheduleJob(job) {
   runningCronTasks[job.id || job._id.toString()] = task;
 }
 
-/**
- * Run a specific job handler by its Database ID
- * @param {string} jobId 
- */
 async function runJobHandler(jobId) {
   try {
     const job = await ScheduledJob.findById(jobId).populate('templateId').populate('recipientGroupId');
@@ -166,9 +137,6 @@ async function runJobHandler(jobId) {
       return;
     }
 
-    console.log(`⚙️ [Scheduler] Running handler for job: "${job.name}" (${job.notificationType})`);
-    
-    // Update last run time
     job.lastRunTime = new Date();
     await job.save();
 
@@ -185,34 +153,27 @@ async function runJobHandler(jobId) {
   }
 }
 
-/**
- * Birthday Job Handler
- */
 async function handleBirthdayJob(job) {
   const todayKey = moment().tz(job.timezone || 'Africa/Cairo').format('MM-DD');
-  console.log(`[BirthdayHandler] Checking birthdays for Egypt date key: ${todayKey}`);
 
   const templateContent = job.templateId ? job.templateId.content : '🎉 كل سنة وأنت طيب! 🎈';
 
-  // 1. Process Staff Birthdays
   const staff = await User.find({ isActive: true });
   for (const u of staff) {
     if (u.birthdate) {
       const uBirthday = moment(u.birthdate).format('MM-DD');
       if (uBirthday === todayKey) {
-        const phone = u.phonenumber; // virtual getter decrypts
+        const phone = u.phonenumber; 
         if (!phone) {
-          console.warn(`[BirthdayHandler] Staff member ${u.fullName} has birthday today but no phone number.`);
+          console.warn(`[BirthdayHandler] Staff member (ID: ${u._id}) has birthday today but no phone number.`);
           continue;
         }
 
         const alreadySent = await hasBeenNotifiedToday(u._id, phone);
         if (alreadySent) {
-          console.log(`[BirthdayHandler] Staff ${u.fullName} already notified for today's birthday. Skipping.`);
           continue;
         }
 
-        // Infrastructure is ready for placeholders (e.g. replacing {name}), but placeholder logic not requested
         const messageText = templateContent.replace(/{name}/g, u.fullName || '');
 
         await queueNotification({
@@ -227,24 +188,22 @@ async function handleBirthdayJob(job) {
     }
   }
 
-  // 2. Process Student Birthdays
   const students = await Student.find({});
   for (const s of students) {
     if (s.birthdate) {
       const sBirthday = moment(s.birthdate).format('MM-DD');
       if (sBirthday === todayKey) {
-        const fatherPhone = s.father_phonenumber; // virtual getter decrypts
-        const motherPhone = s.mother_phonenumber; // virtual getter decrypts
+        const fatherPhone = s.father_phonenumber; 
+        const motherPhone = s.mother_phonenumber; 
         const sName = s.getFullName() || '';
         
         if (!fatherPhone && !motherPhone) {
-          console.warn(`[BirthdayHandler] Student ${sName} has birthday today but no parent phone number.`);
+          console.warn(`[BirthdayHandler] Student (ID: ${s._id}) has birthday today but no parent phone number.`);
           continue;
         }
 
         const messageText = templateContent.replace(/{name}/g, sName);
 
-        // Queue for father
         if (fatherPhone) {
           const alreadySentFather = await hasBeenNotifiedToday(s._id, fatherPhone);
           if (!alreadySentFather) {
@@ -257,11 +216,9 @@ async function handleBirthdayJob(job) {
               jobId: job._id
             });
           } else {
-            console.log(`[BirthdayHandler] Student ${sName} father already notified. Skipping.`);
           }
         }
 
-        // Queue for mother
         if (motherPhone) {
           const alreadySentMother = await hasBeenNotifiedToday(s._id, motherPhone);
           if (!alreadySentMother) {
@@ -274,7 +231,6 @@ async function handleBirthdayJob(job) {
               jobId: job._id
             });
           } else {
-            console.log(`[BirthdayHandler] Student ${sName} mother already notified. Skipping.`);
           }
         }
       }
@@ -282,11 +238,7 @@ async function handleBirthdayJob(job) {
   }
 }
 
-/**
- * Friday Follow-up Job Handler
- */
 async function handleWeeklyFollowupJob(job) {
-  console.log('[WeeklyFollowupHandler] Executing weekly follow-up notification dispatch...');
 
   const templateContent = job.templateId ? job.templateId.content : '🕊️ سلام ونعمة. نفتقدكم في الخدمة. 📋';
   const group = job.recipientGroupId;
@@ -296,10 +248,8 @@ async function handleWeeklyFollowupJob(job) {
     return;
   }
 
-  // Resolve recipients list
   let recipients = [];
 
-  // 1. Static list
   if (group.recipients && group.recipients.length > 0) {
     recipients = group.recipients.map(r => ({
       id: r.recipientId,
@@ -308,12 +258,12 @@ async function handleWeeklyFollowupJob(job) {
       phone: r.phoneNumber
     }));
   } 
-  // 2. Dynamic criteria
+  
   else if (group.criteria) {
     const { role, classLevel, assignedclass } = group.criteria;
     
     if (role) {
-      // Find staff matching criteria
+      
       const query = { isActive: true, role };
       if (assignedclass) query.assignedclass = assignedclass;
       if (classLevel) query.assignedlevel = classLevel;
@@ -326,8 +276,7 @@ async function handleWeeklyFollowupJob(job) {
         phone: u.phonenumber
       }));
     } else {
-      // Find students matching criteria.
-      // Load all students and filter in memory using decrypted getters because classname and classLevel are GCM-encrypted in the database
+
       const allStudents = await Student.find({});
       const matchedStudents = allStudents.filter(s => {
         if (classLevel && s.getClassLevel() !== Number(classLevel)) return false;
@@ -357,12 +306,9 @@ async function handleWeeklyFollowupJob(job) {
     }
   }
 
-  console.log(`[WeeklyFollowupHandler] Dispatching to ${recipients.length} resolved recipients.`);
-
   for (const recipient of recipients) {
     if (!recipient.phone) continue;
 
-    // Build message (placeholders ready if needed)
     const messageText = templateContent.replace(/{name}/g, recipient.name || '');
 
     await queueNotification({
@@ -376,9 +322,6 @@ async function handleWeeklyFollowupJob(job) {
   }
 }
 
-/**
- * Dynamically trigger a job execution manually
- */
 async function runJobManually(jobId) {
   await runJobHandler(jobId);
 }

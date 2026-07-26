@@ -16,12 +16,11 @@ if (typeof Platform !== 'undefined' && Platform.OS !== 'web') {
     Clipboard = null;
   }
 }
-// we'll use Facebook-style pickers for birthdate (day/month/year)
+
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import { Picker } from '@react-native-picker/picker';
 
-// Dynamically require the modal datetime picker only on native platforms
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -31,7 +30,6 @@ if (Platform.OS !== 'web') {
   }
 }
 
-// Use centralized API_URL from config instead of hardcoded values
 const initialStaff = {
   fullName: '',
   username: '',
@@ -41,6 +39,7 @@ const initialStaff = {
   googleCode: '',
   address: '',
   phonenumber: '',
+  telegramChatId: '',
   birthdate: '',
   studentsassigned: [],
   assignedclass: '',
@@ -50,8 +49,6 @@ const initialStaff = {
   isClassLeader: false,
 };
 
-// Classes per level
-// Use string keys so web <select> and native Picker keep values consistent
 const CLASS_OPTIONS = {
   '1': ['فصل السيرافيم', 'فصل الشاروبيم'],
   '2': ['الملاك رفائيل', 'الملاك ميخائيل'],
@@ -79,11 +76,10 @@ export default function AddStaffScreen({ route, navigation }) {
   const [generatedCreds, setGeneratedCreds] = useState(null);
   const [studentQuery, setStudentQuery] = useState('');
   const [studentResults, setStudentResults] = useState([]);
-  const [selectedStudents, setSelectedStudents] = useState([]); // kept but not shown
+  const [selectedStudents, setSelectedStudents] = useState([]); 
   const [showCalendar, setShowCalendar] = useState(false);
   const [inlineMessage, setInlineMessage] = useState('');
 
-  // Contact picker state
   const [contactsList, setContactsList] = useState([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [contactPickerVisible, setContactPickerVisible] = useState(false);
@@ -92,7 +88,6 @@ export default function AddStaffScreen({ route, navigation }) {
   const [customAlertTitle, setCustomAlertTitle] = useState('');
   const [customAlertMessage, setCustomAlertMessage] = useState('');
 
-  // modernized overlay alert helper
   const showAlert = (title, message) => {
     setCustomAlertTitle(title);
     setCustomAlertMessage(message || '');
@@ -114,10 +109,9 @@ export default function AddStaffScreen({ route, navigation }) {
 
   const handleChange = (key, value) => setStaff({ ...staff, [key]: value });
 
-  // specialized role change handler: principal => no level/class, co-principal => level only
   const handleRoleChange = (roleVal) => {
     setStaff(prev => {
-      // normalize ar -> en roles
+      
       const normalized = String(roleVal).trim().replace(/\s+/g, '');
       if (['امينالخدمة', 'أمينالخدمة', 'امينالخدمه', 'أمينالخدمه'].includes(normalized) || roleVal === 'principal') {
         roleVal = 'principal';
@@ -128,11 +122,11 @@ export default function AddStaffScreen({ route, navigation }) {
       }
 
       if (roleVal === 'principal') {
-        // principal does not have level or class
+        
         return { ...prev, role: roleVal, assignedlevel: '', assignedclass: '' };
       }
       if (roleVal === 'co-principal') {
-        // co-principal has level but not class
+        
         const assignedLevels = stats.assignedCoPrincipalLevels || [];
         const available = [1, 2, 3].filter(lvl => !assignedLevels.includes(lvl));
         const defaultLvl = available.length > 0 ? String(available[0]) : '';
@@ -143,10 +137,10 @@ export default function AddStaffScreen({ route, navigation }) {
   };
 
   const handleLevelChange = (lvl) => {
-    // lvl should be string key like '1','2','3' or ''
+    
     setStaff(prev => {
       const next = { ...prev, assignedlevel: String(lvl || '') };
-      // only auto-set class when role is teacher (not co-principal)
+      
       if (prev.role !== 'co-principal') {
         const opts = CLASS_OPTIONS[String(lvl)] || [];
         next.assignedclass = opts.length ? opts[0] : '';
@@ -159,27 +153,25 @@ export default function AddStaffScreen({ route, navigation }) {
     setStaff(prev => ({ ...prev, assignedclass: cls }));
   };
 
-  // generate username on demand (sparkles button)
   const generateUsernameOnDemand = () => {
     const name = staff.fullName;
-    // Get the first word from the name (works with Arabic or English)
+    
     const cleanName = (name || '').trim();
     const parts = cleanName.split(/\s+/).filter(Boolean);
     let base = 'user';
     if (parts.length > 0) {
       base = parts[0];
     }
-    // Keep original characters (including Arabic) but remove spaces and special chars
+    
     base = base.replace(/[\s\-_\.]/g, '');
     if (!base) base = 'user';
-    // Generate a 5 digit random number
+    
     const suffix = Math.floor(Math.random() * 90000 + 10000);
     const username = `${base}${suffix}`;
     
     handleChange('username', username);
   };
 
-  // Generate a complex password on demand (refresh button)
   const generatePasswordOnDemand = () => {
     const length = 16;
     const uppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -189,14 +181,14 @@ export default function AddStaffScreen({ route, navigation }) {
     const all = uppers + lowers + digits + symbols;
     const rand = (chars) => chars.charAt(Math.floor(Math.random() * chars.length));
     let pw = '';
-    // ensure at least two of each category
+    
     pw += rand(uppers) + rand(uppers);
     pw += rand(lowers) + rand(lowers);
     pw += rand(digits) + rand(digits);
     pw += rand(symbols) + rand(symbols);
-    // fill remaining with random chars
+    
     for (let i = pw.length; i < length; i++) pw += rand(all);
-    // shuffle multiple times for better randomization
+    
     for (let i = 0; i < 3; i++) {
       pw = pw.split('').sort(() => 0.5 - Math.random()).join('');
     }
@@ -204,7 +196,7 @@ export default function AddStaffScreen({ route, navigation }) {
   };
 
   React.useEffect(() => {
-    // Check if token exists
+    
     if (!token) {
       const msg = 'No authentication token found. Please login again.';
       setInlineMessage(msg);
@@ -212,7 +204,6 @@ export default function AddStaffScreen({ route, navigation }) {
       return;
     }
 
-    // fetch staff stats for role choices
     (async () => {
       try {
         const res = await axios.get(`${API_URL}/users/staff-stats`, { 
@@ -228,8 +219,7 @@ export default function AddStaffScreen({ route, navigation }) {
         }
       }
     })();
-    
-    // populate device ids
+
     try {
       const devId = Device.osInternalBuildId || Device.deviceName || Constants.installationId || '';
       handleChange('deviceId', devId);
@@ -241,7 +231,6 @@ export default function AddStaffScreen({ route, navigation }) {
     return formatDateDDMMYYYY(dateStr);
   };
 
-  // Use a canonical year so the picker is used only for day+month
   const PICKER_YEAR = 2000;
   const toPickerDateObj = (dateStr) => {
     try {
@@ -263,7 +252,7 @@ export default function AddStaffScreen({ route, navigation }) {
   };
 
   const handleAddOne = () => {
-    // Validate required fields and show which are missing
+    
     const missing = [];
     if (!staff.fullName || String(staff.fullName).trim() === '') missing.push('fullName');
     if (!staff.username || String(staff.username).trim() === '') missing.push('username');
@@ -283,7 +272,6 @@ export default function AddStaffScreen({ route, navigation }) {
       return;
     }
 
-    // Prepare a sanitized copy to add to the list
     const toAdd = {
       fullName: String(staff.fullName).trim(),
       username: String(staff.username).trim(),
@@ -294,24 +282,24 @@ export default function AddStaffScreen({ route, navigation }) {
       address: staff.address || '',
       phonenumber: staff.phonenumber || '',
       birthdate: staff.birthdate || '',
-      studentsassigned: [], // FIXED: Always send empty array instead of string
+      studentsassigned: [], 
       assignedclass: staff.assignedclass || '',
       deviceId: staff.deviceId || '',
       lockedDeviceId: staff.lockedDeviceId || '',
-      // don't send empty string for assignedlevel ('' -> Number('') === 0 which fails enum validation server-side)
+      
       assignedlevel: (staff.assignedlevel !== undefined && staff.assignedlevel !== '') ? staff.assignedlevel : undefined,
     };
 
     setStaffList(prev => [...prev, toAdd]);
     setStaff(initialStaff);
     setInlineMessage(locale === 'ar' ? 'تمت الإضافة إلى قائمة الانتظار' : 'Added to queue list');
-    // modal is only shown on submit all
+    
     showAlert(locale === 'ar' ? 'تمت الإضافة' : 'Added', locale === 'ar' ? 'العنصر أُضيف إلى قائمة الانتظار' : 'Item added to queue list.');
   };
 
   const handleSubmit = async () => {
     try {
-      // Validate token first
+      
       if (!token) {
         const msg = 'No authentication token. Please login again.';
         setInlineMessage(msg);
@@ -372,10 +360,10 @@ export default function AddStaffScreen({ route, navigation }) {
       let remaining = [...staffList];
       
       for (const s of toProcess) {
-        // normalize s
+        
         const payload = { ...s };
         if (typeof payload.isActive === 'string') payload.isActive = payload.isActive === 'true' || payload.isActive === '1';
-        // assignedlevel should be a number only when provided and not empty
+        
         if (payload.assignedlevel !== undefined && payload.assignedlevel !== '' && payload.assignedlevel !== null) {
           const n = Number(payload.assignedlevel);
           payload.assignedlevel = isNaN(n) ? undefined : n;
@@ -383,7 +371,6 @@ export default function AddStaffScreen({ route, navigation }) {
           delete payload.assignedlevel;
         }
 
-        // Ensure studentsassigned is always an array
         payload.studentsassigned = [];
 
         try {
@@ -399,25 +386,24 @@ export default function AddStaffScreen({ route, navigation }) {
             password: res.data?.credentials?.password || payload.password || s.password
           };
           created.push(creds);
-          // remove the first matching item from remaining
+          
           const idx = remaining.findIndex(item => item.username === s.username && item.fullName === s.fullName);
           if (idx !== -1) remaining.splice(idx, 1);
-          // update UI so pending item disappears immediately
+          
           setStaffList([...remaining]);
         } catch (err) {
           logger.error('Failed to add staff:', err.response?.data || err.message);
-          
-          // Handle 401 specifically
+
           if (err.response?.status === 401) {
             const authMsg = 'Session expired or invalid token. Please login again.';
             setInlineMessage(authMsg);
             showAlert('Authentication Error', authMsg);
-            // Stop processing remaining items
+            
             break;
           }
           
           failed.push({ item: s, err: err.response?.data?.msg || err.message || 'Unknown error' });
-          // leave the item in remaining so user can retry
+          
         }
       }
       
@@ -481,7 +467,6 @@ export default function AddStaffScreen({ route, navigation }) {
     showAlert(locale === 'ar' ? 'تم النسخ' : 'Copied', locale === 'ar' ? 'تم النسخ إلى الحافظة' : 'Copied to clipboard');
   };
 
-  // Show warning if no token
   if (!token) {
     return (
       <View style={{ padding: 16 }}>
@@ -500,7 +485,7 @@ export default function AddStaffScreen({ route, navigation }) {
       <Text style={styles.headerText}>{t('addStaff')}</Text>
 
       <View style={styles.formCard}>
-        {/* Full Name Input */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('fullNameLabel')}</Text>
           <View style={styles.inputWrapper}>
@@ -515,7 +500,7 @@ export default function AddStaffScreen({ route, navigation }) {
           </View>
         </View>
         
-        {/* Role Select */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('roleLabel')}</Text>
           <View style={styles.pickerWrapper}>
@@ -552,32 +537,29 @@ export default function AddStaffScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Phone Number Input */}
+        {}
+
+
+        {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('phoneLabel')}</Text>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('telegramChatIdLabel')}</Text>
           <View style={styles.inputWrapper}>
-            <TouchableOpacity
-              onPress={pickContactForStaff}
-              style={styles.inputIcon}
-              activeOpacity={0.6}
-            >
-              <Ionicons name="call-outline" size={20} color="#2f4360" />
-            </TouchableOpacity>
+            <Ionicons name="paper-plane-outline" size={20} color="#2f4360" style={styles.inputIcon} />
             <TextInput 
-              value={staff.phonenumber} 
-              onChangeText={val => handleChange('phonenumber', val)} 
-              keyboardType="phone-pad"
+              value={staff.telegramChatId} 
+              onChangeText={val => handleChange('telegramChatId', val)} 
+              keyboardType="numeric"
               style={[styles.input, { flex: 1, textAlign: locale === 'ar' ? 'right' : 'left' }]} 
-              placeholder={t('phonePlaceholder')}
+              placeholder={t('telegramChatIdPlaceholder')}
               placeholderTextColor="#a0a0a0"
             />
           </View>
           <Text style={styles.contactHint}>
-            {locale === 'ar' ? '📞 اضغط على أيقونة الهاتف لاستيراد رقم من جهات الاتصال' : '📞 Tap the phone icon to pick from contacts'}
+            💡 {t('telegramChatIdHint')}
           </Text>
         </View>
         
-        {/* Birthdate Input */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('birthdate')}</Text>
           <View style={styles.pickerWrapper}>
@@ -639,7 +621,7 @@ export default function AddStaffScreen({ route, navigation }) {
           )}
         </View>
         
-        {/* Level / Class selection block */}
+        {}
         {!staff.role ? (
           <View style={styles.promptBox}>
             <Ionicons name="information-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
@@ -647,7 +629,7 @@ export default function AddStaffScreen({ route, navigation }) {
           </View>
         ) : (staff.role === 'teacher' || staff.role === 'co-principal') ? (
           <>
-            {/* Level Selector */}
+            {}
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gradeLevel')}</Text>
               <View style={styles.pickerWrapper}>
@@ -704,8 +686,8 @@ export default function AddStaffScreen({ route, navigation }) {
               </View>
             </View>
 
-            {/* Class Selector (Teachers only) */}
-            {/* Class Selector (Teachers only) */}
+            {}
+            {}
             {staff.role === 'teacher' && (
               <>
                 <View style={styles.inputGroup}>
@@ -750,7 +732,7 @@ export default function AddStaffScreen({ route, navigation }) {
                   </View>
                 </View>
 
-                {/* Class Leader Switch */}
+                {}
                 <View style={[styles.inputGroup, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#f0f0f0', marginTop: 10 }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="star-outline" size={20} color="#2f4360" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
@@ -775,7 +757,7 @@ export default function AddStaffScreen({ route, navigation }) {
           </View>
         ) : null}
         
-        {/* Username Input */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('usernameLabel')}</Text>
           <View style={styles.inputWrapper}>
@@ -796,7 +778,7 @@ export default function AddStaffScreen({ route, navigation }) {
           </View>
         </View>
         
-        {/* Password Input */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('passwordLabel')}</Text>
           <View style={styles.inputWrapper}>
@@ -818,7 +800,7 @@ export default function AddStaffScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Buttons Row */}
+        {}
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.secondaryButton} onPress={handleAddOne}>
             <Ionicons name="add-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
@@ -836,7 +818,7 @@ export default function AddStaffScreen({ route, navigation }) {
         ) : null}
       </View>
 
-      {/* Credentials Modal */}
+      {}
       <Modal visible={credModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -904,7 +886,7 @@ export default function AddStaffScreen({ route, navigation }) {
         </View>
       </Modal>
 
-      {/* Custom Alert Modal */}
+      {}
       <Modal visible={customAlertVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -931,7 +913,7 @@ export default function AddStaffScreen({ route, navigation }) {
         </View>
       </Modal>
 
-      {/* Contact Picker Modal */}
+      {}
       <Modal visible={contactPickerVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { maxHeight: '80%', padding: 0 }]}>

@@ -1,7 +1,11 @@
 const crypto = require('crypto');
 
 const ALGORITHM = 'aes-256-cbc';
-const KEY = crypto.createHash('sha256').update(String(process.env.ENCRYPTION_KEY || 'default_secret_key')).digest();
+const secretKey = process.env.ENCRYPTION_KEY || process.env.AES_SECRET_KEY;
+if (!secretKey) {
+  throw new Error('Missing ENCRYPTION_KEY or AES_SECRET_KEY in server environment (.env)');
+}
+const KEY = crypto.createHash('sha256').update(String(secretKey)).digest();
 const IV_LENGTH = 16;
 
 function encrypt(text) {

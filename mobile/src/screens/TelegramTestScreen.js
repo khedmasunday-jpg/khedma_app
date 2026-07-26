@@ -48,7 +48,7 @@ export default function TelegramTestScreen({ route, navigation }) {
       const res = await axios.get(`${API_URL}/users/staff`, { headers: getHeaders() });
       setStaffList(res.data || []);
     } catch (err) {
-      // ignore
+      
     }
     setFetchingStaff(false);
   };
@@ -57,7 +57,6 @@ export default function TelegramTestScreen({ route, navigation }) {
     fetchStatus();
     fetchStaff();
 
-    // Poll status every 5 seconds while on this screen
     const interval = setInterval(() => {
       fetchStatus();
     }, 5000);
@@ -125,8 +124,8 @@ export default function TelegramTestScreen({ route, navigation }) {
       return;
     }
     const staffMember = staffList.find(s => s._id === staffId);
-    if (staffMember && staffMember.phonenumber) {
-      setPhoneNumber(staffMember.phonenumber);
+    if (staffMember && (staffMember.telegramChatId || staffMember.phonenumber)) {
+      setPhoneNumber(staffMember.telegramChatId || staffMember.phonenumber);
     } else {
       setPhoneNumber('');
     }
@@ -155,7 +154,7 @@ export default function TelegramTestScreen({ route, navigation }) {
           isRtl ? 'نجاح' : 'Success',
           isRtl ? 'تم إرسال الرسالة بنجاح!' : 'Message sent successfully!'
         );
-        setMessage(''); // Clear message box
+        setMessage(''); 
       } else {
         throw new Error(response.data.msg || 'Unknown error');
       }
@@ -169,7 +168,49 @@ export default function TelegramTestScreen({ route, navigation }) {
     setLoading(false);
   };
 
-  // Helper to determine status badge styling
+  const [broadcastLoading, setBroadcastLoading] = useState(false);
+
+  const handleBroadcast = async () => {
+    if (!message.trim()) {
+      Alert.alert(isRtl ? 'تنبيه' : 'Warning', isRtl ? 'برجاء إدخال نص الرسالة للتعميم' : 'Please enter message content for broadcast');
+      return;
+    }
+
+    const confirmMsg = isRtl
+      ? `هل أنت تأكد من إرسال هذا التعميم لجميع الخدام (${staffList.length} خادم)؟`
+      : `Are you sure you want to broadcast this message to all staff members (${staffList.length} members)?`;
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (!window.confirm(confirmMsg)) return;
+    }
+
+    setBroadcastLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/telegram/broadcast`, {
+        message: message.trim(),
+        targetRole: 'all'
+      }, { headers: getHeaders() });
+
+      if (response.data && response.data.success) {
+        Alert.alert(
+          isRtl ? 'تمت إضافة التعميم بنجاح! 🚀' : 'Broadcast Queued! 🚀',
+          response.data.msg || (isRtl ? 'تم جدولة الرسائل وإرسالها في الخلفية.' : 'Messages queued in background.')
+        );
+        setMessage('');
+      } else {
+        throw new Error(response.data.msg || 'Unknown error');
+      }
+    } catch (err) {
+      const errMsg = err.response?.data?.msg || err.message || 'Server error';
+      Alert.alert(
+        isRtl ? 'خطأ' : 'Error',
+        isRtl ? `فشل الإرسال: ${errMsg}` : `Broadcast error: ${errMsg}`
+      );
+    } finally {
+      setBroadcastLoading(false);
+    }
+  };
+
   const getStatusBadge = () => {
     switch (status) {
       case 'connected':
@@ -200,7 +241,7 @@ export default function TelegramTestScreen({ route, navigation }) {
           </Text>
         </View>
 
-        {/* Connection Status Section */}
+        {}
         <View style={styles.statusBox}>
           <Text style={styles.sectionTitle}>{isRtl ? 'حالة الخدمة' : 'Service Status'}</Text>
           <View style={styles.statusRow}>
@@ -234,7 +275,7 @@ export default function TelegramTestScreen({ route, navigation }) {
           )}
         </View>
 
-        {/* QR Code Scan Section */}
+        {}
         {telegramMode === 'local' && (status === 'disconnected' || status === 'connecting' || status === 'error') && (
           <View style={styles.qrBox}>
             <Text style={styles.qrSectionTitle}>
@@ -269,7 +310,7 @@ export default function TelegramTestScreen({ route, navigation }) {
               </View>
             )}
             
-            {/* Reconnect Button */}
+            {}
             <TouchableOpacity
               style={styles.reconnectButton}
               onPress={handleReconnect}
@@ -289,9 +330,9 @@ export default function TelegramTestScreen({ route, navigation }) {
           </View>
         )}
 
-        {/* Form Inputs */}
+        {}
         <View style={styles.form}>
-          {/* User Selection */}
+          {}
           <Text style={styles.inputLabel}>{isRtl ? 'اختار الخادم (المستلم)' : 'Select Servant (Recipient)'}</Text>
           {fetchingStaff ? (
             <ActivityIndicator size="small" color="#2f4360" style={styles.loader} />
@@ -310,7 +351,7 @@ export default function TelegramTestScreen({ route, navigation }) {
             </View>
           )}
 
-          {/* Phone Number Box */}
+          {}
           <Text style={styles.inputLabel}>{isRtl ? 'رقم التليفون' : 'Phone Number'}</Text>
           <TextInput
             style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
@@ -321,7 +362,7 @@ export default function TelegramTestScreen({ route, navigation }) {
             placeholderTextColor="#888"
           />
 
-          {/* Message Area */}
+          {}
           <Text style={styles.inputLabel}>{isRtl ? 'نص الرسالة' : 'Message Body'}</Text>
           <TextInput
             style={[styles.textArea, { textAlign: isRtl ? 'right' : 'left' }]}
@@ -333,18 +374,36 @@ export default function TelegramTestScreen({ route, navigation }) {
             placeholderTextColor="#888"
           />
 
-          {/* Send Button */}
+          {}
           <TouchableOpacity
             style={styles.sendButton}
             onPress={handleSend}
-            disabled={loading}
+            disabled={loading || broadcastLoading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <View style={styles.btnRow}>
                 <Ionicons name="paper-plane-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
-                <Text style={styles.sendButtonText}>{isRtl ? 'إرسال الرسالة الآن' : 'Send Test Message'}</Text>
+                <Text style={styles.sendButtonText}>{isRtl ? 'إرسال لخادم محدد' : 'Send to Selected Person'}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {}
+          <TouchableOpacity
+            style={[styles.sendButton, { backgroundColor: '#e67e22', marginTop: 10 }]}
+            onPress={handleBroadcast}
+            disabled={loading || broadcastLoading}
+          >
+            {broadcastLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <View style={styles.btnRow}>
+                <Ionicons name="megaphone-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+                <Text style={styles.sendButtonText}>
+                  {isRtl ? `إرسال تعميم لجميع الخدام (${staffList.length} خادم)` : `Broadcast to All Staff (${staffList.length} Members)`}
+                </Text>
               </View>
             )}
           </TouchableOpacity>

@@ -1,22 +1,9 @@
 import Constants from 'expo-constants';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import axios from 'axios';
 import { logger } from '../utils/logger';
-import { getAuthToken } from './authSession';
+import { getAuthToken, clearAuthToken } from './authSession';
 
-/**
- * ⚠️ SECURITY: API Configuration
- * 
- * NEVER hardcode API URLs in source code. Always use:
- * 1. Environment variables (EXPO_PUBLIC_API_URL)
- * 2. EAS Secrets / app.json environment section
- * 3. Build-time configuration
- */
-
-/**
- * Resolve the local IP address or host based on Expo environment
- * Used ONLY in development for localhost/LAN detection
- */
 export const resolveHostFromConstants = () => {
   const m = Constants.manifest || {};
   const expoConfig = Constants.expoConfig || {};
@@ -39,24 +26,10 @@ export const resolveHostFromConstants = () => {
   return 'localhost';
 };
 
-/**
- * Get API base URL depending on platform
- * 
- * Priority:
- * 1. Environment variable EXPO_PUBLIC_API_URL (preferred)
- * 2. For web: 127.0.0.1 (dev only) or environment var
- * 3. For mobile: LAN IP detection (dev only) or environment var
- * 
- * ⚠️ In production builds:
- *    - MUST use EXPO_PUBLIC_API_URL
- *    - Should use HTTPS
- *    - Should enable certificate pinning
- */
 export const getApiBase = (overrideHost) => {
   const isWeb = Platform.OS === 'web';
   const isProduction = !__DEV__;
-  
-  // Get API URL from environment variable (highest priority)
+
   const envApiUrl = process.env.EXPO_PUBLIC_API_URL;
   
   if (envApiUrl) {
@@ -64,7 +37,6 @@ export const getApiBase = (overrideHost) => {
     return envApiUrl;
   }
 
-  // ⚠️ Fallback logic for development or production web
   if (isProduction) {
     if (isWeb) {
       const resolvedHost = typeof window !== 'undefined' && window.location ? window.location.hostname : 'localhost';
@@ -75,17 +47,14 @@ export const getApiBase = (overrideHost) => {
     throw new Error('EXPO_PUBLIC_API_URL environment variable is required for production builds');
   }
 
-  // ✅ WEB mode (expo start --web) - development only
   if (isWeb) {
     const host = overrideHost || (typeof window !== 'undefined' && window.location ? window.location.hostname : '127.0.0.1');
     logger.log(`Development web mode: using ${host}:5000`);
     return `http://${host}:5000/api`;
   }
 
-  // ✅ MOBILE mode (Expo Go or emulator) - development only
   const host = overrideHost || resolveHostFromConstants();
 
-  // Special case: Android emulator
   if (Platform.OS === 'android' && host === 'localhost') {
     logger.log('Android emulator detected: using special gateway IP 10.0.2.2');
     const protocol = 'http:';
@@ -98,10 +67,6 @@ export const getApiBase = (overrideHost) => {
   return `${protocol}//${host}:5000/api`;
 };
 
-/**
- * Create an axios client configured for your backend
- * Includes Authorization header if token provided
- */
 export function createApiClient(token, overrideHost) {
   const baseURL = getApiBase(overrideHost);
 
@@ -122,12 +87,10 @@ export function createApiClient(token, overrideHost) {
   return client;
 }
 
-/**
- * Export the API base URL (for direct axios use)
- */
 export const API_URL = getApiBase();
 
-// ✅ Security: Globally intercept all Axios requests to automatically attach the Auth Token
+axios.defaults.timeout = 15000;
+
 axios.interceptors.request.use(
   (config) => {
     const token = getAuthToken();
@@ -140,3 +103,44 @@ axios.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    
+    if (error.config && error.config.suppressAlert) {
+      return Promise.reject(error);
+    }
+
+    if (error.response) {
+      const status = error.response.status;
+      const serverMsg = error.response.data?.msg || error.response.data?.message;
+
+      if (status === 401) {
+        logger.error('401 Unauthorized - clearing invalid/expired token session');
+        clearAuthToken();
+        
+        if (!error.config?.url?.includes('/auth/login')) {
+          Alert.alert('انتهت الجلسة (Session Expired)', 'انتهت دورتك الحالية. يرجى تسجيل الدخول مجدداً.');
+        }
+      } else if (status === 403) {
+        Alert.alert('غير مصرح (Access Denied)', serverMsg || 'غير مصرح لك بإجراء هذه العملية.');
+      } else if (status === 429) {
+        Alert.alert('تنبيه (Rate Limited)', serverMsg || 'تم تجاوز عدد المحاولات المسموح بها. يرجى الانتظار والمحاولة لاحقاً.');
+      } else if (status >= 400 && status < 500) {
+        Alert.alert('خطأ في البيانات (Request Error)', serverMsg || 'تعذر إكمال الطلب. يرجى التأكد من البيانات والمحاولة مرة أخرى.');
+      } else if (status >= 500) {
+        Alert.alert('خطأ في الخادم (Server Error)', serverMsg || 'حدث خطأ غير متوقع في الخادم. يرجى المحاولة لاحقاً.');
+      }
+    } else if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      logger.error('Request timed out:', error.config?.url);
+      Alert.alert('انتهت المهلة (Timeout)', 'استغرق الطلب وقتاً أطول من المتوقع. يرجى المحاولة مرة أخرى.');
+    } else if (!error.response) {
+      logger.error('Network Error / Server Unreachable:', error.message);
+      Alert.alert('خطأ في الاتصال (Connection Error)', 'تعذر الاتصال بالخادم. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.');
+    }
+
+    return Promise.reject(error);
+  }
+);
+

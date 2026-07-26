@@ -1,11 +1,11 @@
-// models/ScheduledJob.js
+
 const mongoose = require('mongoose');
 
 const scheduledJobSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
     description: { type: String },
-    cronExpression: { type: String, required: true }, // e.g., '0 11 * * *'
+    cronExpression: { type: String, required: true }, 
     timezone: { type: String, default: 'Africa/Cairo' },
     isActive: { type: Boolean, default: true },
     lastRunTime: { type: Date },

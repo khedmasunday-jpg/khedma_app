@@ -16,6 +16,8 @@ import { useLanguage } from '../utils/LanguageContext';
 import { logger } from '../utils/logger';
 import { API_URL } from '../config/api';
 import { getAuthToken } from '../config/authSession';
+import SkeletonList from '../components/SkeletonLoader';
+import { fetchWithCache, invalidateCache } from '../utils/apiCache';
 
 export default function ActivateDeactivateScreen({ route, navigation }) {
   const { token: routeToken, role } = route.params || {};
@@ -25,7 +27,6 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Custom Alert state
   const [customAlertVisible, setCustomAlertVisible] = useState(false);
   const [customAlertTitle, setCustomAlertTitle] = useState('');
   const [customAlertMessage, setCustomAlertMessage] = useState('');
@@ -52,8 +53,8 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
     try {
       const endpoint = role === 'admin' ? '/users/staff' : '/users/staff-safe';
       const url = `${API_URL}${endpoint}`;
-      const res = await axios.get(url, { headers: { Authorization: token } });
-      setStaff(res.data);
+      const data = await fetchWithCache(url, { headers: { Authorization: token } });
+      setStaff(data);
     } catch (err) {
       showAlert(errorTitle, isRtl ? 'فشل تحميل بيانات الخدام' : 'Failed to fetch staff data');
     }
@@ -61,31 +62,29 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
   };
 
   const updateStatus = async (userId, active) => {
+    
+    const previousStaff = [...staff];
+
+    setStaff(prev => prev.map(u => u._id === userId ? { ...u, isActive: active } : u));
+
     try {
       const endpoint = `${API_URL}/users/${userId}/${active ? 'activate' : 'deactivate'}`;
       await axios.patch(endpoint, {}, { headers: { Authorization: token } });
-      
-      const userObj = staff.find(u => u._id === userId);
+      invalidateCache('users/staff');
+
+      const userObj = previousStaff.find(u => u._id === userId);
       const name = userObj ? userObj.fullName : '';
-      
-      let successMsg = '';
-      if (isRtl) {
-        successMsg = active 
-          ? `تم تفعيل حساب الخادم ${name} بنجاح` 
-          : `تم تعطيل حساب الخادم ${name} بنجاح`;
-      } else {
-        successMsg = `User ${name} was successfully ${active ? 'activated' : 'deactivated'}.`;
-      }
+      let successMsg = isRtl
+        ? (active ? `تم تفعيل حساب الخادم ${name} بنجاح` : `تم تعطيل حساب الخادم ${name} بنجاح`)
+        : `User ${name} was successfully ${active ? 'activated' : 'deactivated'}.`;
       
       showAlert(successTitle, successMsg);
-      fetchStaff();
     } catch (err) {
-      let errMsg = '';
-      if (isRtl) {
-        errMsg = active ? 'فشل تفعيل حساب الخادم' : 'فشل تعطيل حساب الخادم';
-      } else {
-        errMsg = `Failed to ${active ? 'activate' : 'deactivate'} user account.`;
-      }
+      
+      setStaff(previousStaff);
+      let errMsg = isRtl
+        ? (active ? 'فشل تفعيل حساب الخادم' : 'فشل تعطيل حساب الخادم')
+        : `Failed to ${active ? 'activate' : 'deactivate'} user account.`;
       showAlert(errorTitle, errMsg);
     }
   };
@@ -114,9 +113,9 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
 
   const getRoleColor = (roleVal) => {
     switch (roleVal) {
-      case 'principal': return '#b8860b'; // Gold
-      case 'co-principal': return '#8a2be2'; // Purple
-      case 'teacher': return '#137333'; // Green
+      case 'principal': return '#b8860b'; 
+      case 'co-principal': return '#8a2be2'; 
+      case 'teacher': return '#137333'; 
       default: return '#2f4360';
     }
   };
@@ -130,7 +129,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header Bar */}
+      {}
       <View style={[styles.headerBar, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name={isRtl ? "arrow-forward-outline" : "arrow-back-outline"} size={24} color="#2f4360" />
@@ -139,7 +138,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Search Input Container */}
+      {}
       <View style={styles.searchContainer}>
         <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <Ionicons name="search-outline" size={20} color="#666" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
@@ -158,10 +157,10 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
         </View>
       </View>
 
-      {/* Staff List */}
+      {}
       <ScrollView contentContainerStyle={styles.listContainer}>
         {loading ? (
-          <ActivityIndicator size="large" color="#2f4360" style={styles.loader} />
+          <SkeletonList count={6} />
         ) : filteredStaff.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="people-outline" size={60} color="#ccc" />
@@ -170,14 +169,14 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
         ) : (
           filteredStaff.map(user => (
             <View key={user._id} style={[styles.card, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-              {/* Left Avatar Icon */}
+              {}
               <View style={isRtl ? { marginLeft: 12 } : { marginRight: 12 }}>
                 <View style={[styles.avatarCircle, { backgroundColor: getRoleColor(user.role) + '15' }]}>
                   <Ionicons name={getRoleIcon(user.role)} size={22} color={getRoleColor(user.role)} />
                 </View>
               </View>
 
-              {/* Middle User Details */}
+              {}
               <View style={styles.cardMiddle}>
                 <Text style={[styles.nameText, { textAlign: isRtl ? 'right' : 'left' }]}>
                   {user.fullName}
@@ -196,7 +195,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
                 </View>
               </View>
 
-              {/* Right Action Button */}
+              {}
               <View style={isRtl ? { marginRight: 8 } : { marginLeft: 8 }}>
                 {(user.role !== 'principal' || role === 'admin') && (
                   <TouchableOpacity 
@@ -221,7 +220,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
         )}
       </ScrollView>
 
-      {/* Custom Alert Modal */}
+      {}
       <Modal visible={customAlertVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>

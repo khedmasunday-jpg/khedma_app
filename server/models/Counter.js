@@ -1,4 +1,4 @@
-// models/Counter.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
@@ -42,7 +42,6 @@ const counterSchema = new mongoose.Schema({
   count_enc: { data: String, iv: String, tag: String },
 });
 
-// Encrypt before saving
 counterSchema.pre('save', function (next) {
   const fields = ['model', 'count'];
   for (const field of fields) {
@@ -54,7 +53,6 @@ counterSchema.pre('save', function (next) {
   next();
 });
 
-// Virtual getters for decrypted values
 ['model', 'count'].forEach((field) => {
   counterSchema.virtual(field).get(function () {
     const dec = decryptField(this[`${field}_enc`]);
@@ -63,7 +61,6 @@ counterSchema.pre('save', function (next) {
   });
 });
 
-// Hide raw encrypted values
 counterSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
   for (const key of Object.keys(obj)) {

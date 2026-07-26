@@ -1,13 +1,4 @@
-/*
-  Migration script: encrypt plaintext fields for students collection.
-  Usage:
-    cd server
-    node scripts/migrate_encrypt_students.js
 
-  This script reads MONGO_URI and AES_SECRET_KEY from server/.env (so run from server/).
-  It will encrypt plaintext fields into corresponding *_enc fields and unset the plaintext fields.
-  Make a backup before running (recommended).
-*/
 
 require('dotenv').config({ path: '../.env' });
 const mongoose = require('mongoose');
@@ -39,18 +30,14 @@ function encryptFieldRaw(value) {
 }
 
 async function main() {
-  // CLI flags
+  
   const argv = process.argv.slice(2);
   const isApply = argv.includes('--apply');
-  const dryRun = !isApply; // default to dry-run unless --apply provided
+  const dryRun = !isApply; 
   const backupDirArgIndex = argv.findIndex(a => a === '--backup-dir');
   const backupDir = backupDirArgIndex >= 0 ? argv[backupDirArgIndex + 1] : null;
   const batchSizeIndex = argv.findIndex(a => a === '--batch-size');
   const batchSize = batchSizeIndex >= 0 ? parseInt(argv[batchSizeIndex + 1], 10) : 100;
-
-  console.log('Migration script: encrypt plaintext student fields.');
-  console.log(`Mode: ${dryRun ? 'DRY RUN (no writes)' : 'APPLY (will modify documents)'}`);
-  if (backupDir) console.log(`Backup dir: ${backupDir}`);
 
   if (backupDir && !dryRun) {
     try {
@@ -62,13 +49,10 @@ async function main() {
   }
 
   await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-  const db = mongoose.connection.db;
-  console.log('Connected to MongoDB');
-
+  const db = mongoose.connection.db;
   const colName = 'students';
   const col = db.collection(colName);
 
-  // First pass: count how many documents would be updated
   const cursor = col.find({});
   let willUpdateCount = 0;
   const fields = [
@@ -90,18 +74,11 @@ async function main() {
       if (doc[plain] !== undefined && !doc[enc]) { will = true; break; }
     }
     if (will) willUpdateCount++;
-  }
-
-  console.log(`Documents that would be updated: ${willUpdateCount}`);
-  if (dryRun) {
-    console.log('Dry run complete. To apply changes run with --apply');
-    await mongoose.disconnect();
+  }  if (dryRun) {    await mongoose.disconnect();
     process.exit(0);
   }
 
-  // Apply mode
-  console.log('Starting update pass...');
-  const applyCursor = col.find({});
+    const applyCursor = col.find({});
   let updated = 0;
   let processed = 0;
   while (await applyCursor.hasNext()) {
@@ -126,14 +103,14 @@ async function main() {
     }
 
     if (will) {
-      // backup original doc if requested
+      
       if (backupDir) {
         try {
           const filePath = path.join(backupDir, `${doc._id}.json`);
           fs.writeFileSync(filePath, JSON.stringify(doc, null, 2), { flag: 'w' });
         } catch (err) {
           console.error('Failed to backup doc', doc._id, err.message);
-          // continue even if backup fails
+          
         }
       }
 
@@ -148,13 +125,8 @@ async function main() {
     }
 
     processed++;
-    if (processed % Math.max(1, batchSize) === 0) {
-      console.log(`Processed ${processed} documents, updated ${updated}`);
-    }
-  }
-
-  console.log(`Finished. Updated ${updated} documents in ${colName}`);
-  await mongoose.disconnect();
+    if (processed % Math.max(1, batchSize) === 0) {    }
+  }  await mongoose.disconnect();
   process.exit(0);
 }
 

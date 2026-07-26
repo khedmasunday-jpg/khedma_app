@@ -1,6 +1,4 @@
-// utils/contactPicker.js
-// Shared helper to open device contacts and pick a phone number.
-// Works on iOS / Android. On web it shows a friendly message.
+
 
 import { Platform } from 'react-native';
 
@@ -13,14 +11,6 @@ if (Platform.OS !== 'web') {
   }
 }
 
-/**
- * Opens the device contacts and collects all contacts that have at least one
- * phone number. Returns an array of { name, phones: [{ label, number }] }
- * so the caller can present a picker modal.
- *
- * @param {Function} showAlert  – caller's alert helper (title, message)
- * @returns {Array|null}  – mapped contacts or null on failure / web
- */
 export async function loadContactsForPicker(showAlert) {
   if (Platform.OS === 'web') {
     if ('contacts' in navigator && 'ContactsManager' in window) {
@@ -48,7 +38,7 @@ export async function loadContactsForPicker(showAlert) {
         }
         return mappedContacts;
       } catch (ex) {
-        return null; // Could be cancelled by user or permission denied
+        return null; 
       }
     } else {
       showAlert(

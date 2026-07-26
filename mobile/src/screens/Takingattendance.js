@@ -7,8 +7,9 @@ import { logger } from '../utils/logger';
 import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { formatDateDDMMYYYY } from '../utils/dateFormatter';
+import SkeletonList from '../components/SkeletonLoader';
+import { fetchWithCache, invalidateCache } from '../utils/apiCache';
 
-// Conditionally require the native modal date picker on non-web platforms.
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -57,11 +58,11 @@ export default function AttendanceScreen({ route, navigation }) {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`${API_URL}/classes`, { headers: { Authorization: token } })
-      .then(res => {
-        setClasses(res.data);
-        if (res.data && res.data.length > 0) {
-          setSelectedClass(res.data[0]._id);
+    fetchWithCache(`${API_URL}/classes`, { headers: { Authorization: token } })
+      .then(data => {
+        setClasses(data);
+        if (data && data.length > 0) {
+          setSelectedClass(data[0]._id);
         }
       })
       .catch(err => {
@@ -74,9 +75,9 @@ export default function AttendanceScreen({ route, navigation }) {
   useEffect(() => {
     if (!selectedClass) return;
     setLoading(true);
-    axios.get(`${API_URL}/classes/${selectedClass}/students`, { headers: { Authorization: token } })
-      .then(res => {
-        const list = Array.isArray(res.data?.students) ? res.data.students : (Array.isArray(res.data) ? res.data : []);
+    fetchWithCache(`${API_URL}/classes/${selectedClass}/students`, { headers: { Authorization: token } })
+      .then(data => {
+        const list = Array.isArray(data?.students) ? data.students : (Array.isArray(data) ? data : []);
         setStudents(list);
         setAttendance(Object.fromEntries(list.map(s => [s._id, 'present'])));
       })
@@ -106,12 +107,16 @@ export default function AttendanceScreen({ route, navigation }) {
     }
   };
 
+  const [submitting, setSubmitting] = useState(false);
+
   const registerAttendance = async () => {
     if (!selectedClass) {
       notify(t('error'), t('selectClassFirst'));
       return;
     }
+    if (submitting) return;
     try {
+      setSubmitting(true);
       const dateKey = selectedDate.toISOString().split('T')[0];
       const payload = {
         students: students.map(s => ({ studentId: s._id, status: attendance[s._id] })),
@@ -133,19 +138,21 @@ export default function AttendanceScreen({ route, navigation }) {
         const list = Array.isArray(res.data?.students) ? res.data.students : (Array.isArray(res.data) ? res.data : []);
         setStudents(list);
       } catch (e) {
-        // ignore fetch error
+        
       } finally {
         setLoading(false);
       }
     } catch (err) {
       const msg = err?.response?.data?.msg || err?.response?.data?.error || err.message || t('error');
       notify(t('error'), msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Dropdown/Scroll for classes */}
+      {}
       <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>{t('selectClass')}</Text>
       <ScrollView horizontal style={styles.dropdown} showsHorizontalScrollIndicator={false}>
         {classes.map(cls => (
@@ -165,10 +172,10 @@ export default function AttendanceScreen({ route, navigation }) {
         ))}
       </ScrollView>
 
-      {/* Student list */}
+      {}
       <ScrollView style={styles.listContainer} showsVerticalScrollIndicator={false}>
         {loading ? (
-          <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />
+          <SkeletonList count={5} />
         ) : students.length === 0 ? (
           <Text style={styles.noStudentsText}>{t('noStudents')}</Text>
         ) : (
@@ -207,7 +214,7 @@ export default function AttendanceScreen({ route, navigation }) {
         )}
       </ScrollView>
 
-      {/* Bottom control panel */}
+      {}
       <View style={styles.controlPanel}>
         <Text style={[styles.dateLabel, { textAlign: isRtl ? 'right' : 'left' }]}>{t('attendanceDate')}</Text>
         <View style={[styles.dateSelectorRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
@@ -269,7 +276,7 @@ export default function AttendanceScreen({ route, navigation }) {
           )}
         </View>
 
-        {/* Action button rows */}
+        {}
         <View style={[styles.bulkActionsRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <TouchableOpacity style={[styles.bulkBtn, styles.btnPresent]} onPress={() => setAll('present')}>
             <Ionicons name="checkmark-done" size={18} color="#ffffff" style={{ marginHorizontal: 4 }} />
@@ -281,9 +288,15 @@ export default function AttendanceScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.submitBtn} onPress={registerAttendance}>
-          <Ionicons name="cloud-upload-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
-          <Text style={styles.submitBtnText}>{t('registerAttendance')}</Text>
+        <TouchableOpacity style={[styles.submitBtn, submitting && { opacity: 0.7 }]} onPress={registerAttendance} disabled={submitting}>
+          {submitting ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <>
+              <Ionicons name="cloud-upload-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
+              <Text style={styles.submitBtnText}>{t('registerAttendance')}</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </View>

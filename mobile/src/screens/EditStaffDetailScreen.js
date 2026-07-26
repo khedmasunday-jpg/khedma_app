@@ -42,7 +42,6 @@ export default function EditStaffDetailScreen({ route, navigation }) {
   const [origBirthdate, setOrigBirthdate] = useState(null);
   const [origUsername, setOrigUsername] = useState('');
 
-  // Contact picker state
   const [contactPickerVisible, setContactPickerVisible] = useState(false);
   const [contactsList, setContactsList] = useState([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
@@ -243,7 +242,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
   );
 
   const canDelete = (requesterRole === 'admin' || requesterRole === 'principal') && user;
-  const editableFields = ['fullName', 'username', 'phonenumber', 'birthdate'];
+  const editableFields = ['fullName', 'username', 'telegramChatId', 'birthdate'];
   
   const classTranslations = {
     'فصل السيرافيم': 'classSeraphim',
@@ -265,6 +264,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
       case 'fullName': return t('fullNameLabel');
       case 'username': return t('usernameLabel');
       case 'phonenumber': return t('phoneLabel');
+      case 'telegramChatId': return t('telegramChatIdLabel');
       case 'birthdate': return t('birthdate');
       case 'role': return t('roleLabel');
       case 'assignedlevel': return t('gradeLevel');
@@ -278,10 +278,10 @@ export default function EditStaffDetailScreen({ route, navigation }) {
     <>
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Title */}
+        {}
         <Text style={styles.title}>{getSafeField('fullName') || 'Unknown Name'}</Text>
         
-        {/* Form Box Wrapper */}
+        {}
         <View style={styles.formContainer}>
           {editableFields.map(key => (
             <View key={key} style={styles.fieldRow}>
@@ -383,6 +383,19 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                       {isRtl ? '📞 اضغط على أيقونة الهاتف لاستيراد رقم' : '📞 Tap the phone icon to pick from contacts'}
                     </Text>
                   </View>
+                ) : key === 'telegramChatId' ? (
+                  <View>
+                    <TextInput
+                      value={getSafeField(key) ? String(getSafeField(key)) : ''}
+                      onChangeText={val => handleChange(key, val)}
+                      placeholder={t('telegramChatIdPlaceholder')}
+                      keyboardType="numeric"
+                      style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
+                    />
+                    <Text style={{ fontSize: 11, color: '#888', marginTop: 3 }}>
+                      💡 {t('telegramChatIdHint')}
+                    </Text>
+                  </View>
                 ) : (
                 <TextInput
                   value={getSafeField(key) ? String(getSafeField(key)) : ''}
@@ -394,7 +407,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
             </View>
           ))}
 
-          {/* Role Picker (Admin only) - Stay in Arabic as per User Rules */}
+          {}
           {requesterRole === 'admin' && (
             <View style={styles.fieldRow}>
               <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
@@ -442,7 +455,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
             </View>
           )}
 
-          {/* Assigned Level Dropdown */}
+          {}
           {(getSafeField('role') === 'teacher' || getSafeField('role') === 'co-principal') && (
             <View style={styles.fieldRow}>
               <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
@@ -507,7 +520,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
             </View>
           )}
 
-          {/* Assigned Class Dropdown */}
+          {}
           {getSafeField('role') === 'teacher' && (
             <View style={styles.fieldRow}>
               <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
@@ -555,7 +568,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
             </View>
           )}
 
-          {/* Class Leader Switch */}
+          {}
           {getSafeField('role') === 'teacher' && (
             <View style={[styles.fieldRow, { flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 }]}>
               <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left', marginBottom: 0 }]}>
@@ -570,7 +583,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
             </View>
           )}
 
-          {/* Password Reset Field */}
+          {}
           <View style={styles.fieldRow}>
             <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
               {getFieldLabel('password')}
@@ -586,7 +599,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
             />
           </View>
 
-          {/* Custom Action Buttons */}
+          {}
           <View style={styles.buttonSection}>
             <TouchableOpacity 
               style={[styles.btn, styles.btnSave, saving && styles.btnDisabled]} 
@@ -630,7 +643,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
       </ScrollView>
     </KeyboardAvoidingView>
 
-      {/* Contact Picker Modal */}
+      {}
       <Modal visible={contactPickerVisible} animationType="slide" transparent>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '75%' }}>

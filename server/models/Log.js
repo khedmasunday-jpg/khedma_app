@@ -1,14 +1,12 @@
-// models/Log.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
-// === AES CONFIG ===
 const AES_SECRET = process.env.AES_SECRET_KEY;
 if (!AES_SECRET) throw new Error('Missing AES_SECRET_KEY in .env');
 
 const AES_KEY = crypto.createHash('sha256').update(AES_SECRET).digest();
 
-// Helpers
 function encryptField(value) {
   if (!value) return null;
   const iv = crypto.randomBytes(16);
@@ -34,7 +32,7 @@ const logSchema = new mongoose.Schema({
 
   actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  // If the action targets a class (like attendance), store class ref and encrypted name
+  
   targetClass: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
   targetUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
@@ -54,7 +52,11 @@ const logSchema = new mongoose.Schema({
   deviceId_enc: { data: String, iv: String, tag: String },
 });
 
-// Pre-save encryption
+logSchema.index({ timestamp: -1 });
+logSchema.index({ performedBy: 1, timestamp: -1 });
+logSchema.index({ targetUser: 1 });
+logSchema.index({ targetClass: 1 });
+
 logSchema.pre('save', function (next) {
   const fieldsToEncrypt = [
     'details', 'ip', 'userAgent', 'actorName', 'actorRole',
@@ -72,7 +74,6 @@ logSchema.pre('save', function (next) {
   next();
 });
 
-// Virtual getters
 [
   'details', 'ip', 'userAgent', 'actorName', 'actorRole',
   'performedByName', 'performedByRole', 'targetUserName', 'targetUserRole', 'targetClassName', 'actionDescription', 'deviceId'
@@ -82,7 +83,6 @@ logSchema.pre('save', function (next) {
   });
 });
 
-// Hide encrypted fields
 logSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
   for (const key of Object.keys(obj)) {

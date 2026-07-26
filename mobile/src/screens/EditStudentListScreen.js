@@ -159,14 +159,14 @@ export default function EditStudentListScreen({ route, navigation }) {
         )}
       </View>
 
-      {/* Filters Panel */}
+      {}
       <View style={styles.filterCard}>
         <Text style={[styles.filterTitle, { textAlign: isRtl ? 'right' : 'left' }]}>
           {isRtl ? 'تصفية حسب الفصل:' : 'Filter by Class:'}
         </Text>
         
         <View style={[styles.pickerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          {/* Grade Selector */}
+          {}
           <View style={styles.pickerWrapper}>
             {Platform.OS === 'web' ? (
               <select
@@ -200,7 +200,7 @@ export default function EditStudentListScreen({ route, navigation }) {
             )}
           </View>
 
-          {/* Class Selector */}
+          {}
           <View style={styles.pickerWrapper}>
             {Platform.OS === 'web' ? (
               <select
@@ -294,7 +294,7 @@ export default function EditStudentListScreen({ route, navigation }) {
         </ScrollView>
       )}
 
-      {/* Floating Modern Action Bar */}
+      {}
       {selectionMode && selectedStudentIds.size > 0 && (
         <View style={[styles.floatingActionBar, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <Text style={styles.selectedCountText}>

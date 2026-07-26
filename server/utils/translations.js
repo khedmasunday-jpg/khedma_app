@@ -1,4 +1,4 @@
-// Central translation mapping for server responses
+
 const map = {
   'Access denied': 'تم الرفض - لا توجد صلاحية',
   'Server error': 'خطأ في الخادم',
@@ -39,13 +39,11 @@ function translateMessage(msg) {
   if (typeof msg !== 'string') return msg;
   if (map[msg]) return map[msg];
 
-  // try partial replacements for known patterns
   let out = msg;
-  // common prefixes
+  
   out = out.replace(/Missing fields:?/i, map['Missing fields'] || 'حقول مفقودة');
   out = out.replace(/Please provide:?/i, map['Please provide:'] || 'يرجى توفير:');
 
-  // replace field tokens
   Object.keys(fieldReplacements).forEach(k => {
     const re = new RegExp(`\\b${k}\\b`, 'g');
     out = out.replace(re, fieldReplacements[k]);

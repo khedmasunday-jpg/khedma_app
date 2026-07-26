@@ -2,13 +2,9 @@ const express = require('express');
 const router = express.Router();
 const attendanceController = require('../controllers/attendanceController');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
-const verifyDevice = require('../middleware/verifyDevice');
 const { body, validationResult } = require('express-validator');
 
-// Admin-only: reset attendance records for a specific class and date
-// IMPORTANT: define this specific route before the param route so Express doesn't
-// mistakenly treat 'reset' as a classId and forward the request to markAttendance.
-router.post('/reset', verifyToken, verifyDevice, authorizeRoles('admin'), async (req, res) => {
+router.post('/reset', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     return await attendanceController.resetClassDate(req, res);
   } catch (err) {
@@ -17,8 +13,7 @@ router.post('/reset', verifyToken, verifyDevice, authorizeRoles('admin'), async 
   }
 });
 
-// Map controller methods to routes
-router.post('/:classId', verifyToken, verifyDevice, [
+router.post('/:classId', verifyToken, [
   body('records').isArray().withMessage('records array required')
 ], async (req, res) => {
   const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ msg: 'Invalid input', errors: errors.array() });
@@ -30,7 +25,7 @@ router.post('/:classId', verifyToken, verifyDevice, [
   }
 });
 
-router.get('/', verifyToken, verifyDevice, async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     return await attendanceController.getAttendance(req, res);
   } catch (err) {
@@ -48,7 +43,7 @@ router.get('/stats', verifyToken, async (req, res) => {
   }
 });
 
-router.get('/history', verifyToken, verifyDevice, async (req, res) => {
+router.get('/history', verifyToken, async (req, res) => {
   try {
     return await attendanceController.getHistory(req, res);
   } catch (err) {
@@ -57,7 +52,7 @@ router.get('/history', verifyToken, verifyDevice, async (req, res) => {
   }
 });
 
-router.get('/today', verifyToken, verifyDevice, async (req, res) => {
+router.get('/today', verifyToken, async (req, res) => {
   try {
     return await attendanceController.getToday(req, res);
   } catch (err) {

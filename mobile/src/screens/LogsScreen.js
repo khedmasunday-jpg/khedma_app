@@ -75,16 +75,14 @@ export default function LogsScreen({ route }) {
       .finally(() => setLoading(false));
   }, []);
 
-  // Helper to categorize logs
   const getLogCategory = (log) => {
     const action = (log.action || '').toLowerCase();
     const desc = (log.actionDescription || '').toLowerCase();
 
-    // Logins
     if (action.includes('login') || desc.includes('login')) {
       return 'login';
     }
-    // Attendance
+    
     if (
       action.includes('attendance') || 
       action.includes('assignment') || 
@@ -93,7 +91,7 @@ export default function LogsScreen({ route }) {
     ) {
       return 'attendance';
     }
-    // Users (Adding user, editing, deleting, etc.)
+    
     if (
       action.includes('user') || 
       action.includes('student') || 
@@ -106,11 +104,10 @@ export default function LogsScreen({ route }) {
     ) {
       return 'user';
     }
-    // Others
+    
     return 'other';
   };
 
-  // Pre-calculate counts for each filter dynamically
   const counts = {
     all: logs.length,
     login: logs.filter(l => getLogCategory(l) === 'login').length,
@@ -119,7 +116,6 @@ export default function LogsScreen({ route }) {
     other: logs.filter(l => getLogCategory(l) === 'other').length,
   };
 
-  // Get icon and colors for each category
   const getCategoryMeta = (category) => {
     switch (category) {
       case 'login':
@@ -149,7 +145,6 @@ export default function LogsScreen({ route }) {
     }
   };
 
-  // Format timestamp to dd/mm/yyyy, hh:mm AM/PM
   const formatLogTimestamp = (dateInput) => {
     if (!dateInput) return '';
     try {
@@ -173,7 +168,6 @@ export default function LogsScreen({ route }) {
     }
   };
 
-  // Localized Action Names mapping for Arabic
   const translateAction = (action, isAr) => {
     if (!action) return '';
     if (!isAr) return action;
@@ -199,7 +193,6 @@ export default function LogsScreen({ route }) {
     return action;
   };
 
-  // Role localization mapping
   const getLocalizedRole = (r) => {
     if (!r) return '';
     switch (r.toLowerCase()) {
@@ -211,7 +204,6 @@ export default function LogsScreen({ route }) {
     }
   };
 
-  // Filter labels and details
   const filterPills = [
     { id: 'all', labelKey: 'filterAll', icon: 'list-outline' },
     { id: 'login', labelKey: 'filterLogins', icon: 'log-in-outline' },
@@ -258,7 +250,6 @@ export default function LogsScreen({ route }) {
     return true;
   };
 
-  // Perform client-side filter and search
   const filteredLogs = logs.filter(log => {
     const cat = getLogCategory(log);
     const matchesFilter = selectedFilter === 'all' || cat === selectedFilter;
@@ -271,8 +262,7 @@ export default function LogsScreen({ route }) {
     const q = searchQuery.toLowerCase();
     const action = (log.action || '').toLowerCase();
     const desc = (log.actionDescription || '').toLowerCase();
-    
-    // Performer fields
+
     const performerName = log.performedByName || log.actorName || (log.performedBy && (log.performedBy.fullName || log.performedBy.username)) || 'Unknown';
     const performerRole = log.performedByRole || log.actorRole || (log.performedBy && log.performedBy.role) || 'Unknown';
     const perfName = performerName.toLowerCase();
@@ -280,8 +270,7 @@ export default function LogsScreen({ route }) {
     
     const details = (log.details || '').toLowerCase();
     const ip = (log.ip || log.ipAddress || log.clientIp || log.requestIp || log.remoteAddr || log.actorIp || '').toLowerCase();
-    
-    // Target fields
+
     const targetName = (log.targetUserName || (log.targetUser && (log.targetUser.fullName || log.targetUser.username)) || '').toLowerCase();
     const targetClass = (log.targetClassName || '').toLowerCase();
     
@@ -294,10 +283,10 @@ export default function LogsScreen({ route }) {
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* Title */}
+      {}
       <Text style={styles.title}>{t('logs')}</Text>
 
-      {/* Search Bar */}
+      {}
       <View style={[styles.searchContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <Ionicons name="search-outline" size={20} color="#2f4360" style={styles.searchIcon} />
         <TextInput
@@ -314,7 +303,7 @@ export default function LogsScreen({ route }) {
         )}
       </View>
 
-      {/* Filter Buttons Grid */}
+      {}
       <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         {filterPills.map((pill) => {
           const isActive = selectedFilter === pill.id;
@@ -343,7 +332,7 @@ export default function LogsScreen({ route }) {
         })}
       </View>
 
-      {/* Time Range Filter Buttons Grid */}
+      {}
       <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         {timeFilters.map((tFilter) => {
           const isActive = selectedTimeFilter === tFilter.id;
@@ -371,7 +360,7 @@ export default function LogsScreen({ route }) {
         })}
       </View>
 
-      {/* Custom Date Range Panel */}
+      {}
       {selectedTimeFilter === 'custom' && (
         <View style={[styles.customDateContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <View style={[styles.customDateWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
@@ -423,7 +412,7 @@ export default function LogsScreen({ route }) {
         </View>
       )}
 
-      {/* Main Logs View */}
+      {}
       <View style={styles.box}>
         {loading ? (
           <View style={styles.center}>
@@ -439,35 +428,33 @@ export default function LogsScreen({ route }) {
             {filteredLogs.map((log, idx) => {
               const category = getLogCategory(log);
               const meta = getCategoryMeta(category);
-              
-              // Performer fields
+
               const performerName = log.performedByName || log.actorName || (log.performedBy && (log.performedBy.fullName || log.performedBy.username)) || 'Unknown';
               const performerRole = log.performedByRole || log.actorRole || (log.performedBy && log.performedBy.role) || 'Unknown';
-              
-              // Client IP
+
               const ip = log.ip || log.ipAddress || log.clientIp || log.requestIp || log.remoteAddr || log.actorIp || null;
 
               return (
                 <View key={idx} style={[styles.logCard, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                  {/* Category Circle Badge */}
+                  {}
                   <View style={[styles.badgeContainer, { backgroundColor: meta.bg }]}>
                     <Ionicons name={meta.icon} size={22} color={meta.color} />
                   </View>
 
-                  {/* Log details */}
+                  {}
                   <View style={[styles.cardContent, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
-                    {/* Header: Action Title */}
+                    {}
                     <Text style={styles.actionTitle}>
                       {translateAction(log.actionDescription || log.action, isRtl)}
                     </Text>
 
-                    {/* Performed by */}
+                    {}
                     <Text style={styles.performer}>
                       <Text style={styles.label}>{t('performedByLabel')}</Text>
                       {performerName} ({getLocalizedRole(performerRole)})
                     </Text>
 
-                    {/* Target User / Target Class (if available) */}
+                    {}
                     {(log.targetClassName || log.targetUserName || log.targetUser) ? (
                       <Text style={styles.target}>
                         <Text style={styles.label}>
@@ -480,7 +467,7 @@ export default function LogsScreen({ route }) {
                       </Text>
                     ) : null}
 
-                    {/* Optional Details (styled in a light border bubble) */}
+                    {}
                     {log.details ? (
                       <View style={[styles.detailsBox, { alignSelf: 'stretch' }]}>
                         <Text style={[styles.detailsText, { textAlign: isRtl ? 'right' : 'left' }]}>
@@ -489,7 +476,7 @@ export default function LogsScreen({ route }) {
                       </View>
                     ) : null}
 
-                    {/* Footer: Date & IP */}
+                    {}
                     <View style={[styles.cardFooter, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                       <View style={[styles.footerItem, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                         <Ionicons name="time-outline" size={13} color="rgba(47, 67, 96, 0.5)" style={{ marginHorizontal: 2 }} />

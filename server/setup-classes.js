@@ -2,21 +2,16 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Class = require('./models/Class');
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
 async function setupClasses() {
-  try {
-    console.log('🏫 Setting up 6-class system...');
+  try {    
     
-    // Clear existing classes
-    await Class.deleteMany({});
-    console.log('🗑️ Cleared existing classes');
+    await Class.deleteMany({});    
     
-    // Create 6 classes
     const classes = [
       { name: 'الشاروبيم', level: 1, year: 1 },
       { name: 'السيرافيم', level: 2, year: 1 },
@@ -31,18 +26,8 @@ async function setupClasses() {
       const cls = new Class(clsData);
       await cls.save();
       createdClasses.push(cls);
-    }
-    console.log('✅ Created 6 classes:');
-    
-    createdClasses.forEach(cls => {
-      console.log(`   📚 ${cls.name} (Level ${cls.level}, Year ${cls.year})`);
-    });
-    
-    console.log('\n🎓 Class progression system:');
-    console.log('   Year 1: Class 1 → Class 2');
-    console.log('   Year 2: Class 3 → Class 4');
-    console.log('   Year 3: Class 5 → Class 6 (Graduation)');
-    
+    }    
+    createdClasses.forEach(cls => {    });    
     process.exit(0);
   } catch (err) {
     console.error('❌ Error setting up classes:', err);

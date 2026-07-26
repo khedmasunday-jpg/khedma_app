@@ -16,7 +16,6 @@ export default function AssignStudentsScreen1({ navigation, route }) {
     logger.log('Token in AssignStudentsScreen1:', token);
     const client = createApiClient(token);
 
-    // First fetch the DB user record so we can confirm the server-side assignedlevel
     client.get('/auth/me')
       .then(userRes => {
         if (!mounted) return;
@@ -26,12 +25,12 @@ export default function AssignStudentsScreen1({ navigation, route }) {
         logger.warn('/auth/me failed:', err?.response?.data || err.message || err);
       })
       .finally(() => {
-        // Then fetch the teachers list
+        
         client.get('/classes/co-principal/teachers')
           .then(res => {
             if (!mounted) return;
             logger.log('Raw API response:', res.data);
-        // Try to decode token payload for debugging, but do so safely
+        
         try {
           if (typeof atob !== 'undefined') {
             const payload = JSON.parse(atob(token.split('.')[1]));

@@ -1,13 +1,11 @@
-// routes/assignment.js
+
 const express = require('express');
 const router = express.Router();
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
-const verifyDevice = require('../middleware/verifyDevice');
 const User = require('../models/User');
 const Student = require('../models/Student');
 
-// Assign مخدومين to teacher
-router.post('/assign', verifyToken, verifyDevice, authorizeRoles('co-principal'), async (req, res) => {
+router.post('/assign', verifyToken, authorizeRoles('co-principal'), async (req, res) => {
   const { teacherId, studentIds } = req.body;
   try {
     const teacher = await User.findById(teacherId);
@@ -23,8 +21,7 @@ router.post('/assign', verifyToken, verifyDevice, authorizeRoles('co-principal')
   }
 });
 
-// Update مخدومين assigned to teacher
-router.put('/assign/:teacherId', verifyToken, verifyDevice, authorizeRoles('co-principal'), async (req, res) => {
+router.put('/assign/:teacherId', verifyToken, authorizeRoles('co-principal'), async (req, res) => {
   const { studentIds } = req.body;
   try {
     const teacher = await User.findById(req.params.teacherId);
@@ -40,8 +37,7 @@ router.put('/assign/:teacherId', verifyToken, verifyDevice, authorizeRoles('co-p
   }
 });
 
-// Remove all assigned مخدومين from teacher
-router.delete('/assign/:teacherId', verifyToken, verifyDevice, authorizeRoles('co-principal'), async (req, res) => {
+router.delete('/assign/:teacherId', verifyToken, authorizeRoles('co-principal'), async (req, res) => {
   try {
     const teacher = await User.findById(req.params.teacherId);
     if (!teacher || teacher.role !== 'teacher') {

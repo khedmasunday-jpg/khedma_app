@@ -95,7 +95,6 @@ export default function AssignStudentsScreen2({ route, navigation }) {
     return localTranslations[locale]?.[key] || localTranslations['en'][key] || key;
   };
 
-  // ✅ Unified alert helper for Web/Native
   const showAlert = (title, message, onOk = null) => {
     if (Platform.OS === "web") {
       window.alert(`${title}\n\n${message}`);
@@ -359,7 +358,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
           contentContainerStyle={styles.scrollContent} 
           showsVerticalScrollIndicator={false}
         >
-          {/* Header Card */}
+          {}
           <View style={styles.headerCard}>
             <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
               <Ionicons name="school" size={28} color="#2f4360" />
@@ -374,7 +373,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
             </View>
           </View>
 
-          {/* Admin Operations Card */}
+          {}
           {isCoPrincipal && (
             <View style={styles.adminCard}>
               <View style={[styles.adminHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
@@ -401,7 +400,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
                 </TouchableOpacity>
               </View>
 
-              {/* Remove Selected Button inside Admin Card */}
+              {}
               {assignedSelectedCount > 0 && (
                 <TouchableOpacity style={[styles.adminBtn, styles.btnRemoveSelected, { marginTop: 12 }]} onPress={removeSelected}>
                   <Ionicons name="trash-outline" size={18} color="#fff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
@@ -416,12 +415,12 @@ export default function AssignStudentsScreen2({ route, navigation }) {
             </View>
           )}
 
-          {/* List Section Title */}
+          {}
           <Text style={[styles.sectionTitle, { textAlign: isRtl ? 'right' : 'left' }]}>
             {localT('availableTitle')}
           </Text>
 
-          {/* Search Box */}
+          {}
           <View style={[styles.searchWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
             <Ionicons name="search-outline" size={20} color="#2f4360" style={styles.searchIcon} />
             <TextInput
@@ -438,7 +437,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
             )}
           </View>
 
-          {/* Selection Count Badge */}
+          {}
           {selected.length > 0 && (
             <View style={[styles.selectionBadge, { alignSelf: isRtl ? 'flex-end' : 'flex-start', flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
               <Ionicons name="checkmark-circle" size={16} color="#2f4360" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
@@ -448,7 +447,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
             </View>
           )}
 
-          {/* Student List Area */}
+          {}
           {loading ? (
             <View style={{ paddingVertical: 40 }}>
               <ActivityIndicator size="large" color="#2f4360" />
@@ -496,7 +495,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
                       </View>
                     </View>
 
-                    {/* Right check/checkbox indicator */}
+                    {}
                     <View style={styles.checkboxContainer}>
                       {isSelected ? (
                         <Ionicons name="checkbox" size={24} color="#2f4360" />
@@ -511,7 +510,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
           )}
         </ScrollView>
 
-        {/* Dynamic Sticky Bottom Footer Button for Assignment */}
+        {}
         {newSelectedCount > 0 && (
           <View style={styles.footerPanel}>
             <TouchableOpacity style={styles.btnAssign} onPress={assign}>
@@ -537,7 +536,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 100, // leave space for sticky footer
+    paddingBottom: 100, 
   },
   headerCard: {
     backgroundColor: 'rgba(255, 252, 246, 0.95)',

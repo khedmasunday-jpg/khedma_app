@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Alert, StyleSheet, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Alert, StyleSheet, Platform, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { createApiClient } from '../config/api';
 import { getAuthToken } from '../config/authSession';
+import { useLanguage } from '../utils/LanguageContext';
 import { logger } from '../utils/logger';
 import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 
-// Conditionally require modal date picker on native
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try { DateTimePickerModal = require('react-native-modal-datetime-picker').default; } catch (e) { DateTimePickerModal = null; }
@@ -14,36 +15,17 @@ if (Platform.OS !== 'web') {
 export default function ResetDBScreen({ route, navigation }) {
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
-  const [loading, setLoading] = useState(false);
+  const { locale } = useLanguage();
+  const isAr = locale === 'ar';
 
+  const [loading, setLoading] = useState(false);
+  const [loadingMaster, setLoadingMaster] = useState(false);
   const client = createApiClient(token);
+
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-
-  const confirmAndReset = () => {
-    // Use a browser-friendly fallback because Alert.alert may not show interactive
-    // buttons when running under react-native-web / browser.
-    const title = 'Confirm Reset';
-    const message = 'This will reset the attendance counters for all students to zero. This action cannot be undone. Continue?';
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      // window.confirm returns true when user presses OK
-      if (window.confirm(message)) {
-        doReset();
-      }
-    } else {
-      Alert.alert(
-        title,
-        message,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Reset', style: 'destructive', onPress: () => doReset() }
-        ],
-        { cancelable: true }
-      );
-    }
-  };
 
   const notify = (title, message) => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -53,57 +35,123 @@ export default function ResetDBScreen({ route, navigation }) {
     }
   };
 
-  const doReset = async () => {
+  const confirmAndResetCounters = () => {
+    const title = isAr ? 'تأكيد تصفير الحضور' : 'Confirm Attendance Reset';
+    const message = isAr
+      ? 'سيعمل هذا على تصفير عداد الحضور لجميع المخدومين وإعادة ضبط التواريخ. هل تريد الاستمرار؟'
+      : 'This will reset attendance counters for all students to zero. Continue?';
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm(`${title}\n\n${message}`)) {
+        doResetCounters();
+      }
+    } else {
+      Alert.alert(
+        title,
+        message,
+        [
+          { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
+          { text: isAr ? 'تصفير' : 'Reset', style: 'destructive', onPress: () => doResetCounters() }
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+  const doResetCounters = async () => {
     try {
-  setLoading(true);
-  const res = await client.post('/students/reset-attendance');
-      const msg = res?.data?.msg || 'Reset completed';
+      setLoading(true);
+      const res = await client.post('/students/reset-attendance');
       const count = res?.data?.modifiedCount;
-      const text = `${msg}${typeof count === 'number' ? ` (modified: ${count})` : ''}`;
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        window.alert(text);
-      } else {
-        Alert.alert('Done', text);
-      }
+      notify(
+        isAr ? 'تم التصفير بنجاح 🚀' : 'Reset Complete 🚀',
+        isAr
+          ? `تم تصفير عداد الحضور لعدد ${count || 0} مخدوم.`
+          : `Attendance counters reset for ${count || 0} students.`
+      );
     } catch (err) {
-      logger.error('Reset error', err && err.message ? err.message : err);
-      const message = err?.response?.data?.msg || err?.message || 'Failed to reset';
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        window.alert(`Error: ${message}`);
-      } else {
-        Alert.alert('Error', message);
-      }
+      logger.error('Reset error', err);
+      notify(
+        isAr ? 'خطأ' : 'Error',
+        err?.response?.data?.msg || err?.message || (isAr ? 'فشل التصفير' : 'Failed to reset')
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Load classes for per-class reset option
+  const confirmAndMasterReset = () => {
+    const title = isAr ? '⚠️ تحذير: حذف وإعادة ضبط شاملة (Master Reset)' : '⚠️ Warning: Master Reset All Data';
+    const message = isAr
+      ? 'تحذير شديد الخطورة!\nسيعمل هذا الخيار على مسح كافة المخدومين وسجلات الحضور نهائياً لبدء تجربة أو موسم جديد من الصفر.\n\nهل أنت متأكد تماماً من تنفيذ مسح الشامل؟'
+      : 'CRITICAL WARNING!\nThis will PERMANENTLY DELETE ALL STUDENTS AND ATTENDANCE RECORDS from the database to allow a fresh start.\n\nAre you absolutely sure you want to execute a Master Reset?';
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm(`${title}\n\n${message}`)) {
+        doMasterReset();
+      }
+    } else {
+      Alert.alert(
+        title,
+        message,
+        [
+          { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
+          { text: isAr ? 'نعم، امسح كل البيانات' : 'Yes, Wipe Everything', style: 'destructive', onPress: () => doMasterReset() }
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+  const doMasterReset = async () => {
+    try {
+      setLoadingMaster(true);
+      const res = await client.post('/students/reset-all');
+      if (res.data && res.data.success) {
+        notify(
+          isAr ? 'تمت إعادة الضبط الشاملة بنجاح 🧹' : 'Master Reset Complete 🧹',
+          isAr
+            ? `تم مسح وقوائم البيانات بنجاح!\n• المخدومين: ${res.data.deletedStudents || 0}\n• حسابات الخدام: ${res.data.deletedUsers || 0}\n• الإشعارات: ${res.data.deletedNotifications || 0}\n• السجلات: ${res.data.deletedLogs || 0}\n\n(تم الاحتفاظ بحساب الأدمن)`
+            : `Database successfully cleared!\n• Students: ${res.data.deletedStudents || 0}\n• Staff Accounts: ${res.data.deletedUsers || 0}\n• Notifications: ${res.data.deletedNotifications || 0}\n• Logs: ${res.data.deletedLogs || 0}\n\n(Admin account retained)`
+        );
+      } else {
+        notify(isAr ? 'خطأ' : 'Error', res.data?.msg || 'Failed to execute master reset');
+      }
+    } catch (err) {
+      logger.error('Master Reset error:', err);
+      notify(
+        isAr ? 'خطأ' : 'Error',
+        err?.response?.data?.msg || err?.message || (isAr ? 'حدث خطأ أثناء الضبط الشامل' : 'Failed to execute master reset')
+      );
+    } finally {
+      setLoadingMaster(false);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       try {
         const res = await client.get('/classes');
         if (Array.isArray(res.data)) setClasses(res.data);
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     })();
   }, []);
 
   const resetForClassDate = async () => {
-    if (!selectedClass) return (Platform.OS === 'web' ? window.alert('Error:\n\nPlease select a class') : Alert.alert('Error', 'Please select a class'));
-    if (!selectedDate) return (Platform.OS === 'web' ? window.alert('Error:\n\nPlease select a date') : Alert.alert('Error', 'Please select a date'));
+    if (!selectedClass) return notify(isAr ? 'خطأ' : 'Error', isAr ? 'من فضلك اختر الفصل' : 'Please select a class');
+    if (!selectedDate) return notify(isAr ? 'خطأ' : 'Error', isAr ? 'من فضلك اختر التاريخ' : 'Please select a date');
     const dateKey = selectedDate.toISOString().split('T')[0];
-    const confirmed = Platform.OS === 'web' && typeof window !== 'undefined' ? window.confirm(`Clear attendance for class and date ${dateKey}? This will delete attendance records for that class on that date and adjust student counters.`) : true;
+    const confirmed = Platform.OS === 'web' && typeof window !== 'undefined'
+      ? window.confirm(isAr ? `مسح حضور الفصل في تاريخ ${dateKey}؟` : `Clear attendance for class and date ${dateKey}?`)
+      : true;
+
     if (Platform.OS !== 'web') {
-      // use Alert for native
-      // NOTE: synchronous confirmation isn't available; we show an Alert and proceed on press
       Alert.alert(
-        'Confirm',
-        `Clear attendance for class and date ${dateKey}? This will delete attendance records for that class on that date and adjust student counters.`,
+        isAr ? 'تأكيد' : 'Confirm',
+        isAr ? `مسح حضور الفصل في تاريخ ${dateKey}؟` : `Clear attendance for class and date ${dateKey}?`,
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Clear', style: 'destructive', onPress: async () => {
+          { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
+          { text: isAr ? 'مسح' : 'Clear', style: 'destructive', onPress: async () => {
             await doResetForClassDate(selectedClass, dateKey);
           }}
         ]
@@ -117,84 +165,141 @@ export default function ResetDBScreen({ route, navigation }) {
     try {
       setLoading(true);
       const payload = { classId: String(classId), date: dateKey };
-      logger.log('Resetting attendance for payload:', payload);
       const res = await client.post('/attendance/reset', payload);
       const data = res?.data || {};
-      const text = data?.msg ? `${data.msg} (deleted: ${data.deletedCount || 0}, adjusted: ${data.adjustedStudents || 0}, clearedLastAbsent: ${data.clearedLastAbsent || 0})` : 'Reset completed';
-      if (Platform.OS === 'web' && typeof window !== 'undefined') window.alert(text); else Alert.alert('Done', text);
+      const text = data?.msg ? `${data.msg} (${isAr ? 'سجلات محذوفة:' : 'deleted:'} ${data.deletedCount || 0})` : 'Reset completed';
+      notify(isAr ? 'تم' : 'Done', text);
     } catch (err) {
-      logger.error('Reset for class/date error response:', err.response?.data || err.message || err);
-      const message = err?.response?.data?.msg || err?.message || 'Failed to reset for class/date';
-      if (Platform.OS === 'web' && typeof window !== 'undefined') window.alert(`Error: ${message}`); else Alert.alert('Error', message);
-    } finally { setLoading(false); }
+      logger.error('Reset for class/date error:', err);
+      notify(isAr ? 'خطأ' : 'Error', err?.response?.data?.msg || err?.message || 'Failed to reset for class/date');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={{ width: '100%', alignItems: 'center' }}>
-        <Text style={styles.text}>Reset attendance counters for all students</Text>
-        <Button title={loading ? 'Resetting...' : 'Reset Attendance Counters'} color="#d9534f" onPress={confirmAndReset} disabled={loading} />
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {}
+      <View style={styles.headerCard}>
+        <View style={styles.iconCircle}>
+          <Ionicons name="refresh-circle-outline" size={40} color="#d9534f" />
+        </View>
+        <Text style={styles.headerTitle}>
+          {isAr ? 'إعادة ضبط البيانات وتصفير الحضور' : 'Database Reset & Operations'}
+        </Text>
+        <Text style={styles.headerSubtitle}>
+          {isAr
+            ? 'أدوات لإعادة ضبط عداد الحضور، مسح حضور تاريخ معين، أو إعادة الضبط الشاملة للاختبار'
+            : 'Tools to reset attendance counters, clear specific dates, or perform a full master reset'}
+        </Text>
       </View>
 
-      <View style={{ height: 1, backgroundColor: '#eee', marginVertical: 18, width: '100%' }} />
+      {}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="stats-chart-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Text style={styles.cardTitle}>
+            {isAr ? 'تصفير عداد الحضور فقط' : 'Reset Attendance Counters'}
+          </Text>
+        </View>
+        <Text style={styles.cardDesc}>
+          {isAr
+            ? 'يعيد عداد الحضور وتواريخ الغياب والحضور لجميع المخدومين إلى 0 دون حذف بيانات المخدومين.'
+            : 'Resets attendance counters and last attendance dates to 0 for all students without deleting student profiles.'}
+        </Text>
+        <TouchableOpacity
+          style={[styles.warningBtn, loading && styles.disabledBtn]}
+          onPress={confirmAndResetCounters}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.btnText}>
+              {isAr ? 'تصفير عداد الحضور للجميع' : 'Reset Attendance Counters'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
 
-      <View style={{ width: '100%' }}>
-        <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Reset attendance for specific class and date</Text>
+      {}
+      <View style={[styles.card, styles.dangerCard]}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="trash-bin-outline" size={22} color="#d9534f" style={{ marginRight: 8 }} />
+          <Text style={[styles.cardTitle, { color: '#d9534f' }]}>
+            {isAr ? 'إعادة الضبط الشاملة (Master Reset)' : 'Master Reset All Data'}
+          </Text>
+        </View>
+        <Text style={styles.cardDesc}>
+          {isAr
+            ? 'يقوم بمسح وحذف كلي لكافة المخدومين وسجلات الحضور وقوائم الفصول للبدء واختبار استيراد ملفات الإكسل من جديد.'
+            : 'Deletes all student profiles, attendance records, and class lists to provide a completely clean database for testing Excel imports.'}
+        </Text>
+        <TouchableOpacity
+          style={[styles.dangerBtn, loadingMaster && styles.disabledBtn]}
+          onPress={confirmAndMasterReset}
+          disabled={loadingMaster}
+        >
+          {loadingMaster ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="flame-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+              <Text style={styles.btnText}>
+                {isAr ? 'مسح وإعادة ضبط جميع البيانات' : 'Wipe & Reset All Data'}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
 
-        <Text style={{ marginBottom: 6 }}>Select class:</Text>
-        <ScrollView horizontal style={{ marginBottom: 8 }}>
+      {}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="calendar-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Text style={styles.cardTitle}>
+            {isAr ? 'مسح حضور فصل في تاريخ معين' : 'Reset Class for Specific Date'}
+          </Text>
+        </View>
+
+        <Text style={styles.inputLabel}>{isAr ? 'اختر الفصل:' : 'Select Class:'}</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
           {classes.map(c => (
             <TouchableOpacity
               key={c._id}
               onPress={() => setSelectedClass(c._id)}
-              style={{ padding: 8, backgroundColor: selectedClass === c._id ? '#cce5ff' : '#eee', borderRadius: 8, marginRight: 8 }}
+              style={[
+                styles.classPill,
+                selectedClass === c._id && styles.classPillSelected
+              ]}
             >
-              <Text>{c.name}</Text>
+              <Text style={[styles.classPillText, selectedClass === c._id && styles.classPillTextSelected]}>
+                {c.name}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <Text style={{ marginBottom: 6 }}>Select date:</Text>
+        <Text style={styles.inputLabel}>{isAr ? 'اختر التاريخ:' : 'Select Date:'}</Text>
         {Platform.OS === 'web' ? (
-          <View style={{ position: 'relative', width: 200, minHeight: 40, justifyContent: 'center', borderWidth: 1, borderRadius: 6, borderColor: '#ccc', backgroundColor: '#f5f5f5', marginBottom: 12, overflow: 'hidden' }}>
-            <View style={{ paddingLeft: 12 }} pointerEvents="none">
-              <Text style={{ color: selectedDate ? '#333' : '#a0a0a0', fontSize: 15 }}>
-                {selectedDate ? formatDateDDMMYYYY(selectedDate) : 'dd/mm/yyyy'}
-              </Text>
-            </View>
+          <View style={styles.webDateWrap}>
+            <Text style={{ color: '#333', fontSize: 14 }}>
+              {selectedDate ? formatDateDDMMYYYY(selectedDate) : 'dd/mm/yyyy'}
+            </Text>
             <input
               type="date"
-              value={(() => {
-                try {
-                  if (!selectedDate) return '';
-                  if (typeof selectedDate === 'string') return selectedDate.split('T')[0];
-                  if (selectedDate instanceof Date) return selectedDate.toISOString().split('T')[0];
-                  return String(selectedDate).split('T')[0];
-                } catch (e) { return ''; }
-              })()}
+              value={selectedDate instanceof Date ? selectedDate.toISOString().split('T')[0] : ''}
               onChange={(e) => {
-                const v = e.target.value; if (!v) return setSelectedDate(new Date()); const d = new Date(v); if (isNaN(d.getTime())) return setSelectedDate(new Date()); setSelectedDate(d);
+                const d = new Date(e.target.value);
+                if (!isNaN(d.getTime())) setSelectedDate(d);
               }}
-              onClick={(e) => {
-                try { e.target.showPicker(); } catch (err) {}
-              }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                opacity: 0,
-                outlineStyle: 'none',
-                cursor: 'pointer',
-                zIndex: 2,
-              }}
+              style={styles.hiddenWebDateInput}
             />
           </View>
         ) : (
           <>
-            <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={{ padding: 8, backgroundColor: '#eee', borderRadius: 6, marginBottom: 12, alignSelf: 'flex-start' }}>
-              <Text>{formatDateDDMMYYYY(selectedDate)}</Text>
+            <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={styles.nativeDateBtn}>
+              <Text style={{ fontSize: 14, color: '#333' }}>{formatDateDDMMYYYY(selectedDate)}</Text>
             </TouchableOpacity>
             {DateTimePickerModal && (
               <DateTimePickerModal
@@ -208,13 +313,168 @@ export default function ResetDBScreen({ route, navigation }) {
           </>
         )}
 
-        <Button title={loading ? 'Clearing...' : 'Reset Class/Date'} color="#d9534f" onPress={resetForClassDate} disabled={loading || !selectedClass} />
+        <TouchableOpacity
+          style={[styles.secondaryBtn, (!selectedClass || loading) && styles.disabledBtn]}
+          onPress={resetForClassDate}
+          disabled={!selectedClass || loading}
+        >
+          <Text style={styles.btnText}>
+            {isAr ? 'مسح حضور التاريخ المحدد' : 'Clear Date Attendance'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  text: { marginBottom: 12, fontSize: 16, textAlign: 'center' }
+  container: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  headerCard: {
+    width: '100%',
+    maxWidth: 500,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(217, 83, 79, 0.2)',
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#fdf2f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2f4360',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: '#666',
+    textAlign: 'center',
+  },
+  card: {
+    width: '100%',
+    maxWidth: 500,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.12)',
+  },
+  dangerCard: {
+    borderColor: 'rgba(217, 83, 79, 0.3)',
+    backgroundColor: '#fffdfd',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    paddingBottom: 8,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2f4360',
+  },
+  cardDesc: {
+    fontSize: 13,
+    color: '#555',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  warningBtn: {
+    backgroundColor: '#e67e22',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dangerBtn: {
+    backgroundColor: '#d9534f',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryBtn: {
+    backgroundColor: '#2f4360',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  btnText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  disabledBtn: {
+    opacity: 0.5,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#444',
+    marginBottom: 6,
+  },
+  classPill: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: '#f0f4f8',
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  classPillSelected: {
+    backgroundColor: '#2f4360',
+  },
+  classPillText: {
+    fontSize: 13,
+    color: '#444',
+  },
+  classPillTextSelected: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  webDateWrap: {
+    position: 'relative',
+    height: 42,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    paddingLeft: 12,
+    marginBottom: 10,
+  },
+  hiddenWebDateInput: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    opacity: 0,
+    cursor: 'pointer',
+  },
+  nativeDateBtn: {
+    padding: 10,
+    backgroundColor: '#f0f4f8',
+    borderRadius: 8,
+    marginBottom: 10,
+  },
 });

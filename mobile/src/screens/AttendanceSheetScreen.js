@@ -98,7 +98,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {
           const sid = (r.student && (r.student._id || r.student)) ? (r.student._id || r.student) : null;
           const status = r.status || (r.status_enc ? 'present' : null);
           if (sid) map[sid] = status === 'absent' ? 'absent' : 'present';
-        } catch (e) { /* ignore */ }
+        } catch (e) {  }
       }
 
       if (Array.isArray(students) && students.length > 0) {
@@ -133,13 +133,13 @@ export default function AttendanceSheetScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Top Class and Date Header Panel */}
+      {}
       <View style={styles.headerPanel}>
         <Text style={[styles.title, { textAlign: isRtl ? 'right' : 'left' }]}>
           {currentClassName || t('selectClass')}
         </Text>
         
-        {/* Class switcher if classId wasn't preset */}
+        {}
         {!classId && classes.length > 0 && (
           <ScrollView horizontal style={styles.classSelector} showsHorizontalScrollIndicator={false}>
             {classes.map(c => (
@@ -156,7 +156,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {
           </ScrollView>
         )}
 
-        {/* Date Selector Row */}
+        {}
         <View style={[styles.dateRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <View style={[styles.dateInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
             <Ionicons name="calendar-outline" size={18} color="#2f4360" style={{ marginHorizontal: 6 }} />
@@ -223,7 +223,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {
         </View>
       </View>
 
-      {/* Student List */}
+      {}
       <ScrollView style={styles.studentsList} showsVerticalScrollIndicator={false}>
         {loading ? (
           <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />

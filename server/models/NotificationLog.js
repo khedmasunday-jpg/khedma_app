@@ -1,4 +1,4 @@
-// models/NotificationLog.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
@@ -33,7 +33,7 @@ function decryptField(enc) {
 
 const notificationLogSchema = new mongoose.Schema(
   {
-    // The target phone number or details
+    
     recipient: {
       type: String,
       set: function (v) {
@@ -54,7 +54,6 @@ const notificationLogSchema = new mongoose.Schema(
     recipientId: { type: mongoose.Schema.Types.ObjectId, refPath: 'recipientType' },
     recipientType: { type: String, enum: ['User', 'Student', 'custom'], default: 'custom' },
 
-    // The message text
     message: {
       type: String,
       set: function (v) {
@@ -83,7 +82,10 @@ const notificationLogSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { getters: true }, toObject: { getters: true } }
 );
 
-// Hooks for pre-save / updates
+notificationLogSchema.index({ status: 1, scheduledTime: 1 });
+notificationLogSchema.index({ jobId: 1 });
+notificationLogSchema.index({ recipientId: 1 });
+
 notificationLogSchema.pre('save', function (next) {
   if (this.isModified('message') && this.message) {
     this.message_enc = encryptField(this.message);
@@ -110,7 +112,6 @@ notificationLogSchema.pre('insertMany', function (next, docs) {
   next();
 });
 
-// Hide raw encrypted data in JSON outputs
 notificationLogSchema.methods.toJSON = function () {
   const obj = this.toObject({ getters: true, virtuals: false });
   if (obj) {

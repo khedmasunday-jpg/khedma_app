@@ -5,7 +5,7 @@ import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 export default function WebDateInput({ value, onChange, placeholder = 'dd/mm/yyyy', style = {} }) {
   return (
     <View style={[styles.container, style]}>
-      {/* Visible styled text showing the formatted date */}
+      {}
       <Text 
         style={[
           styles.text, 
@@ -16,7 +16,7 @@ export default function WebDateInput({ value, onChange, placeholder = 'dd/mm/yyy
         {value ? formatDateDDMMYYYY(value) : placeholder}
       </Text>
       
-      {/* Transparent native date input overlayed on top */}
+      {}
       <input
         type="date"
         value={value ? value.split('T')[0] : ''}
@@ -62,6 +62,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 12,
     fontSize: 15,
-    pointerEvents: 'none', // Allows clicks to pass through to the input beneath
+    pointerEvents: 'none', 
   },
 });

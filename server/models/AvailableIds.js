@@ -1,4 +1,4 @@
-// models/AvailableIds.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
@@ -41,7 +41,6 @@ const availableIdsSchema = new mongoose.Schema({
   ids_enc: { data: String, iv: String, tag: String },
 });
 
-// Encrypt before save
 availableIdsSchema.pre('save', function (next) {
   if (this.isModified('ids')) {
     this.ids_enc = encryptField(this.ids);
@@ -50,12 +49,10 @@ availableIdsSchema.pre('save', function (next) {
   next();
 });
 
-// Virtual getter to decrypt automatically
 availableIdsSchema.virtual('ids').get(function () {
   return decryptField(this.ids_enc) || [];
 });
 
-// Hide raw encrypted data in responses
 availableIdsSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
   delete obj.ids_enc;

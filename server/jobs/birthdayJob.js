@@ -1,5 +1,5 @@
-// jobs/birthdayJob.js
-//need testing
+
+
 const cron = require('node-cron');
 const moment = require('moment');
 const User = require('../models/User');
@@ -11,15 +11,12 @@ let notifiedToday = new Set();
 
 const runBirthdayJob = async (isManual = false) => {
   try {
-    const todayKey = moment.utc().format('MM-DD');
-    console.log(`[BirthdayJob] Running at ${new Date().toISOString()} | Today = ${todayKey}`);
-
-    // Reset notification cache at midnight UTC
+    const todayKey = moment.utc().format('MM-DD');
+    
     if (moment.utc().format('HH:mm') === '00:00') notifiedToday.clear();
 
-    // --- Notify Principals if a Teacher or Co-Principal has a birthday ---
     const staff = await User.find({
-      birthdate: { $exists: true }, // ✅ Correct field name
+      birthdate: { $exists: true }, 
       role: { $in: ['teacher', 'co-principal'] }
     });
 
@@ -48,19 +45,13 @@ const runBirthdayJob = async (isManual = false) => {
               recipientId: principal._id,
               recipientType: 'User'
             });
-          }
-          
-          console.log(`[BirthdayJob] Principal ${principal.fullName} notified about: ${names || 'Unknown'}`);
-          notifiedToday.add(key);
+          }          notifiedToday.add(key);
         }
       }
-    } else {
-      console.log('[BirthdayJob] No staff birthdays today.');
-    }
+    } else {    }
 
-    // --- Notify Co-Principals if a Student in their level has a birthday ---
     const coPrincipals = await User.find({ role: 'co-principal' });
-    // Students store birthdate as an encrypted field; fetch all and use model getters/virtuals
+    
     const students = await Student.find({});
 
     for (const cp of coPrincipals) {
@@ -97,21 +88,14 @@ const runBirthdayJob = async (isManual = false) => {
               recipientId: cp._id,
               recipientType: 'User'
             });
-          }
-          
-          console.log(`[BirthdayJob] Co-Principal ${cp.fullName} notified about students: ${names || 'Unknown'}`);
-          notifiedToday.add(key);
+          }          notifiedToday.add(key);
         }
       }
-    }
-
-    console.log('✅ [BirthdayJob] Completed successfully.\n');
-  } catch (err) {
+    }  } catch (err) {
     console.error('[BirthdayJob] Error:', err);
   }
 };
 
-// Run every day at 10:00 AM
 cron.schedule('0 10 * * *', runBirthdayJob, { timezone: 'Africa/Cairo' });
 
 module.exports = { runBirthdayJob };

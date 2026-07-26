@@ -1,4 +1,4 @@
-// models/MessageTemplate.js
+
 const mongoose = require('mongoose');
 
 const messageTemplateSchema = new mongoose.Schema(

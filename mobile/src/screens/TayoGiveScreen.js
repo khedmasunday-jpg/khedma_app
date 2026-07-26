@@ -6,9 +6,13 @@ import { getAuthToken } from '../config/authSession';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 
+import SkeletonList from '../components/SkeletonLoader';
+import { fetchWithCache, invalidateCache } from '../utils/apiCache';
+
 export default function TayoGiveScreen({ navigation }) {
   const { t } = useLanguage();
   const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   
   const [selectedLevel, setSelectedLevel] = useState('All');
@@ -25,13 +29,15 @@ export default function TayoGiveScreen({ navigation }) {
   }, []);
 
   const fetchStudents = async () => {
+    setLoading(true);
     try {
       const token = getAuthToken();
-      const res = await Axios.get(`${API_URL}/tayo/students`, { headers: { Authorization: token } });
-      setStudents(res.data);
+      const data = await fetchWithCache(`${API_URL}/tayo/students`, { headers: { Authorization: token } });
+      setStudents(data);
     } catch (err) {
       console.error(err);
     }
+    setLoading(false);
   };
 
   const availableLevels = useMemo(() => {
@@ -79,25 +85,33 @@ export default function TayoGiveScreen({ navigation }) {
     if (!amount || isNaN(amount) || parseInt(amount) <= 0) return Alert.alert(t('error'), t('invalidNumber'));
     if (!reason.trim()) return Alert.alert(t('error'), t('reasonRequired'));
 
+    const addVal = parseInt(amount);
+    const targetId = selectedStudent._id;
+    const previousStudents = [...students];
+
+    setStudents(prev => prev.map(s => s._id === targetId ? { ...s, tayoBalance: (s.tayoBalance || 0) + addVal } : s));
+    setModalVisible(false);
+
     try {
       const token = getAuthToken();
       await Axios.post(`${API_URL}/tayo/transaction`, {
-        studentId: selectedStudent._id,
-        amount: parseInt(amount),
+        studentId: targetId,
+        amount: addVal,
         reason
       }, { headers: { Authorization: token } });
       
+      invalidateCache('tayo/students');
       Alert.alert(t('success'), t('tayoAddedSuccess'));
-      setModalVisible(false);
-      fetchStudents();
     } catch (err) {
+      
+      setStudents(previousStudents);
       Alert.alert(t('error'), t('tayoAddError'));
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Search Bar */}
+      {}
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#2f4360" style={styles.searchIcon} />
         <TextInput 
@@ -109,7 +123,7 @@ export default function TayoGiveScreen({ navigation }) {
         />
       </View>
 
-      {/* Filters */}
+      {}
       <View style={styles.filtersSection}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
           <Text style={styles.filterLabel}>{t('sortBy')}</Text>
@@ -139,29 +153,32 @@ export default function TayoGiveScreen({ navigation }) {
           ))}
         </ScrollView>
       </View>
-      
-      <FlatList 
-        data={filteredAndSorted}
-        keyExtractor={item => item._id}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => openModal(item)}>
-            <View style={styles.cardLeft}>
-              <View style={styles.avatar}>
-                <Ionicons name="person" size={24} color="#f3ede0" />
+      {loading ? (
+        <SkeletonList count={6} style={{ padding: 16 }} />
+      ) : (
+        <FlatList
+          data={filteredAndSorted}
+          keyExtractor={item => item._id}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.card} onPress={() => openGiveModal(item)}>
+              <View style={styles.cardLeft}>
+                <View style={styles.avatar}>
+                  <Ionicons name="person" size={24} color="#f3ede0" />
+                </View>
+                <View style={styles.infoWrapper}>
+                  <Text style={styles.name}>{item.fullName}</Text>
+                  <Text style={styles.info}>{item.classname} {item.classLevel ? `- ${t('levelPrefix')}${item.classLevel}` : ''}</Text>
+                </View>
               </View>
-              <View style={styles.infoWrapper}>
-                <Text style={styles.name}>{item.fullName}</Text>
-                <Text style={styles.info}>{item.classname} {item.classLevel ? `- ${t('levelPrefix')}${item.classLevel}` : ''}</Text>
+              <View style={styles.cardRight}>
+                <Text style={styles.balanceLabel}>{t('balance')}</Text>
+                <Text style={styles.balance}>{item.tayoBalance || 0}</Text>
               </View>
-            </View>
-            <View style={styles.cardRight}>
-              <Text style={styles.balanceLabel}>{t('balance')}</Text>
-              <Text style={styles.balance}>{item.tayoBalance || 0}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+            </TouchableOpacity>
+          )}
+        />
+      )}
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContainer}>

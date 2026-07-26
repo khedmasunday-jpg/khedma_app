@@ -5,6 +5,8 @@ import { useLanguage } from '../utils/LanguageContext';
 import { logger } from '../utils/logger';
 import { getAuthToken } from '../config/authSession';
 import { API_URL } from '../config/api';
+import SkeletonList from '../components/SkeletonLoader';
+import { fetchWithCache } from '../utils/apiCache';
 
 export default function ClassDisplayScreen({ route, navigation }) {
   const { token: routeToken, role } = route.params || {};
@@ -28,21 +30,19 @@ export default function ClassDisplayScreen({ route, navigation }) {
   const [loading, setLoading] = useState(false);
   const [expandedStudent, setExpandedStudent] = useState(null);
 
-  // Fetch classes for the user
   useEffect(() => {
-    axios.get(`${API_URL}/classes`, { headers: { Authorization: token } })
-      .then(res => setClasses(res.data))
+    fetchWithCache(`${API_URL}/classes`, { headers: { Authorization: token } })
+      .then(data => setClasses(data))
       .catch(() => Alert.alert(t('error'), locale === 'ar' ? 'فشل تحميل الفصول' : 'Failed to fetch classes'));
   }, []);
 
-  // Fetch detailed student data for selected class
   const fetchClassDetails = async (classId) => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/classes/${classId}/students`, {
+      const data = await fetchWithCache(`${API_URL}/classes/${classId}/students`, {
         headers: { Authorization: token }
       });
-      setClassData(res.data);
+      setClassData(data);
     } catch (err) {
       Alert.alert(t('error'), locale === 'ar' ? 'فشل تحميل بيانات الفصل' : 'Failed to fetch class details');
     }
@@ -57,7 +57,7 @@ export default function ClassDisplayScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Class Dropdown */}
+      {}
       <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>{t('selectClass')}</Text>
       <ScrollView horizontal style={styles.dropdown} showsHorizontalScrollIndicator={false}>
         {(Array.isArray(classes) ? classes : []).map(cls => (
@@ -80,7 +80,7 @@ export default function ClassDisplayScreen({ route, navigation }) {
         ))}
       </ScrollView>
 
-      {/* View Attendance Sheet Action */}
+      {}
       <View style={styles.actionContainer}>
         <TouchableOpacity
           style={styles.attendanceActionBtn}
@@ -90,20 +90,20 @@ export default function ClassDisplayScreen({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Class Details Title */}
+      {}
       {classData && (
         <View style={styles.classInfo}>
           <Text style={styles.classTitle}>{classData.className}</Text>
         </View>
       )}
 
-      {/* Students List */}
+      {}
       <ScrollView style={styles.studentsList} showsVerticalScrollIndicator={false}>
         {loading ? (
-          <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />
+          <SkeletonList count={5} />
         ) : classData?.students?.map(student => (
           <View key={student._id} style={styles.studentCard}>
-            {/* Student Header */}
+            {}
             <TouchableOpacity
               style={[styles.studentHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}
               onPress={() => toggleStudentDetails(student._id)}
@@ -116,7 +116,7 @@ export default function ClassDisplayScreen({ route, navigation }) {
               </Text>
             </TouchableOpacity>
 
-            {/* Expanded Student Details (RTL supported) */}
+            {}
             {expandedStudent === student._id && (
               <View style={styles.studentDetails}>
                 <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>

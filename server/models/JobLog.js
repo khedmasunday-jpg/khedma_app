@@ -1,4 +1,4 @@
-// models/JobLog.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
@@ -31,7 +31,6 @@ const jobLogSchema = new mongoose.Schema({
   lastRunDate_enc: { data: String, iv: String, tag: String },
 });
 
-// Pre-save encryption
 jobLogSchema.pre('save', function (next) {
   const fields = ['jobName', 'lastRunDate'];
   for (const field of fields) {
@@ -43,14 +42,12 @@ jobLogSchema.pre('save', function (next) {
   next();
 });
 
-// Virtual getters for decryption
 ['jobName', 'lastRunDate'].forEach(field => {
   jobLogSchema.virtual(field).get(function () {
     return decryptField(this[`${field}_enc`]);
   });
 });
 
-// Hide raw encrypted data
 jobLogSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
   for (const key of Object.keys(obj)) {

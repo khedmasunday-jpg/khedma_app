@@ -1,4 +1,4 @@
-// App.js or src/screens/LoginScreen.js
+
 
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet, Platform } from 'react-native';
@@ -29,8 +29,7 @@ export default function LoginScreen({ navigation }) {
 
       logger.log("✅ Login response:", res.data);
 
-      // Save token to session manager
-      setAuthToken(res.data.token);
+      setAuthToken(res.data.token, res.data.user);
 
       navigation.navigate('PostLogin', { 
         token: res.data.token, 
@@ -39,10 +38,19 @@ export default function LoginScreen({ navigation }) {
         isClassLeader: res.data.user.isClassLeader || false
       });
     } catch (err) {
-      Alert.alert(
-        locale === 'ar' ? 'فشل تسجيل الدخول' : 'Login Failed',
-        err.response?.data?.msg || err.message || (locale === 'ar' ? 'بيانات غير صحيحة' : 'Invalid credentials')
-      );
+      if (err.response?.status === 429) {
+        Alert.alert(
+          locale === 'ar' ? 'تم تجاوز عدد المحاولات' : 'Too Many Attempts',
+          locale === 'ar'
+            ? 'لقد تجاوزت عدد محاولات الدخول المسموح بها. يرجى الانتظار 15 دقيقة والمحاولة مرة أخرى.'
+            : 'Too many login attempts. Please wait 15 minutes and try again.'
+        );
+      } else {
+        Alert.alert(
+          locale === 'ar' ? 'فشل تسجيل الدخول' : 'Login Failed',
+          locale === 'ar' ? 'اسم المستخدم أو كلمة المرور غير صحيحة' : 'Invalid username or password'
+        );
+      }
     }
   };
 

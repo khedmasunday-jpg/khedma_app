@@ -6,23 +6,15 @@ const User = require('../models/User');
 const Log = require('../models/Log');
 const Class = require('../models/Class');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
-const verifyDevice = require('../middleware/verifyDevice');
 const { body, validationResult } = require('express-validator');
 const userController = require('../controllers/userController');
 const Student = require('../models/Student');
 
-// -----------------------------------------------------------------
-// ALL MANUAL DECRYPTION FUNCTIONS HAVE BEEN REMOVED.
-// The Mongoose model will handle this automatically.
-// -----------------------------------------------------------------
-
-// Get all users (admin only) - FIXED
 router.get('/', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
-    // 1. Remove .lean()
-    const users = await User.find();
     
-    // 2. res.json() handles all decryption and cleanup
+    const users = await User.find().select('-password -fullName_enc -address_enc -googleCode_enc -phonenumber_enc -telegramChatId_enc');
+
     res.json(users);
   } catch (err) {
     console.error('Error fetching all users:', err);
@@ -30,8 +22,7 @@ router.get('/', verifyToken, authorizeRoles('admin'), async (req, res) => {
   }
 });
 
-// Add user (admin and principal only) - FIXED
-router.post('/', verifyToken, verifyDevice, [
+router.post('/', verifyToken, [
   body('fullName').isString().trim().notEmpty(),
   body('username').isString().trim().notEmpty(),
   body('password').isString().notEmpty(),
@@ -48,44 +39,39 @@ router.post('/', verifyToken, verifyDevice, [
     
     const existing = await User.findOne({ username });
     if (existing) return res.status(400).json({ msg: 'Username already exists' });
-    
-    // 1. Create new user with plain-text
+
     const newUser = new User({
       fullName: fullName,
       username: username,
-      password: password, // pre('save') hook will hash this
+      password: password, 
       role: role,
       isActive: true
     });
-    
-    // 2. .save() triggers pre('save') hook, which encrypts
+
     await newUser.save();
-    
-    // 3. newUser object has decrypted virtuals
+
     await Log.create({ 
       action: 'Add user', 
       performedBy: req.user.id, 
       targetUser: newUser._id,
       actorName: req.user.fullName,
       actorRole: req.user.role,
-      targetUserName: newUser.fullName, // From virtual
-      targetUserRole: newUser.role,     // From virtual
+      targetUserName: newUser.fullName, 
+      targetUserRole: newUser.role,     
       actionDescription: `${req.user.role} "${req.user.fullName}" added ${newUser.role} "${newUser.fullName}"`
     });
-    
-    // 4. res.json() sends clean, decrypted data
+
     res.status(201).json({ 
       msg: 'User created successfully',
       user: newUser 
     });
   } catch (err) {
     console.error('❌ Error adding user:', err);
-    res.status(500).json({ msg: 'Server error: ' + err.message });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-// Reset users (admin only)
-router.delete('/', verifyToken, verifyDevice, authorizeRoles('admin'), async (req, res) => {
+router.delete('/', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     await User.deleteMany({});
     await Log.create({ 
@@ -102,13 +88,11 @@ router.delete('/', verifyToken, verifyDevice, authorizeRoles('admin'), async (re
   }
 });
 
-// --- Controller Routes ---
 router.get('/staff-safe', verifyToken, userController.getStaffSafeData);
 router.get('/staff', verifyToken, authorizeRoles('admin', 'principal'), userController.getStaffFullData);
-router.post('/staff', verifyToken, verifyDevice, userController.addStaff);
+router.post('/staff', verifyToken, authorizeRoles('admin', 'principal'), userController.addStaff);
 router.get('/staff-stats', verifyToken, userController.getStaffStats);
 
-// Get current user data - FIXED (and much simpler)
 router.get('/me', verifyToken, async (req, res) => {
   try {
     if (!req.user.id || !mongoose.Types.ObjectId.isValid(req.user.id)) {
@@ -124,15 +108,32 @@ router.get('/me', verifyToken, async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error('❌ /me route error:', err);
-    res.status(500).json({ msg: 'Server error', error: err.message });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-// Get logs (admin only) - FIXED
 router.get('/logs/all', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
-    const logs = await Log.find().sort({ timestamp: -1 });
-    
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
+    const cursor = req.query.cursor;
+
+    const query = {};
+    if (cursor) {
+      const cursorDate = new Date(cursor);
+      if (!isNaN(cursorDate.getTime())) {
+        query.timestamp = { $lt: cursorDate };
+      }
+    }
+
+    const total = await Log.countDocuments({});
+    const skip = cursor ? 0 : (page - 1) * limit;
+
+    const logs = await Log.find(query)
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit);
+
     const userCache = new Map();
     const fetchUser = async (id) => {
       if (!id) return null;
@@ -144,53 +145,58 @@ router.get('/logs/all', verifyToken, authorizeRoles('admin'), async (req, res) =
 
     const populatedLogs = [];
     for (const log of logs) {
-      // Use the model's toJSON() so virtuals are applied and encrypted fields are hidden
       const logObj = log.toJSON();
-
-      // Try to resolve performedBy to a user object if possible
       const actor = await fetchUser(logObj.performedBy);
       if (actor) {
-        // keep performedBy as a user-like object for the client
         logObj.performedBy = actor;
-        // prefer explicit performedByName/performedByRole from the log virtuals if present
         logObj.performedByName = logObj.performedByName || actor.fullName || actor.username;
         logObj.performedByRole = logObj.performedByRole || actor.role;
       } else {
-        // leave performedBy as-is (could be null) and fallback to actorName
         logObj.performedBy = logObj.performedBy || null;
         logObj.performedByName = logObj.performedByName || logObj.actorName || 'Unknown';
         logObj.performedByRole = logObj.performedByRole || logObj.actorRole || 'Unknown';
       }
 
-      // Resolve target user if present
       const target = await fetchUser(logObj.targetUser);
       logObj.targetUser = target ? target : logObj.targetUser ? logObj.targetUser : null;
       logObj.targetUserName = logObj.targetUserName || (target ? (target.fullName || target.username) : null);
 
-      // If the log references a class, resolve its name
       if (logObj.targetClass) {
         try {
           const cls = await Class.findById(logObj.targetClass).select('name');
           if (cls) {
             logObj.targetClassName = logObj.targetClassName || cls.name;
           }
-        } catch (e) {
-          // ignore
-        }
+        } catch (e) {}
       }
 
       populatedLogs.push(logObj);
     }
 
-    res.json(populatedLogs);
+    const nextCursor = logs.length > 0 ? logs[logs.length - 1].timestamp : null;
+    const totalPages = Math.ceil(total / limit);
+    const hasMore = page < totalPages;
+
+    if (req.query.page || req.query.limit || req.query.cursor) {
+      res.json({
+        logs: populatedLogs,
+        total,
+        page,
+        limit,
+        totalPages,
+        nextCursor,
+        hasMore
+      });
+    } else {
+      res.json(populatedLogs);
+    }
   } catch (err) {
     console.error('Error fetching logs:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });
 
-// Delete user (admin only) - FIXED
-router.delete('/:id', verifyToken, verifyDevice, authorizeRoles('admin', 'principal'), async (req, res) => {
+router.delete('/:id', verifyToken, authorizeRoles('admin', 'principal'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
@@ -227,10 +233,8 @@ router.delete('/:id', verifyToken, verifyDevice, authorizeRoles('admin', 'princi
   }
 });
 
-// Update user non-credential fields
-router.patch('/:id', verifyToken, verifyDevice, userController.updateUser);
+router.patch('/:id', verifyToken, userController.updateUser);
 
-// Get a single user by id - FIXED (and much simpler)
 router.get('/:id', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -247,8 +251,7 @@ router.get('/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Change user role (admin only) - FIXED
-router.patch('/:id/role', verifyToken, verifyDevice, authorizeRoles('admin'), async (req, res) => {
+router.patch('/:id/role', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     const { role } = req.body;
     
@@ -281,10 +284,9 @@ router.patch('/:id/role', verifyToken, verifyDevice, authorizeRoles('admin'), as
   }
 });
 
-// Update self credentials (any logged-in user can update their own credentials)
-router.patch('/me/update-credentials', verifyToken, verifyDevice, async (req, res) => {
+router.patch('/me/update-credentials', verifyToken, async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, telegramChatId } = req.body;
     
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
@@ -298,7 +300,11 @@ router.patch('/me/update-credentials', verifyToken, verifyDevice, async (req, re
     }
     
     if (password) {
-      user.password = password; // pre('save') will hash this
+      user.password = password; 
+    }
+
+    if (telegramChatId !== undefined) {
+      user.telegramChatId = telegramChatId;
     }
     
     await user.save();
@@ -321,24 +327,20 @@ router.patch('/me/update-credentials', verifyToken, verifyDevice, async (req, re
   }
 });
 
-// Update user credentials (admin and principal) - principals are limited
-router.patch('/:id/credentials', verifyToken, verifyDevice, authorizeRoles('admin', 'principal'), async (req, res) => {
+router.patch('/:id/credentials', verifyToken, authorizeRoles('admin', 'principal'), async (req, res) => {
   try {
     const { username, password } = req.body;
     
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
-    
-    // Principals may not change credentials for admins or other principals
-    if (req.user.role === 'principal' && (user.role === 'admin' || user.role === 'principal')) {
-      console.log('🔐 Principal attempted to change credentials of protected role:', user.role);
-      return res.status(403).json({ msg: 'Principals cannot change credentials of admins or principals' });
+
+    if (req.user.role === 'principal' && (user.role === 'admin' || user.role === 'principal')) {      return res.status(403).json({ msg: 'Principals cannot change credentials of admins or principals' });
     }
 
     if (username) user.username = username;
-    if (password) user.password = password; // pre('save') will hash this
+    if (password) user.password = password; 
 
-    await user.save(); // Use .save() to trigger password hash
+    await user.save(); 
     
     await Log.create({ 
       action: 'Update credentials', 
@@ -357,8 +359,7 @@ router.patch('/:id/credentials', verifyToken, verifyDevice, authorizeRoles('admi
   }
 });
 
-// Deactivate user (admin only) - FIXED
-router.patch('/:id/deactivate', verifyToken, verifyDevice, async (req, res) => {
+router.patch('/:id/deactivate', verifyToken, authorizeRoles('admin', 'principal'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ msg: 'User not found' });
@@ -383,12 +384,11 @@ router.patch('/:id/deactivate', verifyToken, verifyDevice, async (req, res) => {
     res.json({ msg: 'User deactivated', user: target });
   } catch (err) {
     console.error('Error deactivating user:', err);
-    res.status(500).json({ msg: 'Server error' }); // <--- THIS IS NOW FIXED
+    res.status(500).json({ msg: 'Server error' }); 
   }
 });
 
-// Activate user (admin only) - FIXED
-router.patch('/:id/activate', verifyToken, verifyDevice, async (req, res) => {
+router.patch('/:id/activate', verifyToken, authorizeRoles('admin', 'principal'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ msg: 'User not found' });
@@ -417,5 +417,4 @@ router.patch('/:id/activate', verifyToken, verifyDevice, async (req, res) => {
   }
 });
 
-// All other routes (debug, etc.) are fine.
 module.exports = router;

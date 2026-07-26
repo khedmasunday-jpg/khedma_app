@@ -1,4 +1,4 @@
-// routes/telegramRoutes.js
+
 const express = require('express');
 const router = express.Router();
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
@@ -11,14 +11,9 @@ const NotificationLog = require('../models/NotificationLog');
 const telegramClient = require('../services/telegramClient');
 const schedulerService = require('../services/schedulerService');
 
-// Require authentication and principal/admin authorization for all Telegram configurations
 router.use(verifyToken);
 router.use(authorizeRoles('admin', 'principal'));
 
-/**
- * GET /api/telegram/status
- * Get the current OpenWA connection status and mode
- */
 router.get('/status', async (req, res) => {
   try {
     const status = telegramClient.getTelegramStatus();
@@ -31,53 +26,37 @@ router.get('/status', async (req, res) => {
       rateLimitDelayMs: process.env.TELEGRAM_SEND_DELAY_MS || 3000
     });
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * POST /api/telegram/reconnect
- * Manually trigger re-initialization of Telegram client (e.g. to get a new QR code)
- */
 router.post('/reconnect', async (req, res) => {
   try {
     await telegramClient.reconnectTelegram();
     res.json({ msg: 'Telegram client re-initialization triggered successfully.' });
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * POST /api/telegram/logout
- * Log out and clear the saved Telegram session
- */
 router.post('/logout', async (req, res) => {
   try {
     await telegramClient.logoutTelegram();
     res.json({ msg: 'Telegram logged out successfully.' });
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-// --- Message Template Endpoints ---
-
-/**
- * GET /api/telegram/templates
- */
 router.get('/templates', async (req, res) => {
   try {
     const templates = await MessageTemplate.find().sort({ createdAt: -1 });
     res.json(templates);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * POST /api/telegram/templates
- */
 router.post('/templates', async (req, res) => {
   try {
     const { name, content, type, description } = req.body;
@@ -88,13 +67,10 @@ router.post('/templates', async (req, res) => {
     await template.save();
     res.status(201).json(template);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * PUT /api/telegram/templates/:id
- */
 router.put('/templates/:id', async (req, res) => {
   try {
     const { name, content, type, description } = req.body;
@@ -106,41 +82,29 @@ router.put('/templates/:id', async (req, res) => {
     if (!template) return res.status(404).json({ msg: 'Template not found' });
     res.json(template);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * DELETE /api/telegram/templates/:id
- */
 router.delete('/templates/:id', async (req, res) => {
   try {
     const template = await MessageTemplate.findByIdAndDelete(req.params.id);
     if (!template) return res.status(404).json({ msg: 'Template not found' });
     res.json({ msg: 'Template deleted successfully' });
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-
-// --- Recipient Group Endpoints ---
-
-/**
- * GET /api/telegram/groups
- */
 router.get('/groups', async (req, res) => {
   try {
     const groups = await RecipientGroup.find().sort({ createdAt: -1 });
     res.json(groups);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * POST /api/telegram/groups
- */
 router.post('/groups', async (req, res) => {
   try {
     const { name, description, criteria, recipients } = req.body;
@@ -150,13 +114,10 @@ router.post('/groups', async (req, res) => {
     await group.save();
     res.status(201).json(group);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * PUT /api/telegram/groups/:id
- */
 router.put('/groups/:id', async (req, res) => {
   try {
     const { name, description, criteria, recipients } = req.body;
@@ -168,29 +129,20 @@ router.put('/groups/:id', async (req, res) => {
     if (!group) return res.status(404).json({ msg: 'Group not found' });
     res.json(group);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * DELETE /api/telegram/groups/:id
- */
 router.delete('/groups/:id', async (req, res) => {
   try {
     const group = await RecipientGroup.findByIdAndDelete(req.params.id);
     if (!group) return res.status(404).json({ msg: 'Group not found' });
     res.json({ msg: 'Group deleted successfully' });
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-
-// --- Scheduled Job Endpoints ---
-
-/**
- * GET /api/telegram/jobs
- */
 router.get('/jobs', async (req, res) => {
   try {
     const jobs = await ScheduledJob.find()
@@ -199,13 +151,10 @@ router.get('/jobs', async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(jobs);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * POST /api/telegram/jobs
- */
 router.post('/jobs', async (req, res) => {
   try {
     const { name, description, cronExpression, timezone, isActive, notificationType, templateId, recipientGroupId, settings } = req.body;
@@ -226,19 +175,15 @@ router.post('/jobs', async (req, res) => {
     });
 
     await job.save();
-    
-    // Reload scheduler to apply changes
+
     await schedulerService.initializeScheduler();
 
     res.status(201).json(job);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * PUT /api/telegram/jobs/:id
- */
 router.put('/jobs/:id', async (req, res) => {
   try {
     const { name, description, cronExpression, timezone, isActive, notificationType, templateId, recipientGroupId, settings } = req.body;
@@ -249,44 +194,29 @@ router.put('/jobs/:id', async (req, res) => {
     );
     if (!job) return res.status(404).json({ msg: 'Job not found' });
 
-    // Reload scheduler to apply changes
     await schedulerService.initializeScheduler();
 
     res.json(job);
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * POST /api/telegram/jobs/:id/run
- * Manually trigger a job to execute right now
- */
 router.post('/jobs/:id/run', async (req, res) => {
   try {
     const job = await ScheduledJob.findById(req.params.id);
     if (!job) return res.status(404).json({ msg: 'Job not found' });
 
-    console.log(`[Manual Trigger] User initiated manual run of job: "${job.name}"`);
-    
-    // Run asynchronously so response is instant, worker process-queue handles sending
     schedulerService.runJobManually(job._id).catch(err => {
       console.error(`Manual run of job ${job.name} failed:`, err);
     });
 
     res.json({ msg: `Job "${job.name}" triggered successfully. Messages are being queued.` });
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-
-// --- Notification Log Endpoints ---
-
-/**
- * GET /api/telegram/logs
- * Retrieve all send logs with optional status, type, and pagination
- */
 router.get('/logs', async (req, res) => {
   try {
     const { status, type, page = 1, limit = 50 } = req.query;
@@ -312,14 +242,10 @@ router.get('/logs', async (req, res) => {
       totalItems: total
     });
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
-/**
- * POST /api/telegram/send-test
- * Directly send a test message to a specified number or user
- */
 router.post('/send-test', async (req, res) => {
   try {
     const { to, message, userId } = req.body;
@@ -327,12 +253,18 @@ router.post('/send-test', async (req, res) => {
       return res.status(400).json({ msg: 'Recipient (to) and message are required' });
     }
 
-    console.log(`[Test Telegram Send] Sending test to ${to} for user ${userId || 'none'}`);
-    const result = await telegramClient.sendTelegramMessage(to, message);
+    let targetChatId = to;
+    if (userId) {
+      const User = require('../models/User');
+      const targetUser = await User.findById(userId);
+      if (targetUser && targetUser.telegramChatId) {
+        targetChatId = targetUser.telegramChatId;
+      }
+    }
+    const result = await telegramClient.sendTelegramMessage(targetChatId, message);
 
-    // Save to NotificationLog
     const log = new NotificationLog({
-      recipient: to,
+      recipient: targetChatId,
       recipientId: userId || null,
       recipientType: userId ? 'User' : 'custom',
       message: message,
@@ -347,10 +279,58 @@ router.post('/send-test', async (req, res) => {
     if (result.success) {
       res.json({ success: true, messageId: result.messageId });
     } else {
-      res.status(500).json({ success: false, msg: result.error || 'Failed to send message' });
+      let friendlyError = result.error || 'Failed to send message';
+      if (friendlyError.includes('chat not found')) {
+        friendlyError = `Telegram Chat ID "${targetChatId}" was not found by Telegram. Please ensure the user has started the bot (/start) and saved their correct numeric Chat ID in their profile.`;
+      }
+      res.status(400).json({ success: false, msg: friendlyError });
     }
   } catch (err) {
-    res.status(500).json({ msg: err.message || 'Server error' });
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+router.post('/broadcast', async (req, res) => {
+  try {
+    const { message, targetRole } = req.body;
+    if (!message) {
+      return res.status(400).json({ msg: 'Message text is required for broadcast' });
+    }
+
+    const User = require('../models/User');
+    const notificationService = require('../services/notificationService');
+
+    const query = { isActive: true };
+    if (targetRole && targetRole !== 'all') {
+      query.role = targetRole;
+    }
+
+    const users = await User.find(query);
+    let queuedCount = 0;
+
+    for (const u of users) {
+      const recipientTarget = u.telegramChatId || u.phonenumber;
+      if (!recipientTarget) continue;
+
+      await notificationService.queueNotification({
+        recipient: recipientTarget,
+        message: message,
+        notificationType: 'custom',
+        recipientId: u._id,
+        recipientType: 'User',
+        scheduledTime: new Date()
+      });
+      queuedCount++;
+    }
+
+    res.json({
+      success: true,
+      msg: `Broadcast queued successfully for ${queuedCount} users! Messages are sending safely in the background.`,
+      targetCount: queuedCount
+    });
+  } catch (err) {
+    console.error('Broadcast error:', err);
+    res.status(500).json({ msg: 'Failed to send broadcast' });
   }
 });
 

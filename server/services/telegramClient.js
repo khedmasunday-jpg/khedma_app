@@ -1,7 +1,6 @@
-// services/telegramClient.js
+
 const TelegramBot = require('node-telegram-bot-api').default || require('node-telegram-bot-api');
 
-// Fallback to empty string to prevent crashes if token is missing
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
 let bot = null;
 
@@ -23,13 +22,19 @@ function initializeTelegram() {
 
     bot.on('message', (msg) => {
       const chatId = msg.chat.id;
-      // In a real app, you'd map this chatId to the user in your database using their phone number or a specific command
-      if (msg.text === '/start') {
-        bot.sendMessage(chatId, `Welcome to Khedma Notifications! Your Chat ID is: ${chatId}\n\nPlease share this ID with the admin so they can send you notifications.`);
+      if (msg.text && msg.text.startsWith('/start')) {
+        const welcomeText = `🎉 أهلاً بك في خدمة إشعارات تطبيق الخدمة (Khedma App)!\n\n` +
+          `🆔 رمز المعرف الخاص بك (Chat ID):\n` +
+          `\`${chatId}\`\n\n` +
+          `قم بنسخ هذا الرقم وإدخاله في التطبيق تحت قائمة "الملف الشخصي" (Profile) أو إعطائه للمسؤول لتلقي التنبيهات والإشعارات فوراً على تليجرام.\n\n` +
+          `-----------------------------------\n` +
+          `Welcome to Khedma Notifications!\n` +
+          `Your Telegram Chat ID is: \`${chatId}\`\n` +
+          `Please copy this ID into your Khedma App profile settings to receive notifications.`;
+
+        bot.sendMessage(chatId, welcomeText, { parse_mode: 'Markdown' });
       }
     });
-
-    console.log('✅ [Telegram] Bot started and polling successfully.');
     botStatus = 'connected';
     return true;
   } catch (err) {
@@ -39,12 +44,6 @@ function initializeTelegram() {
   }
 }
 
-/**
- * Send a Telegram text message
- * @param {string} to The Telegram Chat ID of the recipient
- * @param {string} message The text content of the message
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
- */
 async function sendTelegramMessage(to, message) {
   if (!bot || botStatus !== 'connected') {
     return { success: false, error: 'Telegram bot is not connected' };

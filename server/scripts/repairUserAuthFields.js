@@ -20,7 +20,7 @@ function decryptField(enc) {
   ]);
   const txt = buf.toString('utf8');
   try {
-    // Bulk script stored JSON.stringify values
+    
     return JSON.parse(txt);
   } catch {
     return txt;
@@ -28,9 +28,7 @@ function decryptField(enc) {
 }
 
 async function main() {
-  await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-  console.log('✅ Connected to MongoDB');
-
+  await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
   const col = mongoose.connection.collection('users');
   const cursor = col.find({});
   let fixed = 0;
@@ -38,7 +36,6 @@ async function main() {
     const doc = await cursor.next();
     const updates = {};
 
-    // Restore username
     if ((!doc.username || typeof doc.username !== 'string') && doc.username_enc) {
       const decUsername = decryptField(doc.username_enc);
       if (decUsername && typeof decUsername === 'string') {
@@ -46,7 +43,6 @@ async function main() {
       }
     }
 
-    // Restore password (bcrypt hash)
     if ((!doc.password || typeof doc.password !== 'string') && doc.password_enc) {
       const decHash = decryptField(doc.password_enc);
       if (decHash && typeof decHash === 'string' && decHash.startsWith('$2')) {
@@ -54,13 +50,11 @@ async function main() {
       }
     }
 
-    // Restore fullName
     if ((!doc.fullName || typeof doc.fullName !== 'string') && doc.fullName_enc) {
       const decFull = decryptField(doc.fullName_enc);
       if (decFull && typeof decFull === 'string') updates.fullName = decFull;
     }
 
-    // Restore role from encrypted if present
     if (doc.role_enc) {
       const decRole = decryptField(doc.role_enc);
       const allowed = ['admin', 'principal', 'co-principal', 'teacher'];
@@ -77,18 +71,13 @@ async function main() {
         console.error('Failed to repair user', String(doc._id), e.message);
       }
     }
-  }
-
-  console.log(`🔧 Repaired ${fixed} users. Ensure an index exists on username (unique).`);
-
-  // Create partial unique index on username (only when username is a string)
+  }
+  
   try {
     await col.createIndex(
       { username: 1 },
       { unique: true, partialFilterExpression: { username: { $type: 'string' } } }
-    );
-    console.log('✅ Ensured partial unique index on username');
-  } catch (e) {
+    );  } catch (e) {
     console.warn('Index creation warning:', e.message);
   }
 
@@ -99,5 +88,4 @@ main().catch((e) => {
   console.error('❌ Repair failed:', e);
   process.exit(1);
 });
-
 

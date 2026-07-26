@@ -36,11 +36,8 @@ async function main() {
     process.exit(1);
   }
 
-  try {
-    console.log('Connecting to MongoDB...');
-    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+  try {    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-    // Accept an optional assignedlevel (schema requires it for non-principal roles)
     const assignedLevelArg = args.assignedlevel || process.env.ADMIN_ASSIGNED_LEVEL;
     let assignedlevel = undefined;
     if (assignedLevelArg !== undefined) {
@@ -51,17 +48,14 @@ async function main() {
       }
     }
 
-    // Find an admin user
     let admin = await User.findOne({ role: 'admin' });
 
     if (!admin) {
       if (createIfMissing === 'false') {
         console.error('No admin user found and --createIfMissing is false. Aborting.');
         process.exit(1);
-      }
-      console.log('No admin user found — creating a new admin user.');
-
-      // Make sure username is not taken
+      }
+      
       const conflict = await User.findOne({ username });
       if (conflict) {
         console.error('Username already exists for another user. Choose a different username.');
@@ -74,14 +68,12 @@ async function main() {
         password,
         role: 'admin',
         isActive: true,
-        // assignedlevel is required by the schema for non-principal roles — set from arg/env or default to 1
+        
         assignedlevel: assignedlevel !== undefined ? assignedlevel : 1
       });
 
-      await admin.save();
-      console.log('Admin user created successfully.');
-    } else {
-      // check username conflict
+      await admin.save();    } else {
+      
       const conflict = await User.findOne({ username });
       if (conflict && conflict._id.toString() !== admin._id.toString()) {
         console.error('Username already taken by another user. Choose a different username.');
@@ -89,28 +81,20 @@ async function main() {
       }
 
       admin.username = username;
-      admin.password = password; // will be hashed by pre-save hook
-      // Ensure assignedlevel exists to satisfy schema validation
+      admin.password = password; 
+      
       if ((admin.assignedlevel === undefined || admin.assignedlevel === null) && assignedlevel !== undefined) {
         admin.assignedlevel = assignedlevel;
       } else if (admin.assignedlevel === undefined || admin.assignedlevel === null) {
-        // default to 1 if none provided (avoid validation error)
+        
         admin.assignedlevel = 1;
         console.warn('Warning: admin had no assignedlevel — defaulting to 1 to satisfy validation.');
       }
-      await admin.save();
-      console.log('Admin credentials updated successfully.');
-    }
-
-    console.log('New admin username:', username);
-    console.log('Password changed. (Passwords are stored hashed and not displayed.)');
-  } catch (err) {
+      await admin.save();    }  } catch (err) {
     console.error('Error updating admin credentials:', err.message || err);
     process.exit(1);
   } finally {
-    await mongoose.disconnect();
-    console.log('Disconnected from MongoDB.');
-  }
+    await mongoose.disconnect();  }
 }
 
 main();

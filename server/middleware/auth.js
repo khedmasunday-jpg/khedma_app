@@ -1,11 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const BlacklistedToken = require('../models/BlacklistedToken');
 
 async function verifyToken(req, res, next) {
-  let token = req.headers['authorization'];
-  
-  console.log('🔐 Auth Middleware - Token verification started');
-  
+  let token = req.headers['authorization'];  
   if (token && token.startsWith('Bearer ')) {
     token = token.slice(7);
   }
@@ -16,10 +14,12 @@ async function verifyToken(req, res, next) {
   }
   
   try {
-    console.log('🔐 Auth Middleware - Verifying JWT token');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('🔐 Auth Middleware - Token decoded successfully:', { id: decoded.id });
-    
+
+    const isBlacklisted = await BlacklistedToken.findOne({ token });
+    if (isBlacklisted) {
+      return res.status(401).json({ msg: 'Token has been revoked. Please log in again.' });
+    }
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
@@ -32,41 +32,20 @@ async function verifyToken(req, res, next) {
       return res.status(401).json({ msg: 'Account is deactivated' });
     }
 
-    // --- THIS IS THE FIX ---
-    // The line below was triggering the bug in the old User.js file.
-    // We are commenting it out to prevent the server crash.
-    /*
-    console.log('🔐 Auth Middleware - User found:', {
-      id: user._id,
-      username: user.username,
-      role: user.role, // Let virtual field handle this
-      fullName: user.fullName, // Let virtual field handle this
-      isActive: user.isActive
-    });
-    */
-    
-    // Attach user data to request
     req.user = {
       id: user._id,
       _id: user._id,
-      role: user.role, // Virtual field
+      role: user.role, 
       isActive: user.isActive,
-      assignedlevel: user.assignedlevel, // Virtual field
-      assignedclass: user.assignedclass, // Virtual field
-      fullName: user.fullName, // Virtual field
+      assignedlevel: user.assignedlevel, 
+      assignedclass: user.assignedclass, 
+      fullName: user.fullName, 
       username: user.username,
       isClassLeader: user.isClassLeader || false
-    };
-
-    console.log('✅ Auth Middleware - User attached to request:', {
-      id: req.user.id,
-      role: req.user.role,
-      fullName: req.user.fullName
-    });
-    
+    };    
     next();
   } catch (err) {
-    // Check for stack overflow
+    
     if (err.message === 'Maximum call stack size exceeded') {
         console.error('❌ Auth Middleware - RECURSIVE BUG DETECTED. User.js model is likely buggy.');
         return res.status(500).json({ msg: 'Server error: Recursive loop' });
@@ -94,25 +73,14 @@ function authorizeRoles(...roles) {
     if (!req.user.role) {
       console.error('❌ Role Authorization - No role found for user:', req.user.id);
       return res.status(403).json({ msg: 'User role not available' });
-    }
-    
-    console.log('🔐 Role Authorization - Checking roles:', {
-      userRole: req.user.role,
-      requiredRoles: roles
-    });
-    
+    }    
     const isClassLeaderBypass = req.user.role === 'teacher' && req.user.isClassLeader && roles.includes('co-principal');
     
     if (!roles.includes(req.user.role) && !isClassLeaderBypass) {
       console.error('❌ Role Authorization - Access denied for role:', req.user.role);
       return res.status(403).json({ msg: 'Access denied' });
-    }
-    
-    console.log('✅ Role Authorization - Access granted for role:', req.user.role);
-    next();
+    }    next();
   };
 }
-
-// ... (rest of your file is fine) ...
 
 module.exports = { verifyToken, authorizeRoles };

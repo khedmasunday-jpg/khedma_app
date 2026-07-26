@@ -19,7 +19,6 @@ function translate(text) {
   return text;
 }
 
-// override Alert.alert globally when imported
 export function installArabicAlert() {
   const old = Alert.alert;
   Alert.alert = function (title, message, buttons, options) {

@@ -1,10 +1,9 @@
 const crypto = require('crypto');
 require('dotenv').config();
 
-const key = crypto.createHash('sha256').update(process.env.AES_SECRET_KEY).digest(); // 32 bytes
+const key = crypto.createHash('sha256').update(process.env.AES_SECRET_KEY).digest(); 
 const algorithm = 'aes-256-cbc';
 
-// Encrypt a text string
 function encrypt(text) {
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(algorithm, key, iv);
@@ -13,7 +12,6 @@ function encrypt(text) {
   return iv.toString('hex') + ':' + encrypted;
 }
 
-// Decrypt a string
 function decrypt(encryptedData) {
   const [ivHex, encrypted] = encryptedData.split(':');
   const iv = Buffer.from(ivHex, 'hex');

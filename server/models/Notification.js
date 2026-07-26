@@ -1,16 +1,12 @@
-// models/Notification.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
-// === AES CONFIG ===
-// Support either AES_SECRET_KEY or ENCRYPTION_KEY env var for compatibility
 const AES_SECRET = process.env.AES_SECRET_KEY || process.env.ENCRYPTION_KEY;
 if (!AES_SECRET) throw new Error('Missing AES_SECRET_KEY or ENCRYPTION_KEY in .env');
 
-// Derive a 32-byte AES key from the secret
 const AES_KEY = crypto.createHash('sha256').update(AES_SECRET).digest();
 
-// Helper functions
 function encryptField(value) {
   if (!value) return null;
   const iv = crypto.randomBytes(16);
@@ -31,12 +27,10 @@ function decryptField(enc) {
   return decrypted.toString('utf8');
 }
 
-// === Schema ===
 const notificationSchema = new mongoose.Schema({
   recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   type: { type: String, enum: ['birthday', 'weekly', 'other'], default: 'other' },
 
-  // Expose `message` as a virtual-like path with a setter that encrypts into message_enc.
   message: {
     type: String,
     set: function (v) {
@@ -46,7 +40,7 @@ const notificationSchema = new mongoose.Schema({
         return undefined;
       }
       this.message_enc = encryptField(v);
-      return undefined; // don't store plaintext
+      return undefined; 
     },
     get: function () {
       return decryptField(this.message_enc);
@@ -58,11 +52,11 @@ const notificationSchema = new mongoose.Schema({
   read: { type: Boolean, default: false },
 });
 
-// Hooks to ensure encryption for different write paths
-// For single .save() (create/update via document)
+notificationSchema.index({ recipient: 1, createdAt: -1 });
+notificationSchema.index({ recipient: 1, read: 1 });
+
 notificationSchema.pre('save', function(next) {
-  // If message was set via setter above, message_enc is already populated and message is undefined
-  // But handle case where message exists in doc (e.g., created differently)
+
   if (this.isModified('message') && this.message) {
     this.message_enc = encryptField(this.message);
     this.message = undefined;
@@ -70,11 +64,10 @@ notificationSchema.pre('save', function(next) {
   next();
 });
 
-// For findOneAndUpdate and similar where update object is used
 notificationSchema.pre('findOneAndUpdate', function(next) {
   const update = this.getUpdate();
   if (!update) return next();
-  // support both $set and direct fields
+  
   const set = update.$set || update;
   if (set.message !== undefined) {
     if (set.message === null || set.message === '') {
@@ -82,14 +75,13 @@ notificationSchema.pre('findOneAndUpdate', function(next) {
     } else {
       set.message_enc = encryptField(set.message);
     }
-    // remove plaintext
+    
     if (update.$set) delete update.$set.message;
     else delete update.message;
   }
   next();
 });
 
-// For insertMany bulk inserts
 notificationSchema.pre('insertMany', function(next, docs) {
   for (const doc of docs) {
     if (doc.message) {
@@ -100,7 +92,6 @@ notificationSchema.pre('insertMany', function(next, docs) {
   next();
 });
 
-// Hide encrypted fields from output, include getters so `message` is present
 notificationSchema.methods.toJSON = function() {
   const obj = this.toObject({ getters: true, virtuals: false });
   if (obj && obj.message_enc) delete obj.message_enc;

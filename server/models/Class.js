@@ -1,4 +1,4 @@
-// models/Class.js
+
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
@@ -55,7 +55,10 @@ const classSchema = new mongoose.Schema({
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Student' }],
 });
 
-// Virtual getters & setters to decrypt and encrypt automatically
+classSchema.index({ teacher: 1 });
+classSchema.index({ coPrincipal: 1 });
+classSchema.index({ students: 1 });
+
 ['name', 'level', 'year'].forEach((field) => {
   classSchema.virtual(field)
     .get(function () {
@@ -71,7 +74,6 @@ const classSchema = new mongoose.Schema({
     });
 });
 
-// Encrypt before saving
 classSchema.pre('save', function (next) {
   const fields = ['name', 'level', 'year'];
   for (const field of fields) {
@@ -84,7 +86,6 @@ classSchema.pre('save', function (next) {
   next();
 });
 
-// Hide encrypted raw data when serializing and inject decrypted values
 classSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
   const source = this.toObject();
@@ -104,7 +105,6 @@ classSchema.methods.toJSON = function () {
   return obj;
 };
 
-// Ensure updates encrypt and remove plaintext fields
 classSchema.pre('findOneAndUpdate', function (next) {
   const update = this.getUpdate() || {};
   const set = update.$set ? update.$set : update;

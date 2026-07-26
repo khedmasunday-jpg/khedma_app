@@ -14,6 +14,8 @@ import { createApiClient } from '../config/api';
 import { getAuthToken } from '../config/authSession';
 import { useLanguage } from '../utils/LanguageContext';
 import { logger } from '../utils/logger';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 
 export default function BackupScreen({ route, navigation }) {
   const { token: routeToken } = route.params || {};
@@ -23,6 +25,7 @@ export default function BackupScreen({ route, navigation }) {
 
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [runningBackup, setRunningBackup] = useState(false);
+  const [restoringBackup, setRestoringBackup] = useState(false);
   const [backupStatus, setBackupStatus] = useState(null);
 
   const isAr = locale === 'ar';
@@ -107,24 +110,86 @@ export default function BackupScreen({ route, navigation }) {
     }
   };
 
+  const handleRestoreBackup = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/json', '*/*'],
+        copyToCacheDirectory: true
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
+
+      const asset = result.assets[0];
+      let fileContent = '';
+
+      if (Platform.OS === 'web') {
+        const response = await fetch(asset.uri);
+        fileContent = await response.text();
+      } else {
+        fileContent = await FileSystem.readAsStringAsync(asset.uri, { encoding: FileSystem.EncodingType.UTF8 });
+      }
+
+      const jsonData = JSON.parse(fileContent);
+      if (!jsonData || !jsonData.collections) {
+        notify(
+          isAr ? 'خطأ في تنسيق الملف' : 'Invalid File Format',
+          isAr ? 'ملف النسخة الاحتياطية غير صالح (يجب أن يحتوي على كائنات collections).' : 'Invalid backup JSON file (missing collections object).'
+        );
+        return;
+      }
+
+      const confirmMsg = isAr
+        ? `هل أنت تأكد من استعادة كافة بيانات وقواعد واستعادة حسابات الخدام والمخدومين من ملف النسخة الاحتياطية "${asset.name}"؟`
+        : `Are you sure you want to restore all user accounts, students, classes, and logs from backup file "${asset.name}"?`;
+
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        if (!window.confirm(confirmMsg)) return;
+      }
+
+      setRestoringBackup(true);
+      const res = await client.post('/backup/restore', jsonData);
+
+      if (res.data && res.data.success) {
+        const details = res.data.details || {};
+        notify(
+          isAr ? 'تمت استعادة البيانات والحسابات بنجاح! 🚀' : 'Restore Successful! 🚀',
+          isAr
+            ? `تمت استعادة كافة البيانات وحسابات الخدام بنجاح!\nالمجموعات المستعادة: ${details.restoredCollectionsCount || 0}\nإجمالي المستندات: ${details.restoredDocsCount || 0}`
+            : `Database and accounts successfully restored!\nCollections Restored: ${details.restoredCollectionsCount || 0}\nDocuments Restored: ${details.restoredDocsCount || 0}`
+        );
+        fetchStatus();
+      } else {
+        notify(isAr ? 'خطأ' : 'Error', res.data?.msg || 'Failed to restore backup');
+      }
+    } catch (err) {
+      logger.error('Restore backup error:', err);
+      notify(
+        isAr ? 'خطأ' : 'Error',
+        err.response?.data?.msg || err.message || (isAr ? 'فشل إجراء استعادة النسخة الاحتياطية' : 'Failed to restore JSON backup file')
+      );
+    } finally {
+      setRestoringBackup(false);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header Banner */}
+      {}
       <View style={styles.headerCard}>
         <View style={styles.iconCircle}>
           <Ionicons name="cloud-upload-outline" size={36} color="#2f4360" />
         </View>
         <Text style={styles.headerTitle}>
-          {isAr ? 'نظام النسخ الاحتياطي لقاعدة البيانات' : 'Database Backup System'}
+          {isAr ? 'نظام النسخ الاحتياطي والاستعادة' : 'Database Backup & Restore'}
         </Text>
         <Text style={styles.headerSubtitle}>
           {isAr
-            ? 'تصدير بيانات التطبيق ورفعها تلقائياً وآمناً على Google Drive وحفظها محلياً'
-            : 'Export and securely store application database backups locally & on Google Drive'}
+            ? 'تصدير واستعادة بيانات التطبيق وحسابات الخدام والمخدومين وآمناً على Google Drive'
+            : 'Export and restore application database backups, user accounts, and student records'}
         </Text>
       </View>
 
-      {/* Schedule Info Card */}
+      {}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Ionicons name="time-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
@@ -143,7 +208,7 @@ export default function BackupScreen({ route, navigation }) {
         </Text>
       </View>
 
-      {/* Last Backup Info Card */}
+      {}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Ionicons name="shield-checkmark-outline" size={22} color="#27ae60" style={{ marginRight: 8 }} />
@@ -197,7 +262,7 @@ export default function BackupScreen({ route, navigation }) {
         )}
       </View>
 
-      {/* Manual Trigger Action Card */}
+      {}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Ionicons name="flash-outline" size={22} color="#e67e22" style={{ marginRight: 8 }} />
@@ -208,7 +273,7 @@ export default function BackupScreen({ route, navigation }) {
 
         <Text style={styles.actionDescription}>
           {isAr
-            ? 'اضغط على الزر أدناه لتطبيق نسخة احتياطية كاملة وشاملة لكافة بيانات التطبيق في الحال.'
+            ? 'اضغط على الزر أدناه لتطبيق نسخة احتياطية كاملة وشاملة لكافة بيانات التطبيق وحسابات الخدام في الحال.'
             : 'Click the button below to create an immediate full backup of all application database collections.'}
         </Text>
 
@@ -229,6 +294,44 @@ export default function BackupScreen({ route, navigation }) {
               <Ionicons name="play-circle-outline" size={22} color="#ffffff" style={{ marginRight: 6 }} />
               <Text style={styles.primaryButtonText}>
                 {isAr ? 'بدء النسخ الاحتياطي الآن' : 'Start Backup Now'}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {}
+      <View style={[styles.card, { borderColor: 'rgba(39, 174, 96, 0.3)', backgroundColor: '#fbfefc' }]}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="cloud-download-outline" size={22} color="#27ae60" style={{ marginRight: 8 }} />
+          <Text style={[styles.cardTitle, { color: '#27ae60' }]}>
+            {isAr ? 'استعادة ملف نسخة احتياطية (JSON Restore)' : 'Restore JSON Backup File'}
+          </Text>
+        </View>
+
+        <Text style={styles.actionDescription}>
+          {isAr
+            ? 'اختر ملف النسخة الاحتياطية (.json) لاسترجاع كافة حسابات الخدام (26 حساب)، المخدومين، الفصول، والإشعارات دفعة واحدة.'
+            : 'Select a JSON backup file (.json) to restore all user accounts (teachers/principals), students, classes, and logs.'}
+        </Text>
+
+        <TouchableOpacity
+          style={[styles.restoreButton, restoringBackup && styles.disabledButton]}
+          onPress={handleRestoreBackup}
+          disabled={restoringBackup}
+        >
+          {restoringBackup ? (
+            <View style={styles.btnRow}>
+              <ActivityIndicator color="#ffffff" size="small" style={{ marginRight: 8 }} />
+              <Text style={styles.primaryButtonText}>
+                {isAr ? 'جاري استعادة البيانات والحسابات...' : 'Restoring Database & Accounts...'}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.btnRow}>
+              <Ionicons name="folder-open-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
+              <Text style={styles.primaryButtonText}>
+                {isAr ? 'اختيار ملف JSON واستعادة كافة الحسابات' : 'Pick JSON File & Restore All Accounts'}
               </Text>
             </View>
           )}
@@ -363,6 +466,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  restoreButton: {
+    backgroundColor: '#27ae60',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   disabledButton: {
     opacity: 0.6,
   },
@@ -373,6 +484,6 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#ffffff',
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 14,
   },
 });

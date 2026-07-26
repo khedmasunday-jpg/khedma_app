@@ -37,7 +37,7 @@ if (Platform.OS !== 'web') {
 
 const initialStudent = {
   fullName: '',
-  classLevel: '', // year level
+  classLevel: '', 
   classname: '',
   googlecode: '',
   address: '',
@@ -76,14 +76,12 @@ export default function AddStudentsScreen({ route, navigation }) {
   const [customAlertTitle, setCustomAlertTitle] = useState('');
   const [customAlertMessage, setCustomAlertMessage] = useState('');
 
-  // modernized overlay alert helper
   const showAlert = (title, message) => {
     setCustomAlertTitle(title);
     setCustomAlertMessage(message || '');
     setCustomAlertVisible(true);
   };
 
-  // Fetch available classes from the server
   useEffect(() => {
     if (!token) return;
     (async () => {
@@ -355,7 +353,6 @@ export default function AddStudentsScreen({ route, navigation }) {
     try {
       let toSubmit = [...students];
 
-      // Check if the form is currently being filled (active data present)
       const formHasData = 
         (student.fullName && String(student.fullName).trim() !== '') ||
         student.classLevel ||
@@ -364,7 +361,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         (student.father_phonenumber && String(student.father_phonenumber).trim() !== '');
 
       if (formHasData) {
-        // Validate the active form inputs
+        
         const missing = [];
         if (!student.fullName || String(student.fullName).trim() === '') missing.push('fullName');
         if (!student.classLevel) missing.push('classLevel');
@@ -409,7 +406,6 @@ export default function AddStudentsScreen({ route, navigation }) {
         toSubmit.push(toAdd);
       }
 
-      // If both the queue and the form are empty
       if (toSubmit.length === 0) {
         const msgEmpty = locale === 'ar' ? 'لا توجد عناصر للإرسال' : 'Please add at least one student first';
         setInlineMessage(msgEmpty);
@@ -466,7 +462,7 @@ export default function AddStudentsScreen({ route, navigation }) {
       </TouchableOpacity>
 
       <View style={styles.formCard}>
-        {/* Student Name */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('studentName')}</Text>
           <View style={styles.inputWrapper}>
@@ -481,7 +477,7 @@ export default function AddStudentsScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Gender Selection */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gender')}</Text>
           <View style={styles.pickerWrapper}>
@@ -509,7 +505,7 @@ export default function AddStudentsScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Grade Level Selector */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gradeLevel')}</Text>
           <View style={styles.pickerWrapper}>
@@ -544,7 +540,7 @@ export default function AddStudentsScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Class Selector */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('selectClass')}</Text>
           <View style={styles.pickerWrapper}>
@@ -586,7 +582,7 @@ export default function AddStudentsScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Mother Phone */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('motherPhone')}</Text>
           <View style={styles.inputWrapper}>
@@ -611,7 +607,7 @@ export default function AddStudentsScreen({ route, navigation }) {
           </Text>
         </View>
 
-        {/* Father Phone */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('fatherPhone')}</Text>
           <View style={styles.inputWrapper}>
@@ -636,7 +632,7 @@ export default function AddStudentsScreen({ route, navigation }) {
           </Text>
         </View>
 
-        {/* Birthdate */}
+        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('birthdate')}</Text>
           <View style={styles.pickerWrapper}>
@@ -673,7 +669,7 @@ export default function AddStudentsScreen({ route, navigation }) {
           )}
         </View>
 
-        {/* Buttons Row */}
+        {}
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.secondaryButton} onPress={handleAddStudent}>
             <Ionicons name="add-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
@@ -691,7 +687,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         ) : null}
       </View>
 
-      {/* Contact Picker Modal */}
+      {}
       <Modal visible={contactPickerVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -717,7 +713,7 @@ export default function AddStudentsScreen({ route, navigation }) {
                         <TouchableOpacity
                           key={i2}
                           onPress={() => {
-                            let num = p.number.replace(/\D/g, ''); // keep only digits
+                            let num = p.number.replace(/\D/g, ''); 
                             if (num.startsWith('201') && num.length === 12) {
                               num = '0' + num.substring(2);
                             } else if (num.startsWith('00201') && num.length === 14) {
@@ -743,7 +739,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         </View>
       </Modal>
 
-      {/* Custom Alert Modal */}
+      {}
       <Modal visible={customAlertVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>

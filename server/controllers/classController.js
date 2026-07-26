@@ -1,4 +1,4 @@
-// controllers/classController.js
+
 const Class = require('../models/Class');
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
@@ -7,14 +7,13 @@ const router = express.Router();
 const Log = require('../models/Log');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
 
-// Helper to get student data with attendance by class ID
 async function getClassDataWithAttendance(classId) {
   const classObj = await Class.findById(classId).populate('students');
   let students = [];
   if (classObj && Array.isArray(classObj.students) && classObj.students.length) {
     students = classObj.students;
   } else if (classObj && classObj.name) {
-    // fallback to classname lookup if students array isn't populated
+    
     students = await Student.find({ classname: classObj.name });
   }
 
@@ -45,19 +44,17 @@ async function getClassDataWithAttendance(classId) {
   return results;
 }
 
-// Get classes available to the user (filtered by role)
-// GET / - list classes available to requester (role-filtered)
 router.get('/', verifyToken, async (req, res) => {
   try {
     let classes;
     if (req.user.role === 'principal') {
       classes = await Class.find().sort({ level: 1 });
     } else if (req.user.role === 'co-principal') {
-      // Co-principal can manage classes in their assigned year
-      const year = Math.ceil((req.user.assignedlevel || 1) / 2); // Convert level to year
+      
+      const year = Math.ceil((req.user.assignedlevel || 1) / 2); 
       classes = await Class.find({ year }).sort({ level: 1 });
     } else if (req.user.role === 'teacher') {
-      // If teacher has an assignedclass string, return only that class name; otherwise find by teacher id
+      
       if (req.user.assignedclass) {
         classes = await Class.find({ name: req.user.assignedclass });
       } else {
@@ -73,7 +70,6 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// Get students in a class with detailed attendance stats and percentage
 router.get('/:classId/students-detailed', verifyToken, async (req, res) => {
   try {
     const classId = req.params.classId;
@@ -93,7 +89,6 @@ router.get('/:classId/students-detailed', verifyToken, async (req, res) => {
   }
 });
 
-// 🧑‍🏫 Teacher: view own class data
 router.get('/teacher-class', verifyToken, authorizeRoles('teacher'), async (req, res) => {
   try {
     const teacherClass = await Class.findOne({ teacher: req.user.id });
@@ -106,10 +101,9 @@ router.get('/teacher-class', verifyToken, authorizeRoles('teacher'), async (req,
   }
 });
 
-// 👨‍💼 Co-Principal: view assigned classes data
 router.get('/co-classes', verifyToken, authorizeRoles('co-principal'), async (req, res) => {
   try {
-    // Co-principal manages classes in their assigned year
+    
     const year = Math.ceil(req.user.assignedlevel / 2);
     const assignedClasses = await Class.find({ year: year }).sort({ level: 1 });
     const result = [];
@@ -129,7 +123,6 @@ router.get('/co-classes', verifyToken, authorizeRoles('co-principal'), async (re
   }
 });
 
-// 🧑‍💼 Principal: view all classes
 router.get('/all-classes', verifyToken, authorizeRoles('principal'), async (req, res) => {
   try {
     const allClasses = await Class.find();
@@ -145,13 +138,12 @@ router.get('/all-classes', verifyToken, authorizeRoles('principal'), async (req,
   }
 });
 
-// Get teachers under co-principal's authority
 router.get('/co-principal/teachers', verifyToken, authorizeRoles('co-principal'), async (req, res) => {
   try {
-    // Co-principal manages teachers in their assigned year
+    
     const year = Math.ceil(req.user.assignedlevel / 2);
     const classes = await Class.find({ year: year }).populate('teacher');
-    // Get unique teachers
+    
     const teachers = [];
     const teacherIds = new Set();
     for (const cls of classes) {
@@ -171,10 +163,9 @@ router.get('/co-principal/teachers', verifyToken, authorizeRoles('co-principal')
   }
 });
 
-// Get students in co-principal's year
 router.get('/co-principal/students', verifyToken, authorizeRoles('co-principal'), async (req, res) => {
   try {
-    // Co-principal manages students in their assigned year
+    
     const year = Math.ceil(req.user.assignedlevel / 2);
     const yearLevels = year === 1 ? [1, 2] : year === 2 ? [3, 4] : [5, 6];
     const all = await Student.find({});

@@ -1,16 +1,13 @@
-// models/Student.js
+
 const mongoose = require('mongoose');
 const { getNextId, getNextIdBatch } = require('../services/idManager');
 const crypto = require('crypto');
 
-// === AES CONFIG ===
 const AES_SECRET = process.env.AES_SECRET_KEY;
 if (!AES_SECRET) throw new Error('Missing AES_SECRET_KEY in .env');
 
-// Derive 32-byte key
 const AES_KEY = crypto.createHash('sha256').update(AES_SECRET).digest();
 
-// === Encryption Helpers ===
 function encryptField(value) {
   if (!value && value !== 0) return null;
   const iv = crypto.randomBytes(16);
@@ -48,7 +45,6 @@ function normalizeDecryptedText(text) {
   }
 }
 
-// === Schema ===
 const studentSchema = new mongoose.Schema(
   {
     id: { type: Number, unique: true, required: true },
@@ -58,12 +54,11 @@ const studentSchema = new mongoose.Schema(
     studentId: { type: String, unique: true },
     googlecode: { type: String },
     gender: { type: String, enum: ['male', 'female'], default: 'male' },
-    // Reference to the Class document for proper teacher assignment tracking
+    
     class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class', default: null },
-    // Reference to the Teacher (User) this student is assigned to
+    
     teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 
-    // 🔒 Encrypted fields
     address_enc: { data: String, iv: String, tag: String },
     mother_phonenumber_enc: { data: String, iv: String, tag: String },
     father_phonenumber_enc: { data: String, iv: String, tag: String },
@@ -71,34 +66,35 @@ const studentSchema = new mongoose.Schema(
     fullName_enc: { data: String, iv: String, tag: String },
     studentId_enc: { data: String, iv: String, tag: String },
     googlecode_enc: { data: String, iv: String, tag: String },
-    // Encrypted versions possibly created by bulk script
+    
     classname_enc: { data: String, iv: String, tag: String },
     classLevel_enc: { data: String, iv: String, tag: String },
 
-    // Other
     totalAttendance: { type: Number, default: 0 },
     tayoBalance: { type: Number, default: 0 },
     lastAbsentDate: { type: String },
-    // lastAttendanceDate tracks the most recent date the student was marked PRESENT (YYYY-MM-DD)
+    
     lastAttendanceDate: { type: String },
   },
   { timestamps: true }
 );
 
-// === Fixed validation ===
+studentSchema.index({ classLevel: 1, classname: 1 });
+studentSchema.index({ classLevel: 1 });
+studentSchema.index({ classname: 1 });
+
 studentSchema.pre('validate', function (next) {
-  // Ensure required logical fields exist in either plaintext or encrypted form
+  
   const hasFullName = !!(this.fullName || this.fullName_enc);
   const hasClass = !!(this.classname || this.classname_enc);
   const hasLevel = !!(this.classLevel !== undefined && this.classLevel !== null || this.classLevel_enc);
   if (!hasFullName) this.invalidate('fullName', 'fullName is required');
   if (!hasClass) this.invalidate('classname', 'classname is required');
   if (!hasLevel) this.invalidate('classLevel', 'classLevel is required');
-  // Phone numbers are optional - validation removed
+  
   next();
 });
 
-// === Generate numeric + string ID before validation ===
 studentSchema.pre('validate', async function (next) {
   if (!this.isNew || this.id !== undefined) return next();
   try {
@@ -112,7 +108,6 @@ studentSchema.pre('validate', async function (next) {
   }
 });
 
-// === Encrypt sensitive fields before save ===
 studentSchema.pre('save', function (next) {
   if (this.isModified('address')) {
     this.address_enc = encryptField(this.address);
@@ -130,18 +125,14 @@ studentSchema.pre('save', function (next) {
     this.birthdate_enc = encryptField(this.birthdate);
     this.birthdate = undefined;
   }
-  // Support transient virtual setter: if caller assigned `doc.birthdate = ...` we stored
-  // the value on `_birthdate` in the virtual setter above. Encrypt and persist it.
+
   if (typeof this._birthdate !== 'undefined') {
     const v = this._birthdate === null ? null : (this._birthdate || null);
     const toStore = v ? (typeof v === 'string' ? v : new Date(v).toISOString()) : v;
     this.birthdate_enc = encryptField(toStore);
     delete this._birthdate;
   }
-  // Support transient virtual setters for address and phone numbers so that
-  // assigning `student.address = '...'` before save() will persist the
-  // encrypted versions. Values are stored on transient properties like
-  // _address and handled here.
+
   if (typeof this._address !== 'undefined') {
     const v = this._address === null ? null : (this._address || null);
     const toStore = v ? String(v) : v;
@@ -166,19 +157,18 @@ studentSchema.pre('save', function (next) {
   }
   if (this.isModified('studentId')) {
     this.studentId_enc = encryptField(this.studentId);
-    // keep plaintext `studentId` so unique index on this field can be enforced
-    // (we still store encrypted copy in `studentId_enc`)
+
   }
   if (this.isModified('googlecode')) {
     this.googlecode_enc = encryptField(this.googlecode);
     this.googlecode = undefined;
   }
-  // classname -> classname_enc
+  
   if (this.isModified('classname')) {
     this.classname_enc = encryptField(this.classname);
     this.classname = undefined;
   }
-  // classLevel -> classLevel_enc (store as string)
+  
   if (this.isModified('classLevel')) {
     this.classLevel_enc = encryptField(String(this.classLevel));
     this.classLevel = undefined;
@@ -186,7 +176,6 @@ studentSchema.pre('save', function (next) {
   next();
 });
 
-// Ensure findOneAndUpdate also encrypts these when updated via query
 studentSchema.pre('findOneAndUpdate', function (next) {
   const update = this.getUpdate() || {};
   const set = update.$set ? update.$set : update;
@@ -212,7 +201,7 @@ studentSchema.pre('findOneAndUpdate', function (next) {
     unset.birthdate = '';
     delete set.birthdate;
   }
-  // Ensure address and phone numbers are encrypted when updated via findOneAndUpdate
+  
   if (set.address !== undefined) {
     set.address_enc = encryptField(set.address);
     unset.address = '';
@@ -241,10 +230,9 @@ studentSchema.pre('findOneAndUpdate', function (next) {
   next();
 });
 
-// Ensure insertMan also encrypts incoming plain fields (bulk add)
 studentSchema.pre('insertMany', async function(next, docs) {
   try {
-    // Ensure numeric ids and studentId are assigned for docs missing them
+    
     const missingIdDocs = docs.filter(d => d.id === undefined || d.id === null);
     if (missingIdDocs.length) {
       try {
@@ -277,8 +265,7 @@ studentSchema.pre('insertMany', async function(next, docs) {
       }
       if (doc.studentId !== undefined) {
         doc.studentId_enc = encryptField(doc.studentId);
-        // keep plaintext studentId so unique index works correctly
-        // do not delete doc.studentId
+
       }
       if (doc.googlecode !== undefined) {
         doc.googlecode_enc = encryptField(doc.googlecode);
@@ -308,7 +295,6 @@ studentSchema.pre('insertMany', async function(next, docs) {
   next();
 });
 
-// === Virtual fields for decrypted values ===
 studentSchema.virtual('address').get(function () {
   return normalizeDecryptedText(decryptField(this.address_enc));
 });
@@ -322,8 +308,6 @@ studentSchema.virtual('birthdate').get(function () {
   return normalizeDecryptedText(decryptField(this.birthdate_enc));
 });
 
-// Allow assigning birthdate via the virtual so callers can do `student.birthdate = value`.
-// We store the assigned value temporarily on _birthdate and handle encryption in pre('save').
 studentSchema.virtual('birthdate').set(function (v) {
   if (v === undefined) {
     this._birthdate = undefined;
@@ -339,9 +323,6 @@ studentSchema.virtual('birthdate').set(function (v) {
   }
 });
 
-// Allow assigning address and phone numbers via virtual setters so callers can do
-// `student.address = '...'` and have the values encrypted on save. The value is
-// stored on a transient property (e.g. _address) and handled in pre('save').
 studentSchema.virtual('address').set(function (v) {
   if (v === undefined) {
     this._address = undefined;
@@ -369,7 +350,7 @@ studentSchema.virtual('father_phonenumber').set(function (v) {
     this._father_phonenumber = String(v);
   }
 });
-// Fallback methods for classname and classLevel
+
 studentSchema.methods.getClassname = function () {
   return this.classname || normalizeDecryptedText(decryptField(this.classname_enc));
 };
@@ -389,17 +370,16 @@ studentSchema.methods.getGoogleCode = function () {
   return this.googlecode || normalizeDecryptedText(decryptField(this.googlecode_enc));
 };
 
-// === Hide encrypted fields in JSON output ===
 studentSchema.methods.toJSON = function () {
   const obj = this.toObject({ virtuals: true });
-  // For every *_enc field, decrypt and inject its base field if missing, then remove *_enc
+  
   const source = this.toObject();
   for (const key of Object.keys(source)) {
     if (!key.endsWith('_enc')) continue;
     const base = key.slice(0, -4);
-    // Remove raw encrypted blob
+    
     delete obj[key];
-    // Populate decrypted value only if base is absent
+    
     if (obj[base] !== undefined) continue;
     const dec = normalizeDecryptedText(decryptField(source[key]));
     if (base === 'classLevel') {
@@ -411,7 +391,7 @@ studentSchema.methods.toJSON = function () {
       obj[base] = dec;
     }
   }
-  // Derive yearLevel for clients that depend on it
+  
   if (obj.classLevel !== undefined && obj.yearLevel === undefined) {
     const n = Number(obj.classLevel);
     if (!isNaN(n) && n >= 1) obj.yearLevel = Math.ceil(n / 2);
@@ -419,14 +399,6 @@ studentSchema.methods.toJSON = function () {
   return obj;
 };
 
-// === Post-save logging (optional) ===
-studentSchema.post('save', function (doc) {
-  console.log('✅ Student saved:', {
-    id: doc.id,
-    name: doc.fullName,
-    class: doc.classname,
-    level: doc.classLevel,
-  });
-});
+studentSchema.post('save', function (doc) {});
 
 module.exports = mongoose.model('Student', studentSchema);

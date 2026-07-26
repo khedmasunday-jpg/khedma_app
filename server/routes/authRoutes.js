@@ -7,17 +7,18 @@ const { verifyToken, authorizeRoles } = require('../middleware/auth');
 const Log = require('../models/Log');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
+const BlacklistedToken = require('../models/BlacklistedToken');
 
-// Helper function to create enhanced logs (accepts optional client metadata)
+const DUMMY_HASH = '$2a$10$e8N8p2D30.F.g91vU5G1o.5R5wW9oW9oW9oW9oW9oW9oW9oW9oW9o';
+
 async function createEnhancedLog(action, actor, targetUser = null, additionalDetails = '', ip = '', userAgent = '', deviceId = '') {
   try {
-    // sanitize helper: turn values into plain strings and trim
+    
     const sanitize = (v) => {
       if (v === undefined || v === null) return '';
       return String(v).replace(/^\s+|\s+$/g, '');
     };
 
-    // If actor is a lightweight object (e.g. req.user with id), fetch full user doc to get fullName/role
     let actorDoc = actor;
     if (actor && !(actor.fullName) && (actor._id || actor.id)) {
       try {
@@ -57,61 +58,50 @@ async function createEnhancedLog(action, actor, targetUser = null, additionalDet
   }
 }
 
-// Use express-rate-limit for login brute-force protection
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 5, 
   standardHeaders: true,
   legacyHeaders: false,
   message: { msg: 'Too many login attempts. Try again later.' }
 });
 
-// POST /api/auth/login 
-// POST /api/auth/login
-router.post('/login', /* loginLimiter, */ [
+router.post('/login', loginLimiter, [
   body('username').isString().trim().notEmpty(),
   body('password').isString().notEmpty()
 ], async (req, res) => { 
   const { username, password } = req.body; 
 
-  // Validate input
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ msg: 'Invalid input', errors: errors.array() });
+    return res.status(401).json({ msg: 'Invalid credentials' });
   }
 
   try { 
     const user = await User.findOne({ username }); 
     const userAgent = req.headers['user-agent'] || 'Unknown';
     const deviceId = req.body.deviceId || 'Unknown';
+
     if (!user) {
-      // Log failed login: user not found (do NOT reveal to client)
+      
+      await bcrypt.compare(password || '', DUMMY_HASH);
       await createEnhancedLog('Failed login', { fullName: 'Unknown', role: 'unknown', _id: null }, null, `IP: ${req.headers['x-forwarded-for'] || req.ip} | Username attempted: ${username} | Reason: user not found | Device: ${deviceId}`, req.headers['x-forwarded-for'] || req.ip, userAgent, deviceId);
-      // Return a generic invalid credentials message to avoid user enumeration
       return res.status(401).json({ msg: 'Invalid credentials' });
     }
 
     if (!user.isActive) {
-      // Log failed login: deactivated
-  await createEnhancedLog('Failed login', user, null, `Reason: deactivated | Device: ${deviceId} | User-Agent: ${userAgent}`, req.headers['x-forwarded-for'] || req.ip, userAgent, deviceId);
-      return res.status(403).json({ msg: 'This account is deactivated. Please contact an administrator.' });
+      
+      await bcrypt.compare(password || '', DUMMY_HASH);
+      await createEnhancedLog('Failed login', user, null, `Reason: deactivated | Device: ${deviceId} | User-Agent: ${userAgent}`, req.headers['x-forwarded-for'] || req.ip, userAgent, deviceId);
+      return res.status(401).json({ msg: 'Invalid credentials' });
     }
 
-    // Compare against password or, if missing, decrypted password_enc (which should contain the bcrypt hash)
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       await createEnhancedLog('Failed login', user, null, `Reason: wrong password | Device: ${deviceId} | User-Agent: ${userAgent}`, req.headers['x-forwarded-for'] || req.ip, userAgent, deviceId);
       return res.status(401).json({ msg: 'Invalid credentials' });
     }
-    if (!isMatch) {
-      // Log failed login: wrong password
-  await createEnhancedLog('Failed login', user, null, `Reason: wrong password | Device: ${deviceId} | User-Agent: ${userAgent}`, req.headers['x-forwarded-for'] || req.ip, userAgent, deviceId);
-      return res.status(401).json({ msg: 'Invalid credentials' });
-    }
 
-    // Include assignedlevel and assignedclass in token so client can
-    // inspect the user's scope without an extra API call. Server still
-    // relies on fresh DB values via verifyToken for authorization.
     const tokenPayload = {
       id: user._id,
       role: user.role,
@@ -123,16 +113,15 @@ router.post('/login', /* loginLimiter, */ [
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    // Log successful login
     await createEnhancedLog('User login', user, null, `IP: ${req.headers['x-forwarded-for'] || req.ip} | Device: ${deviceId} | User-Agent: ${userAgent}`, req.headers['x-forwarded-for'] || req.ip, userAgent, deviceId);
 
-    // Return token and some user metadata (include assigned fields for convenience)
     res.json({
       token,
       user: {
         username: user.username,
         role: user.role,
         fullName: user.fullName,
+        telegramChatId: user.telegramChatId,
         ISactive: user.isActive,
         assignedlevel: user.assignedlevel,
         assignedclass: user.assignedclass,
@@ -144,7 +133,7 @@ router.post('/login', /* loginLimiter, */ [
     res.status(500).json({ msg: 'Server error' }); 
   } 
 });
-// Restrict listing users to authenticated admins to avoid user enumeration
+
 router.get('/list-users', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     const users = await User.find({}, 'username fullName role');
@@ -155,7 +144,6 @@ router.get('/list-users', verifyToken, authorizeRoles('admin'), async (req, res)
   }
 });
 
-// GET /api/auth/me - return the current DB user (for mobile client to verify assigned fields)
 router.get('/me', verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -163,6 +151,30 @@ router.get('/me', verifyToken, async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error('Error in /auth/me:', err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+router.post('/logout', verifyToken, async (req, res) => {
+  try {
+    let token = req.headers['authorization'];
+    if (token && token.startsWith('Bearer ')) token = token.slice(7);
+    if (!token) return res.status(400).json({ msg: 'No token to invalidate' });
+
+    const decoded = jwt.decode(token);
+    const expiresAt = decoded && decoded.exp
+      ? new Date(decoded.exp * 1000)
+      : new Date(Date.now() + 60 * 60 * 1000); 
+
+    await BlacklistedToken.updateOne(
+      { token },
+      { token, expiresAt },
+      { upsert: true }
+    );
+
+    res.json({ msg: 'Logged out successfully. Token revoked.' });
+  } catch (err) {
+    console.error('Logout error:', err);
     res.status(500).json({ msg: 'Server error' });
   }
 });

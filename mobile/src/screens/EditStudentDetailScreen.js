@@ -46,7 +46,6 @@ export default function EditStudentDetailScreen({ route, navigation }) {
   const isRtl = locale === 'ar';
   const canDelete = userRole === "principal" || userRole === "admin";
 
-  // ✅ Unified alert that works on Web, iOS, and Android
   const showAlert = (title, message, onOk = null) => {
     if (Platform.OS === "web") {
       window.alert(`${title}\n\n${message}`);
@@ -76,7 +75,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    // Fetch class list first so pickers are ready, then load the student and normalize
+    
     (async () => {
       setLoading(true);
       try {
@@ -104,7 +103,6 @@ export default function EditStudentDetailScreen({ route, navigation }) {
         if (meData) setUserRole(meData.role || "");
         logger.log('Fetched classes:', classes.map(c => c.name));
 
-        // Now fetch the student record
         try {
           const res = await axios.get(`${getApiBase()}/students/edit?id=${studentId}`, { headers: { Authorization: `Bearer ${token}` } });
           const s = res.data || {};
@@ -132,7 +130,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                 }
               }
             } catch (e) {
-              // ignore
+              
             }
           } else if (s.yearLevel !== undefined && s.yearLevel !== null) {
             s.yearLevel = String(s.yearLevel);
@@ -348,7 +346,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
       >
         <Text style={styles.title}>{student.fullName}</Text>
 
-        {/* Summary Card */}
+        {}
         <View style={styles.summaryHeader}>
           <Text style={[styles.level, { textAlign: isRtl ? 'right' : 'left' }]}>
             {t('gradeLevel')}: {student.classLevel || student.yearLevel}
@@ -358,7 +356,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
           </Text>
         </View>
 
-        {/* Form Card */}
+        {}
         <View style={styles.formContainer}>
           {editableFields.map((key) => (
             <View key={key} style={styles.fieldRow}>
@@ -589,7 +587,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
             </View>
           ))}
 
-          {/* Submit / Action Buttons Panel */}
+          {}
           <View style={styles.buttonSection}>
             <TouchableOpacity 
               style={[styles.btn, styles.btnSave, saving && styles.btnDisabled]} 
@@ -615,7 +613,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
       </ScrollView>
     </KeyboardAvoidingView>
 
-    {/* Contact Picker Modal */}
+    {}
     <Modal visible={contactPickerVisible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
@@ -641,7 +639,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                       <TouchableOpacity
                         key={i2}
                         onPress={() => {
-                          let num = p.number.replace(/\D/g, ''); // keep only digits
+                          let num = p.number.replace(/\D/g, ''); 
                           if (num.startsWith('201') && num.length === 12) {
                             num = '0' + num.substring(2);
                           } else if (num.startsWith('00201') && num.length === 14) {

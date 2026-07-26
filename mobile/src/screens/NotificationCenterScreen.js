@@ -131,7 +131,7 @@ export default function NotificationCenterScreen({ route, navigation }) {
     try {
       const dateObj = new Date(dateStr);
       if (isNaN(dateObj.getTime())) return '';
-      // Friendly date format
+      
       return dateObj.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
         year: 'numeric',
         month: 'short',
@@ -146,7 +146,7 @@ export default function NotificationCenterScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header Panel with Title and Clear Action */}
+      {}
       <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <Text style={styles.screenTitle}>{t('notifications')}</Text>
         {notifications.length > 0 && (
@@ -160,7 +160,7 @@ export default function NotificationCenterScreen({ route, navigation }) {
         )}
       </View>
 
-      {/* Notifications List area */}
+      {}
       <ScrollView 
         style={styles.scrollArea} 
         contentContainerStyle={styles.scrollContent} 
@@ -186,12 +186,12 @@ export default function NotificationCenterScreen({ route, navigation }) {
                 key={idx} 
                 style={[styles.notifCard, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}
               >
-                {/* Visual Icon Badge */}
+                {}
                 <View style={[styles.iconBadge, { backgroundColor: `${iconInfo.color}15` }]}>
                   <Ionicons name={iconInfo.name} size={22} color={iconInfo.color} />
                 </View>
 
-                {/* Text Content Block */}
+                {}
                 <View style={[styles.textBlock, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
                   <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                     <Text style={styles.notifType}>{getLocalizedType(notif.type)}</Text>

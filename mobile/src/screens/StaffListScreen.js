@@ -43,10 +43,10 @@ export default function StaffListScreen({ route }) {
             <View key={user._id} style={styles.card}>
               <Text style={styles.name}>{user.fullName}</Text>
               <Text style={styles.role}>{user.role === 'teacher' ? 'Teacher' : 'Stage Servant'}</Text>
-              {/* Add any other non-sensitive fields you want to display */}
+              {}
               {user.birthdate && <Text style={styles.info}>Birthdate: {formatDateNoYear(user.birthdate)}</Text>}
               {user.isActive !== undefined && <Text style={styles.info}>Active: {user.isActive ? 'Yes' : 'No'}</Text>}
-              {/* Add more fields as needed */}
+              {}
             </View>
           ))}
         </ScrollView>

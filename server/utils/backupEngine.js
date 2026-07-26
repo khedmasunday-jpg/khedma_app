@@ -6,9 +6,8 @@ const { google } = require('googleapis');
 const Log = require('../models/Log');
 const JobLog = require('../models/JobLog');
 
-// Google Drive Auth helper
 function getDriveInstance() {
-  // Option 1: Use OAuth2 user credentials if provided (bypasses Service Account 0-quota limit on personal drives)
+  
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
@@ -20,7 +19,6 @@ function getDriveInstance() {
     return google.drive({ version: 'v3', auth: oauth2Client });
   }
 
-  // Option 2: Service Account (Requires Shared Drive / Workspace)
   const SCOPES = ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'];
   let googleAuthOpts = { scopes: SCOPES };
 
@@ -31,11 +29,9 @@ function getDriveInstance() {
       console.error('❌ Failed to parse GOOGLE_SERVICE_ACCOUNT_JSON env variable:', err.message);
     }
   } else {
-    // Check candidate key file paths
+    
     const candidatePaths = [
       path.join(__dirname, '../config/drive-service-account.json'),
-      '/home/georgeh/Desktop/khedma-project-503310-ae2a9e16c270.json',
-      path.join(__dirname, '../../config/config/symbolic-photon-446116-r4-b6c0062c9eb7.json'),
       process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH
     ].filter(Boolean);
 
@@ -51,7 +47,6 @@ function getDriveInstance() {
   return google.drive({ version: 'v3', auth });
 }
 
-// Memory store for last backup info
 let lastBackupInfo = null;
 
 async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
@@ -62,8 +57,6 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
 
   const fileName = `khedma-backup-${timestamp}.json.gz`;
   const filePath = path.join(backupDir, fileName);
-
-  console.log(`🚀 Starting database backup (${triggeredBy})...`);
 
   try {
     const db = mongoose.connection.db;
@@ -87,22 +80,17 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
       totalDocs += docs.length;
     }
 
-    console.log(`📦 Extracted ${Object.keys(exportData.collections).length} collections (${totalDocs} documents).`);
-
-    // Convert JSON to Gzip compressed buffer
     const jsonString = JSON.stringify(exportData);
     const compressedBuffer = zlib.gzipSync(Buffer.from(jsonString, 'utf-8'));
     fs.writeFileSync(filePath, compressedBuffer);
     const fileSize = compressedBuffer.length;
 
-    console.log(`💾 Compressed backup created at ${filePath} (${(fileSize / 1024 / 1024).toFixed(2)} MB).`);
-
-    // Upload to Google Drive
     let driveFileId = null;
     let driveErrorMsg = null;
     try {
       const drive = getDriveInstance();
-      const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || '1sHyt3r1EyIB8RB5-7jNPheLoZ5Jm55Op';
+      const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+      if (!folderId) throw new Error('Missing GOOGLE_DRIVE_FOLDER_ID env var');
 
       const fileMetadata = {
         name: fileName,
@@ -121,13 +109,11 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
       });
 
       driveFileId = driveRes.data.id;
-      console.log(`✅ Backup successfully uploaded to Google Drive. File ID: ${driveFileId}`);
     } catch (driveErr) {
       driveErrorMsg = driveErr.message;
       console.error('⚠️ Google Drive upload error:', driveErr.message);
     }
 
-    // Upload to Telegram (if configured)
     let telegramUploaded = false;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       try {
@@ -136,13 +122,11 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
         const caption = `📦 *Khedma App Database Backup*\n📅 *Date:* ${new Date().toLocaleString()}\n💾 *Size:* ${(fileSize / 1024 / 1024).toFixed(2)} MB\n📄 *Docs:* ${totalDocs} (${Object.keys(exportData.collections).length} collections)`;
         await bot.sendDocument(process.env.TELEGRAM_CHAT_ID, filePath, { caption, parse_mode: 'Markdown' });
         telegramUploaded = true;
-        console.log('✅ Backup successfully sent to Telegram!');
       } catch (tgErr) {
         console.error('⚠️ Telegram upload error:', tgErr.message);
       }
     }
 
-    // Upload to Dropbox (if configured)
     let dropboxUploaded = false;
     if (process.env.DROPBOX_ACCESS_TOKEN) {
       try {
@@ -161,13 +145,11 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
           }
         });
         dropboxUploaded = true;
-        console.log('✅ Backup successfully uploaded to Dropbox!');
       } catch (dbxErr) {
         console.error('⚠️ Dropbox upload error:', dbxErr.response?.data || dbxErr.message);
       }
     }
 
-    // Retain local backup file & auto-rotate old local backups (keep last 10 backups)
     try {
       const files = fs.readdirSync(backupDir)
         .filter(f => f.startsWith('khedma-backup-') && f.endsWith('.json.gz'))
@@ -180,7 +162,6 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
         for (const file of toDelete) {
           if (fs.existsSync(file.path)) {
             fs.unlinkSync(file.path);
-            console.log(`🧹 Rotated old local backup file: ${file.name}`);
           }
         }
       }
@@ -188,7 +169,6 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
       console.error('Failed to rotate old local backups:', rotateErr.message);
     }
 
-    // Update JobLog in Mongo
     try {
       const existingJobLog = await JobLog.findOne({ jobName_enc: { $exists: true } });
       const runDateStr = new Date().toISOString();
@@ -202,7 +182,6 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
       console.error('Failed to save JobLog:', jobLogErr.message);
     }
 
-    // Log action if triggered by user
     if (userObj) {
       try {
         await Log.create({
@@ -248,11 +227,114 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
   }
 }
 
+async function restoreDatabaseBackup(backupJsonData, userObj = null) {
+  const startTime = Date.now();
+
+  try {
+    const db = mongoose.connection.db;
+    if (!db) {
+      throw new Error('Database connection is not open.');
+    }
+
+    if (!backupJsonData || !backupJsonData.collections) {
+      throw new Error('Invalid backup file format: missing "collections" object.');
+    }
+
+    let restoredCollectionsCount = 0;
+    let restoredDocsCount = 0;
+
+    const convertValue = (key, value) => {
+      if (value === null || value === undefined) return value;
+
+      const dateKeys = ['date', 'timestamp', 'createdAt', 'updatedAt', 'birthdate', 'lastRunDate', 'lastAttendanceDate', 'lastAbsentDate', 'scheduledTime'];
+      if (dateKeys.includes(key) && typeof value === 'string') {
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) return d;
+      }
+
+      if (typeof value === 'string' && value.length === 24 && /^[0-9a-fA-F]{24}$/.test(value)) {
+        try {
+          return new mongoose.Types.ObjectId(value);
+        } catch (e) {
+          return value;
+        }
+      }
+
+      if (Array.isArray(value)) {
+        return value.map(v => convertValue(key, v));
+      }
+
+      if (typeof value === 'object' && value !== null) {
+        if (value.$oid && typeof value.$oid === 'string') {
+          return new mongoose.Types.ObjectId(value.$oid);
+        }
+        if (value.$date) {
+          return new Date(value.$date);
+        }
+        const newObj = {};
+        for (const [k, v] of Object.entries(value)) {
+          newObj[k] = convertValue(k, v);
+        }
+        return newObj;
+      }
+
+      return value;
+    };
+
+    for (const [colName, docs] of Object.entries(backupJsonData.collections)) {
+      if (colName.startsWith('system.')) continue;
+      if (!Array.isArray(docs)) continue;
+
+      const collection = db.collection(colName);
+      await collection.deleteMany({});
+
+      if (docs.length > 0) {
+        const processedDocs = docs.map(doc => {
+          const newDoc = {};
+          for (const [k, v] of Object.entries(doc)) {
+            newDoc[k] = convertValue(k, v);
+          }
+          return newDoc;
+        });
+        await collection.insertMany(processedDocs);
+        restoredDocsCount += docs.length;
+      }
+      restoredCollectionsCount++;
+    }
+
+    if (userObj) {
+      try {
+        await Log.create({
+          action: 'MANUAL_BACKUP_RESTORE',
+          actor: userObj.id || userObj._id,
+          performedBy: userObj.id || userObj._id,
+          timestamp: new Date(),
+          details: `Database restore completed in ${Date.now() - startTime}ms. Restored ${restoredCollectionsCount} collections (${restoredDocsCount} documents) including Tayo points and Telegram Chat IDs.`,
+          actorName: userObj.fullName || userObj.username,
+          actorRole: userObj.role,
+          actionDescription: `Admin ${userObj.fullName || userObj.username} restored database from JSON backup.`
+        });
+      } catch (e) {}
+    }
+
+    return {
+      success: true,
+      restoredCollectionsCount,
+      restoredDocsCount,
+      durationMs: Date.now() - startTime
+    };
+  } catch (err) {
+    console.error('❌ Restore execution failed:', err);
+    throw err;
+  }
+}
+
 function getLastBackupInfo() {
   return lastBackupInfo;
 }
 
 module.exports = {
   runDatabaseBackup,
+  restoreDatabaseBackup,
   getLastBackupInfo
 };
