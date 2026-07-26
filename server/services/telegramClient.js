@@ -72,11 +72,48 @@ async function logoutTelegram() {
   return true;
 }
 
+async function registerWebhook(baseUrl) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token || !baseUrl) return false;
+  try {
+    const cleanUrl = baseUrl.replace(/\/$/, '');
+    const webhookUrl = `${cleanUrl}/api/telegram/webhook`;
+    await axios.post(`https://api.telegram.org/bot${token}/setWebhook`, { url: webhookUrl });
+    console.log('✅ Registered Telegram Webhook:', webhookUrl);
+    return true;
+  } catch (err) {
+    console.error('❌ Failed to register Telegram Webhook:', err.response?.data || err.message);
+    return false;
+  }
+}
+
+async function handleIncomingUpdate(update) {
+  if (!update || !update.message) return;
+  const msg = update.message;
+  const chatId = msg.chat ? msg.chat.id : null;
+  if (!chatId) return;
+
+  if (msg.text && msg.text.startsWith('/start')) {
+    const welcomeText = `🎉 أهلاً بك في خدمة إشعارات تطبيق الخدمة (Khedma App)!\n\n` +
+      `🆔 رمز المعرف الخاص بك (Chat ID):\n` +
+      `\`${chatId}\`\n\n` +
+      `قم بنسخ هذا الرقم وإدخاله في التطبيق تحت قائمة "الملف الشخصي" (Profile) أو إعطائه للمسؤول لتلقي التنبيهات والإشعارات فوراً على تليجرام.\n\n` +
+      `-----------------------------------\n` +
+      `Welcome to Khedma Notifications!\n` +
+      `Your Telegram Chat ID is: \`${chatId}\`\n` +
+      `Please copy this ID into your Khedma App profile settings to receive notifications.`;
+
+    await sendTelegramMessage(chatId, welcomeText);
+  }
+}
+
 module.exports = {
   initializeTelegram,
   sendTelegramMessage,
   getTelegramStatus,
   getTelegramQrCode,
   reconnectTelegram,
-  logoutTelegram
+  logoutTelegram,
+  registerWebhook,
+  handleIncomingUpdate
 };

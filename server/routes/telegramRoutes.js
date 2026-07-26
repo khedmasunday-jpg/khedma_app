@@ -11,8 +11,33 @@ const NotificationLog = require('../models/NotificationLog');
 const telegramClient = require('../services/telegramClient');
 const schedulerService = require('../services/schedulerService');
 
+// Public Telegram Webhook Endpoint for receiving /start and user messages
+router.post('/webhook', async (req, res) => {
+  try {
+    await telegramClient.handleIncomingUpdate(req.body);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('❌ Error handling Telegram Webhook:', err.message);
+    res.json({ ok: true });
+  }
+});
+
 router.use(verifyToken);
 router.use(authorizeRoles('admin', 'principal'));
+
+router.post('/setup-webhook', async (req, res) => {
+  try {
+    const hostUrl = req.body.url || `https://${req.get('host')}`;
+    const ok = await telegramClient.registerWebhook(hostUrl);
+    if (ok) {
+      res.json({ success: true, msg: `Webhook set successfully to ${hostUrl}/api/telegram/webhook` });
+    } else {
+      res.status(400).json({ success: false, msg: 'Failed to set webhook. Check TELEGRAM_BOT_TOKEN.' });
+    }
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error', error: err.message });
+  }
+});
 
 router.get('/status', async (req, res) => {
   try {
