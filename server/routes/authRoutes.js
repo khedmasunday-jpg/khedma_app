@@ -130,7 +130,7 @@ router.post('/login', loginLimiter, [
     });
   } catch (error) { 
     console.error('Login error:', error.message); 
-    res.status(500).json({ msg: 'Server error' }); 
+    res.status(500).json({ msg: 'Server error', error: error.message, stack: error.stack }); 
   } 
 });
 
