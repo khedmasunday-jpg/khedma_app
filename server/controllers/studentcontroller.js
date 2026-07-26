@@ -109,6 +109,10 @@ exports.bulkAddStudents = async (req, res) => {
       if (targetClass.year !== undefined && Number(stu.classLevel) !== Number(targetClass.year)) {
         continue; 
       }
+
+      if (req.user.role === 'co-principal' && targetClass.year !== req.user.assignedlevel) {
+        continue; // Skip adding to unauthorized levels
+      }
       
       validatedStudents.push({ stu, targetClass });
     }
@@ -234,6 +238,16 @@ exports.addStudent = async (req, res) => {
         return res.status(400).json({
           msg: `Class level mismatch. The class "${req.body.classname}" is for year ${targetClass.year}, but you provided classLevel ${req.body.classLevel}.`,
           field: 'classLevel'
+        });
+      }
+    }
+
+    if (req.user.role === 'co-principal') {
+      const allowedLevel = req.user.assignedlevel;
+      if (targetClass.year !== allowedLevel) {
+        return res.status(403).json({
+          msg: `Unauthorized: You can only add students to level ${allowedLevel} classes.`,
+          field: 'classname'
         });
       }
     }

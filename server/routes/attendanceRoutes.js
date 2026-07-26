@@ -14,7 +14,7 @@ router.post('/reset', verifyToken, authorizeRoles('admin'), async (req, res) => 
 });
 
 router.post('/:classId', verifyToken, [
-  body('records').isArray().withMessage('records array required')
+  body('students').isArray().withMessage('students array required')
 ], async (req, res) => {
   const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ msg: 'Invalid input', errors: errors.array() });
   try {

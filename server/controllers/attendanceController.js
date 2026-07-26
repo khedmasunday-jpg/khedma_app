@@ -79,7 +79,7 @@ exports.markAttendance = async (req, res) => {
       if (foundClass.year !== year) {
         return res.status(403).json({ msg: 'Unauthorized (co-principal)' });
       }
-    } else if (user.role !== 'principal' && user.role !== 'teacher' && user.role !== 'co-principal') {
+    } else if (user.role !== 'principal' && user.role !== 'teacher' && user.role !== 'co-principal' && user.role !== 'admin') {
       return res.status(403).json({ msg: 'Unauthorized role' });
     }
 

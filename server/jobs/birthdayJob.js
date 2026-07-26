@@ -88,14 +88,16 @@ const runBirthdayJob = async (isManual = false) => {
               recipientId: cp._id,
               recipientType: 'User'
             });
-          }          notifiedToday.add(key);
+          }          notifiedToday.add(key);
         }
       }
-    }  } catch (err) {
+    }  } catch (err) {
     console.error('[BirthdayJob] Error:', err);
   }
 };
 
-cron.schedule('0 10 * * *', runBirthdayJob, { timezone: 'Africa/Cairo' });
+if (!process.env.VERCEL) {
+  cron.schedule('0 10 * * *', runBirthdayJob, { timezone: 'Africa/Cairo' });
+}
 
 module.exports = { runBirthdayJob };
