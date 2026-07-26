@@ -49,7 +49,16 @@ app.use(generalLimiter);
 const arabicResponse = require('./middleware/arabicResponse');
 app.use(arabicResponse);
 
-app.use('/api/auth', authRoutes); 
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); 
 app.use('/api/classes', require('./routes/classRoutes')); 
 app.use('/api/attendance', require('./routes/attendanceRoutes')); 
@@ -134,14 +143,7 @@ async function connectDB() {
   }
 }
 
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
+
 
 if (!process.env.VERCEL) {
   connectDB().then(() => {
