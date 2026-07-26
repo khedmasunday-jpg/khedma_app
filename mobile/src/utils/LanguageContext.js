@@ -136,6 +136,8 @@ export const translations = {
     tayoAddError: "Error occurred while adding Taio",
     tayoDeductSuccess: "Taio deducted successfully",
     tayoDeductError: "Error occurred while deducting Taio",
+    cancelBtn: "Cancel",
+    closeModal: "Close",
   },
   ar: {
     appName: "تطبيق الخدمة",
@@ -270,6 +272,8 @@ export const translations = {
     tayoAddError: "حدث خطأ أثناء الإضافة",
     tayoDeductSuccess: "تم خصم طايو بنجاح",
     tayoDeductError: "حدث خطأ أثناء الخصم",
+    cancelBtn: "إلغاء",
+    closeModal: "إغلاق",
     classSeraphim: "فصل السيرافيم",
     classCherubim: "فصل الشاروبيم",
     classRaphael: "الملاك رفائيل",

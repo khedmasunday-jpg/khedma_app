@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, FlatList, TextInput, Modal, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, FlatList, TextInput, Modal, Alert, KeyboardAvoidingView, ScrollView, ActivityIndicator } from 'react-native';
 import Axios from 'axios';
 import { API_URL } from '../config/api';
 import { getAuthToken } from '../config/authSession';
@@ -23,6 +23,7 @@ export default function TayoGiveScreen({ navigation }) {
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -82,15 +83,16 @@ export default function TayoGiveScreen({ navigation }) {
   };
 
   const submitTransaction = async () => {
+    if (submitting) return;
     if (!amount || isNaN(amount) || parseInt(amount) <= 0) return Alert.alert(t('error'), t('invalidNumber'));
     if (!reason.trim()) return Alert.alert(t('error'), t('reasonRequired'));
 
+    setSubmitting(true);
     const addVal = parseInt(amount);
     const targetId = selectedStudent._id;
     const previousStudents = [...students];
 
     setStudents(prev => prev.map(s => s._id === targetId ? { ...s, tayoBalance: (s.tayoBalance || 0) + addVal } : s));
-    setModalVisible(false);
 
     try {
       const token = getAuthToken();
@@ -101,11 +103,13 @@ export default function TayoGiveScreen({ navigation }) {
       }, { headers: { Authorization: token } });
       
       invalidateCache('tayo/students');
+      setModalVisible(false);
       Alert.alert(t('success'), t('tayoAddedSuccess'));
     } catch (err) {
-      
       setStudents(previousStudents);
       Alert.alert(t('error'), t('tayoAddError'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -196,11 +200,15 @@ export default function TayoGiveScreen({ navigation }) {
             <TextInput style={styles.input} placeholder={t('reasonPlaceholder')} value={reason} onChangeText={setReason} />
             
             <View style={styles.row}>
-              <TouchableOpacity style={[styles.btn, styles.cancel]} onPress={() => setModalVisible(false)}>
+              <TouchableOpacity style={[styles.btn, styles.cancel]} onPress={() => setModalVisible(false)} disabled={submitting}>
                 <Text style={styles.cancelBtnText}>{t('cancelBtn')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.btn, styles.save]} onPress={submitTransaction}>
-                <Text style={styles.saveBtnText}>{t('giveBtn')}</Text>
+              <TouchableOpacity style={[styles.btn, styles.save, submitting && { opacity: 0.7 }]} onPress={submitTransaction} disabled={submitting}>
+                {submitting ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.saveBtnText}>{t('giveBtn')}</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
