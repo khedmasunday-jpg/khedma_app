@@ -410,8 +410,9 @@ exports.getStudentData = async (req, res) => {
         .sort((a, b) => (a.level - b.level) || String(a.name).localeCompare(String(b.name)))
         .map(x => x.doc);
     } else if (user.role === 'co-principal') {
-      const docs = await Student.find({ classLevel: user.assignedlevel });
-      students = docs.sort((a, b) => String((typeof a.getClassname==='function'?a.getClassname():a.classname)||'').localeCompare(String((typeof b.getClassname==='function'?b.getClassname():b.classname)||'')));
+      const docs = await Student.find({});
+      students = docs.filter(s => (typeof s.getClassLevel === 'function' ? s.getClassLevel() : s.classLevel) === user.assignedlevel)
+                     .sort((a, b) => String((typeof a.getClassname==='function'?a.getClassname():a.classname)||'').localeCompare(String((typeof b.getClassname==='function'?b.getClassname():b.classname)||'')));
     } else if (user.role === 'teacher') {
       const docs = await Student.find({});
       const cleanUserClass = (user.assignedclass || '').replace(/^فصل\s+/, '').trim();
