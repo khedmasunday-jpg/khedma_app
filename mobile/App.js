@@ -7,6 +7,16 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 
 import { ActivityIndicator } from 'react-native';
 
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = `
+    body, html, #root {
+      background-color: #ffffff !important;
+      color-scheme: light !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
 import LoginScreen from './src/screens/LoginScreen';
 import PostLoginScreen from './src/screens/PostLoginScreen';
 import ClassDisplayScreen from './src/screens/ClassDisplayScreen';
