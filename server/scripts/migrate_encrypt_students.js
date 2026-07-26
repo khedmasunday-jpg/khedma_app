@@ -49,7 +49,8 @@ async function main() {
   }
 
   await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-  const db = mongoose.connection.db;
+  const db = mongoose.connection.db;
+
   const colName = 'students';
   const col = db.collection(colName);
 
@@ -74,11 +75,14 @@ async function main() {
       if (doc[plain] !== undefined && !doc[enc]) { will = true; break; }
     }
     if (will) willUpdateCount++;
-  }  if (dryRun) {    await mongoose.disconnect();
+  }
+  if (dryRun) {
+    await mongoose.disconnect();
     process.exit(0);
   }
 
-    const applyCursor = col.find({});
+  
+  const applyCursor = col.find({});
   let updated = 0;
   let processed = 0;
   while (await applyCursor.hasNext()) {
@@ -125,8 +129,10 @@ async function main() {
     }
 
     processed++;
-    if (processed % Math.max(1, batchSize) === 0) {    }
-  }  await mongoose.disconnect();
+    if (processed % Math.max(1, batchSize) === 0) {
+    }
+  }
+  await mongoose.disconnect();
   process.exit(0);
 }
 

@@ -14,7 +14,7 @@ const AES_KEY = crypto.createHash('sha256').update(AES_SECRET).digest();
 function encryptFieldRaw(value) {
   if (value === undefined || value === null) return null;
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-gcm', AES_KEY, iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', getAesKey(), iv);
   const buf = Buffer.concat([cipher.update(JSON.stringify(value), 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
   return {
@@ -33,15 +33,19 @@ function isEncryptable(value) {
 
 async function processCollection(db, colName) {
   const exists = await db.listCollections({ name: colName }).hasNext();
-  if (!exists) {    return;
+  if (!exists) {
+    return;
   }
 
   const col = db.collection(colName);
 
   const indexes = await col.listIndexes().toArray().catch(() => []);
   for (const idx of indexes) {
-    if (idx.unique && !idx.name.startsWith('_id')) {      try {
-        await col.dropIndex(idx.name);      } catch {      }
+    if (idx.unique && !idx.name.startsWith('_id')) {
+      try {
+        await col.dropIndex(idx.name);
+      } catch {
+      }
     }
   }
 
@@ -76,16 +80,20 @@ async function processCollection(db, colName) {
       await col.updateOne({ _id: doc._id }, update);
       count++;
     }
-  }}
+  }
+}
 
 async function main() {
   await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-  const db = mongoose.connection.db;
+  const db = mongoose.connection.db;
+
   const collections = await db.listCollections().toArray();
-  const names = collections.map(c => c.name);
+  const names = collections.map(c => c.name);
+
   for (const name of names) {
     await processCollection(db, name);
-  }  await mongoose.disconnect();
+  }
+  await mongoose.disconnect();
   process.exit(0);
 }
 

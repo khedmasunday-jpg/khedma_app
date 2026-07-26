@@ -3,15 +3,16 @@ const mongoose = require('mongoose');
 const { getNextId, getNextIdBatch } = require('../services/idManager');
 const crypto = require('crypto');
 
-const AES_SECRET = process.env.AES_SECRET_KEY;
-if (!AES_SECRET) throw new Error('Missing AES_SECRET_KEY in .env');
-
-const AES_KEY = crypto.createHash('sha256').update(AES_SECRET).digest();
+function getAesKey() {
+  const secret = process.env.AES_SECRET_KEY || process.env.ENCRYPTION_KEY;
+  if (!secret) throw new Error('Missing AES_SECRET_KEY in .env');
+  return crypto.createHash('sha256').update(secret).digest();
+}
 
 function encryptField(value) {
   if (!value && value !== 0) return null;
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-gcm', AES_KEY, iv);
+  const cipher = crypto.createCipheriv('aes-256-gcm', getAesKey(), iv);
   const encrypted = Buffer.concat([cipher.update(String(value), 'utf8'), cipher.final()]);
   const tag = cipher.getAuthTag();
   return {
@@ -399,6 +400,7 @@ studentSchema.methods.toJSON = function () {
   return obj;
 };
 
-studentSchema.post('save', function (doc) {});
+studentSchema.post('save', function (doc) {
+});
 
 module.exports = mongoose.model('Student', studentSchema);

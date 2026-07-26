@@ -12,7 +12,7 @@ const AES_KEY = crypto.createHash('sha256').update(AES_SECRET).digest();
 
 function decryptField(enc) {
   if (!enc || !enc.data || !enc.iv || !enc.tag) return null;
-  const decipher = crypto.createDecipheriv('aes-256-gcm', AES_KEY, Buffer.from(enc.iv, 'base64'));
+  const decipher = crypto.createDecipheriv('aes-256-gcm', getAesKey(), Buffer.from(enc.iv, 'base64'));
   decipher.setAuthTag(Buffer.from(enc.tag, 'base64'));
   const buf = Buffer.concat([
     decipher.update(Buffer.from(enc.data, 'base64')),
@@ -28,7 +28,8 @@ function decryptField(enc) {
 }
 
 async function main() {
-  await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+
   const col = mongoose.connection.collection('users');
   const cursor = col.find({});
   let fixed = 0;
@@ -71,13 +72,15 @@ async function main() {
         console.error('Failed to repair user', String(doc._id), e.message);
       }
     }
-  }
+  }
+
   
   try {
     await col.createIndex(
       { username: 1 },
       { unique: true, partialFilterExpression: { username: { $type: 'string' } } }
-    );  } catch (e) {
+    );
+  } catch (e) {
     console.warn('Index creation warning:', e.message);
   }
 
