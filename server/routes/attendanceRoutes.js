@@ -13,10 +13,7 @@ router.post('/reset', verifyToken, authorizeRoles('admin'), async (req, res) => 
   }
 });
 
-router.post('/:classId', verifyToken, [
-  body('students').isArray().withMessage('students array required')
-], async (req, res) => {
-  const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ msg: 'Invalid input', errors: errors.array() });
+router.post('/:classId', verifyToken, async (req, res) => {
   try {
     return await attendanceController.markAttendance(req, res);
   } catch (err) {

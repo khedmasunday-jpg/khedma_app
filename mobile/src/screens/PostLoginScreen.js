@@ -17,7 +17,7 @@ const BUTTONS = [
   { labelKey: 'activateDeactivate', label: 'activate / deactivate', minRank: 1, maxRank: 2, excludeRanks: [3,4] },
   { labelKey: 'editStaff', label: 'تعديل بينات الخدام', maxRank: 2 },
   { labelKey: 'editStudents', label: 'تعديل بينات المخدومين', maxRank: 3 },
-  { labelKey: 'tayo', label: 'طايو', minRank: 2 },
+  { labelKey: 'tayo', label: 'طايو', minRank: 1 },
   { labelKey: 'logs', label: 'Logs', exactRank: 1 },
   { labelKey: 'reset', label: 'Reset', exactRank: 1 },
   { labelKey: 'whatsappTest', label: 'Telegram Test', exactRank: 1 },
@@ -231,10 +231,15 @@ export default function PostLoginScreen({ route, navigation }) {
   const availableButtons = BUTTONS.filter((btn) => {
     if (btn.labelKey === 'editVisitation' && isClassLeader) return true;
     if (btn.excludeRanks && btn.excludeRanks.includes(userRank)) return false;
-    if (btn.exactRank !== undefined) return userRank === btn.exactRank;
-    if (btn.minRank !== undefined && userRank >= btn.minRank) return true;
-    if (btn.maxRank !== undefined && userRank <= btn.maxRank) return true;
-    return false;
+    if (btn.exactRank !== undefined && userRank !== btn.exactRank) return false;
+    if (btn.exactRank !== undefined && userRank === btn.exactRank) return true;
+    
+    if (btn.minRank !== undefined && userRank < btn.minRank) return false;
+    if (btn.maxRank !== undefined && userRank > btn.maxRank) return false;
+    
+    if (btn.minRank === undefined && btn.maxRank === undefined && btn.exactRank === undefined) return true;
+    
+    return true;
   });
 
   const getLocalizedRole = (r) => {
