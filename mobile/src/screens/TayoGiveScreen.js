@@ -85,7 +85,6 @@ export default function TayoGiveScreen({ navigation }) {
   const submitTransaction = async () => {
     if (submitting) return;
     if (!amount || isNaN(amount) || parseInt(amount) <= 0) return Alert.alert(t('error'), t('invalidNumber'));
-    if (!reason.trim()) return Alert.alert(t('error'), t('reasonRequired'));
 
     setSubmitting(true);
     const addVal = parseInt(amount);

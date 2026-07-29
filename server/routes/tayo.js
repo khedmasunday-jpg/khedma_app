@@ -28,8 +28,8 @@ router.get('/students', verifyToken, authorizeRoles('admin', 'principal', 'co-pr
 router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'co-principal', 'teacher'), async (req, res) => {
   try {
     const { studentId, amount, reason } = req.body;
-    if (!studentId || amount === undefined || !reason) {
-      return res.status(400).json({ msg: 'Please provide student, amount and reason' });
+    if (!studentId || amount === undefined) {
+      return res.status(400).json({ msg: 'Please provide student and amount' });
     }
     
     const parsedAmount = parseInt(amount);
@@ -49,7 +49,7 @@ router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'c
       student: student._id,
       givenBy: req.user.id,
       amount: parsedAmount,
-      reason: reason
+      reason: reason || ''
     });
     await log.save();
 

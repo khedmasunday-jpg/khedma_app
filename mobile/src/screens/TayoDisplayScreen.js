@@ -92,7 +92,6 @@ export default function TayoDisplayScreen({ navigation }) {
 
   const submitDeduct = async () => {
     if (!amount || isNaN(amount) || parseInt(amount) <= 0) return Alert.alert(t('error'), t('invalidNumber'));
-    if (!reason.trim()) return Alert.alert(t('error'), t('reasonRequired'));
 
     try {
       const token = getAuthToken();
