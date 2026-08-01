@@ -16,13 +16,18 @@ function encryptField(value) {
 
 function decryptField(enc) {
   if (!enc || !enc.data || !enc.iv || !enc.tag) return null;
-  const decipher = crypto.createDecipheriv('aes-256-gcm', AES_KEY, Buffer.from(enc.iv, 'base64'));
+  try {
+const decipher = crypto.createDecipheriv('aes-256-gcm', AES_KEY, Buffer.from(enc.iv, 'base64'));
   decipher.setAuthTag(Buffer.from(enc.tag, 'base64'));
   const decrypted = Buffer.concat([
     decipher.update(Buffer.from(enc.data, 'base64')),
     decipher.final(),
   ]);
   return decrypted.toString('utf8');
+  } catch (err) {
+    console.error('Decryption error:', err.message);
+    return null;
+  }
 }
 
 const jobLogSchema = new mongoose.Schema({

@@ -23,7 +23,8 @@ function encryptField(value) {
 
 function decryptField(enc) {
   if (!enc || !enc.data || !enc.iv || !enc.tag) return null;
-  const decipher = crypto.createDecipheriv(
+  try {
+const decipher = crypto.createDecipheriv(
     'aes-256-gcm',
     AES_KEY,
     Buffer.from(enc.iv, 'base64')
@@ -34,6 +35,10 @@ function decryptField(enc) {
     decipher.final(),
   ]);
   return decrypted.toString('utf8');
+  } catch (err) {
+    console.error('Decryption error:', err.message);
+    return null;
+  }
 }
 
 function normalizeDecryptedText(text) {
