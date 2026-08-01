@@ -26,6 +26,7 @@ export default function LogsScreen({ route }) {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeFilter, setSelectedTimeFilter] = useState('all');
+  const [amountFilter, setAmountFilter] = useState('50');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -39,6 +40,11 @@ export default function LogsScreen({ route }) {
   ];
 
   const isRtl = locale === 'ar';
+
+  const amountFilters = [
+    { id: '50', label: isRtl ? 'آخر 50' : 'Last 50' },
+    { id: 'all', label: isRtl ? 'الكل' : 'All Logs' },
+  ];
 
   const fetchLogs = (fetchAll = false) => {
     setLoading(true);
@@ -79,8 +85,8 @@ export default function LogsScreen({ route }) {
   };
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
+    fetchLogs(amountFilter === 'all');
+  }, [amountFilter]);
 
   const getLogCategory = (log) => {
     const action = (log.action || '').toLowerCase();
@@ -293,10 +299,6 @@ export default function LogsScreen({ route }) {
       {}
       <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <Text style={styles.title}>{t('logs')}</Text>
-        <TouchableOpacity style={styles.fetchAllBtn} onPress={() => fetchLogs(true)}>
-          <Ionicons name="download-outline" size={16} color="#fff" style={isRtl ? { marginLeft: 4 } : { marginRight: 4 }} />
-          <Text style={styles.fetchAllBtnText}>{isRtl ? 'تحميل الكل' : 'Load All'}</Text>
-        </TouchableOpacity>
       </View>
 
       {}
@@ -367,6 +369,34 @@ export default function LogsScreen({ route }) {
               />
               <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
                 {t(tFilter.labelKey)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {}
+      <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        {amountFilters.map((aFilter) => {
+          const isActive = amountFilter === aFilter.id;
+          return (
+            <TouchableOpacity
+              key={aFilter.id}
+              onPress={() => setAmountFilter(aFilter.id)}
+              style={[
+                styles.filterPill,
+                isActive ? styles.filterPillActive : styles.filterPillInactive,
+                { flexDirection: isRtl ? 'row-reverse' : 'row' }
+              ]}
+            >
+              <Ionicons 
+                name={aFilter.id === 'all' ? 'layers-outline' : 'list-circle-outline'} 
+                size={16} 
+                color={isActive ? '#fff' : '#2f4360'} 
+                style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
+              />
+              <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
+                {aFilter.label}
               </Text>
             </TouchableOpacity>
           );
