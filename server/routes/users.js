@@ -138,7 +138,7 @@ router.get('/logs/all', verifyToken, authorizeRoles('admin'), async (req, res) =
     const fetchUser = async (id) => {
       if (!id) return null;
       if (userCache.has(id.toString())) return userCache.get(id.toString());
-      const user = await User.findById(id).select('fullName role username');
+      const user = await User.findById(id).select('fullName fullName_enc role username');
       userCache.set(id.toString(), user);
       return user;
     };

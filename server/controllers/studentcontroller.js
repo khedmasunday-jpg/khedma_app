@@ -19,7 +19,7 @@ async function createEnhancedLog(action, actor, targetUser = null, additionalDet
     let actorDoc = actor;
     if (actor && !(actor.fullName) && (actor._id || actor.id)) {
       try {
-        actorDoc = await User.findById(actor._id || actor.id).select('fullName role username');
+        actorDoc = await User.findById(actor._id || actor.id).select('fullName fullName_enc role username');
       } catch (e) {
         actorDoc = actor;
       }
