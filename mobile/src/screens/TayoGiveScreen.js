@@ -20,7 +20,7 @@ export default function TayoGiveScreen({ navigation }) {
   const [sortBy, setSortBy] = useState('name'); 
 
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('5');
   const [reason, setReason] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -77,7 +77,7 @@ export default function TayoGiveScreen({ navigation }) {
 
   const openModal = (student) => {
     setSelectedStudent(student);
-    setAmount('');
+    setAmount('5');
     setReason('');
     setModalVisible(true);
   };

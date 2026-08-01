@@ -20,7 +20,7 @@ export default function TayoDisplayScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('logs'); 
   const [logs, setLogs] = useState([]);
   
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('5');
   const [reason, setReason] = useState('');
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function TayoDisplayScreen({ navigation }) {
       Alert.alert(t('success'), t('tayoDeductSuccess'));
       fetchStudents();
       fetchLogs(selectedStudent._id);
-      setAmount('');
+      setAmount('5');
       setReason('');
       setActiveTab('logs');
     } catch (err) {
