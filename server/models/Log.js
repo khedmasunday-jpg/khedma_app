@@ -55,30 +55,21 @@ logSchema.index({ performedBy: 1, timestamp: -1 });
 logSchema.index({ targetUser: 1 });
 logSchema.index({ targetClass: 1 });
 
-logSchema.pre('save', function (next) {
-  const fieldsToEncrypt = [
-    'details', 'ip', 'userAgent', 'actorName', 'actorRole',
-    'performedByName', 'performedByRole',
-    'targetUserName', 'targetUserRole', 'targetClassName',
-    'actionDescription', 'deviceId'
-  ];
-
-  for (const field of fieldsToEncrypt) {
-    if (this.isModified(field) && this[field]) {
-      this[`${field}_enc`] = encryptField(this[field]);
-      this[field] = undefined;
-    }
-  }
-  next();
-});
-
 [
   'details', 'ip', 'userAgent', 'actorName', 'actorRole',
   'performedByName', 'performedByRole', 'targetUserName', 'targetUserRole', 'targetClassName', 'actionDescription', 'deviceId'
 ].forEach(field => {
-  logSchema.virtual(field).get(function () {
-    return decryptField(this[`${field}_enc`]);
-  });
+  logSchema.virtual(field)
+    .get(function () {
+      return decryptField(this[`${field}_enc`]);
+    })
+    .set(function (val) {
+      if (val !== undefined && val !== null && val !== '') {
+        this[`${field}_enc`] = encryptField(val);
+      } else {
+        this[`${field}_enc`] = undefined;
+      }
+    });
 });
 
 logSchema.methods.toJSON = function () {
