@@ -29,6 +29,7 @@ export default function LogsScreen({ route }) {
   const [amountFilter, setAmountFilter] = useState('50');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isLive, setIsLive] = useState(false);
 
   const timeFilters = [
     { id: 'all', labelKey: 'timeAll' },
@@ -46,8 +47,8 @@ export default function LogsScreen({ route }) {
     { id: 'all', label: isRtl ? 'الكل' : 'All Logs' },
   ];
 
-  const fetchLogs = (fetchAll = false) => {
-    setLoading(true);
+  const fetchLogs = (fetchAll = false, silent = false) => {
+    if (!silent) setLoading(true);
     const endpoint = fetchAll ? `${API_URL}/users/logs/all?limit=all` : `${API_URL}/users/logs/all`;
     
     logger.log('API_URL:', API_URL);
@@ -81,12 +82,24 @@ export default function LogsScreen({ route }) {
         Alert.alert('Error', 'Failed to fetch logs');
         setLogs([]);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!silent) setLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchLogs(amountFilter === 'all');
   }, [amountFilter]);
+
+  useEffect(() => {
+    let interval;
+    if (isLive) {
+      interval = setInterval(() => {
+        fetchLogs(amountFilter === 'all', true);
+      }, 5000); 
+    }
+    return () => clearInterval(interval);
+  }, [isLive, amountFilter]);
 
   const getLogCategory = (log) => {
     const action = (log.action || '').toLowerCase();
@@ -299,6 +312,15 @@ export default function LogsScreen({ route }) {
       {}
       <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <Text style={styles.title}>{t('logs')}</Text>
+        <TouchableOpacity 
+          style={[styles.liveBtn, isLive ? styles.liveBtnActive : styles.liveBtnInactive, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
+          onPress={() => setIsLive(!isLive)}
+        >
+          <View style={[styles.liveDot, isLive ? styles.liveDotActive : styles.liveDotInactive, isRtl ? { marginLeft: 6 } : { marginRight: 6 }]} />
+          <Text style={[styles.liveBtnText, isLive ? styles.liveBtnTextActive : styles.liveBtnTextInactive]}>
+            {isRtl ? 'تحديث مباشر' : 'Live Update'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {}
@@ -812,6 +834,46 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  liveBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  liveBtnActive: {
+    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+    borderColor: 'rgba(40, 167, 69, 0.3)',
+  },
+  liveBtnInactive: {
+    backgroundColor: 'rgba(47, 67, 96, 0.05)',
+    borderColor: 'rgba(47, 67, 96, 0.1)',
+  },
+  liveBtnText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  liveBtnTextActive: {
+    color: '#28a745',
+  },
+  liveBtnTextInactive: {
+    color: 'rgba(47, 67, 96, 0.6)',
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  liveDotActive: {
+    backgroundColor: '#28a745',
+    ...Platform.select({
+      web: { boxShadow: '0 0 5px rgba(40,167,69,0.5)' }
+    })
+  },
+  liveDotInactive: {
+    backgroundColor: 'rgba(47, 67, 96, 0.3)',
   },
   fetchAllBtn: {
     backgroundColor: '#007bff',
