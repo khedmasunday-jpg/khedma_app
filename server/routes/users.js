@@ -115,7 +115,8 @@ router.get('/me', verifyToken, async (req, res) => {
 router.get('/logs/all', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
-    const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
+    const isAll = req.query.limit === 'all';
+    const limit = isAll ? 0 : Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
     const cursor = req.query.cursor;
 
     const query = {};
@@ -174,8 +175,8 @@ router.get('/logs/all', verifyToken, authorizeRoles('admin'), async (req, res) =
     }
 
     const nextCursor = logs.length > 0 ? logs[logs.length - 1].timestamp : null;
-    const totalPages = Math.ceil(total / limit);
-    const hasMore = page < totalPages;
+    const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
+    const hasMore = limit > 0 ? page < totalPages : false;
 
     if (req.query.page || req.query.limit || req.query.cursor) {
       res.json({

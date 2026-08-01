@@ -40,12 +40,15 @@ export default function LogsScreen({ route }) {
 
   const isRtl = locale === 'ar';
 
-  useEffect(() => {
+  const fetchLogs = (fetchAll = false) => {
+    setLoading(true);
+    const endpoint = fetchAll ? `${API_URL}/users/logs/all?limit=all` : `${API_URL}/users/logs/all`;
+    
     logger.log('API_URL:', API_URL);
-    logger.log('Full endpoint:', `${API_URL}/users/logs/all`);
+    logger.log('Full endpoint:', endpoint);
     logger.log('Token:', token);
 
-    axios.get(`${API_URL}/users/logs/all`, {
+    axios.get(endpoint, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Accept': 'application/json',
@@ -73,6 +76,10 @@ export default function LogsScreen({ route }) {
         setLogs([]);
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchLogs();
   }, []);
 
   const getLogCategory = (log) => {
@@ -284,7 +291,13 @@ export default function LogsScreen({ route }) {
       showsVerticalScrollIndicator={false}
     >
       {}
-      <Text style={styles.title}>{t('logs')}</Text>
+      <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <Text style={styles.title}>{t('logs')}</Text>
+        <TouchableOpacity style={styles.fetchAllBtn} onPress={() => fetchLogs(true)}>
+          <Ionicons name="download-outline" size={16} color="#fff" style={isRtl ? { marginLeft: 4 } : { marginRight: 4 }} />
+          <Text style={styles.fetchAllBtnText}>{isRtl ? 'تحميل الكل' : 'Load All'}</Text>
+        </TouchableOpacity>
+      </View>
 
       {}
       <View style={[styles.searchContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
@@ -764,5 +777,37 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(217, 83, 79, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerContainer: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  fetchAllBtn: {
+    backgroundColor: '#007bff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#007bff',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 4px rgba(0, 123, 255, 0.2)',
+      }
+    }),
+  },
+  fetchAllBtnText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 'bold',
   },
 });
