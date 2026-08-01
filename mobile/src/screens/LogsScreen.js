@@ -29,7 +29,7 @@ export default function LogsScreen({ route }) {
   const [amountFilter, setAmountFilter] = useState('50');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useState(true);
 
   const timeFilters = [
     { id: 'all', labelKey: 'timeAll' },

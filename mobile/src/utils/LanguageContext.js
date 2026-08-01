@@ -97,7 +97,7 @@ export const translations = {
     phonePlaceholder: "e.g. 01000000000",
     pickBirthdate: "Pick birthdate",
     filterAll: "All",
-    filterLogins: "Logins",
+    filterLogins: "Log in",
     filterAttendance: "Attendance",
     filterUsers: "User Mgmt",
     filterOthers: "Others",
