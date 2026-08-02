@@ -130,15 +130,6 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       {}
-      <View style={[styles.headerBar, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name={isRtl ? "arrow-forward-outline" : "arrow-back-outline"} size={24} color="#2f4360" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{titleText}</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      {}
       <View style={styles.searchContainer}>
         <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <Ionicons name="search-outline" size={20} color="#666" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
