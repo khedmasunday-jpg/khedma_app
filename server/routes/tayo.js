@@ -72,4 +72,15 @@ router.get('/logs/:id', verifyToken, async (req, res) => {
   }
 });
 
+router.post('/reset', verifyToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    await Student.updateMany({}, { $set: { tayoBalance: 0 } });
+    const result = await TayoLog.deleteMany({});
+    res.json({ msg: 'All Taio balances and logs have been reset successfully', deletedCount: result.deletedCount });
+  } catch (err) {
+    console.error('Error resetting Taio:', err);
+    res.status(500).json({ msg: 'Server error while resetting Taio' });
+  }
+});
+
 module.exports = router;

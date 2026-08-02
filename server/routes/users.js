@@ -112,6 +112,16 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
+router.post('/logs/reset', verifyToken, authorizeRoles('admin'), async (req, res) => {
+  try {
+    const result = await Log.deleteMany({});
+    res.json({ msg: 'All system logs have been deleted successfully', deletedCount: result.deletedCount });
+  } catch (err) {
+    console.error('Error resetting logs:', err);
+    res.status(500).json({ msg: 'Server error while resetting logs' });
+  }
+});
+
 router.get('/logs/all', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);

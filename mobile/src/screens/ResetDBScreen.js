@@ -80,6 +80,64 @@ export default function ResetDBScreen({ route, navigation }) {
     }
   };
 
+  const confirmAndResetLogs = () => {
+    const title = isAr ? 'تأكيد مسح سجلات النظام' : 'Confirm Logs Reset';
+    const message = isAr
+      ? 'سيعمل هذا على مسح كافة سجلات النظام والعمليات بشكل نهائي. هل تريد الاستمرار؟'
+      : 'This will permanently delete all system logs. Continue?';
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm(`${title}\n\n${message}`)) doResetLogs();
+    } else {
+      Alert.alert(title, message, [
+        { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
+        { text: isAr ? 'مسح' : 'Clear', style: 'destructive', onPress: () => doResetLogs() }
+      ], { cancelable: true });
+    }
+  };
+
+  const doResetLogs = async () => {
+    try {
+      setLoading(true);
+      const res = await client.post('/users/logs/reset');
+      notify(isAr ? 'تم بنجاح 🚀' : 'Success 🚀', res?.data?.msg || 'Logs reset completed.');
+    } catch (err) {
+      logger.error('Logs reset error', err);
+      notify(isAr ? 'خطأ' : 'Error', err?.response?.data?.msg || err?.message || 'Failed to reset logs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmAndResetTayo = () => {
+    const title = isAr ? 'تأكيد تصفير طايو' : 'Confirm Taio Reset';
+    const message = isAr
+      ? 'سيعمل هذا على تصفير كافة أرصدة طايو ومسح سجلات طايو لجميع المخدومين. هل تريد الاستمرار؟'
+      : 'This will permanently reset all Taio balances to 0 and delete all Taio logs. Continue?';
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm(`${title}\n\n${message}`)) doResetTayo();
+    } else {
+      Alert.alert(title, message, [
+        { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
+        { text: isAr ? 'تصفير' : 'Reset', style: 'destructive', onPress: () => doResetTayo() }
+      ], { cancelable: true });
+    }
+  };
+
+  const doResetTayo = async () => {
+    try {
+      setLoading(true);
+      const res = await client.post('/tayo/reset');
+      notify(isAr ? 'تم بنجاح 🚀' : 'Success 🚀', res?.data?.msg || 'Taio reset completed.');
+    } catch (err) {
+      logger.error('Taio reset error', err);
+      notify(isAr ? 'خطأ' : 'Error', err?.response?.data?.msg || err?.message || 'Failed to reset Taio');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const confirmAndMasterReset = () => {
     const title = isAr ? '⚠️ تحذير: حذف وإعادة ضبط شاملة (Master Reset)' : '⚠️ Warning: Master Reset All Data';
     const message = isAr
@@ -217,6 +275,62 @@ export default function ResetDBScreen({ route, navigation }) {
           ) : (
             <Text style={styles.btnText}>
               {isAr ? 'تصفير عداد الحضور للجميع' : 'Reset Attendance Counters'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Reset Logs Card */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="document-text-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Text style={styles.cardTitle}>
+            {isAr ? 'مسح سجلات النظام' : 'Reset Logs'}
+          </Text>
+        </View>
+        <Text style={styles.cardDesc}>
+          {isAr
+            ? 'يمسح جميع سجلات العمليات والنظام بالكامل لتنظيف قاعدة البيانات.'
+            : 'Deletes all system operation logs and history completely from the database.'}
+        </Text>
+        <TouchableOpacity
+          style={[styles.warningBtn, loading && styles.disabledBtn]}
+          onPress={confirmAndResetLogs}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.btnText}>
+              {isAr ? 'مسح كافة السجلات' : 'Clear All Logs'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Reset Tayo Card */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Ionicons name="star-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Text style={styles.cardTitle}>
+            {isAr ? 'تصفير طايو' : 'Reset Taio'}
+          </Text>
+        </View>
+        <Text style={styles.cardDesc}>
+          {isAr
+            ? 'يقوم بتصفير جميع أرصدة طايو ومسح سجلات طايو لجميع المخدومين.'
+            : 'Resets all Taio balances to 0 and clears Taio history logs for all students.'}
+        </Text>
+        <TouchableOpacity
+          style={[styles.warningBtn, loading && styles.disabledBtn]}
+          onPress={confirmAndResetTayo}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.btnText}>
+              {isAr ? 'تصفير أرصدة طايو' : 'Reset Taio Balances'}
             </Text>
           )}
         </TouchableOpacity>
