@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { API_URL } from '../config/api';
-import { getAuthToken } from '../config/authSession';
+import { getAuthToken, getAuthUser } from '../config/authSession';
 import { logger } from '../utils/logger';
 import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -15,7 +15,10 @@ export default function EditStudentListScreen({ route, navigation }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [serverClasses, setServerClasses] = useState([]);
-  const [selectedGrade, setSelectedGrade] = useState('');
+  const user = getAuthUser() || {};
+  const userLevel = user.assignedlevel;
+
+  const [selectedGrade, setSelectedGrade] = useState(userLevel ? String(userLevel) : '');
   const [selectedClass, setSelectedClass] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
@@ -176,11 +179,12 @@ export default function EditStudentListScreen({ route, navigation }) {
                   setSelectedClass('');
                 }}
                 style={StyleSheet.flatten([styles.webSelect, { direction: isRtl ? 'rtl' : 'ltr' }])}
+                disabled={!!userLevel}
               >
-                <option value="">{t('selectLevel')}</option>
-                <option value="1">{t('level1')}</option>
-                <option value="2">{t('level2')}</option>
-                <option value="3">{t('level3')}</option>
+                {!userLevel && <option value="">{t('selectLevel')}</option>}
+                {(!userLevel || userLevel === 1) && <option value="1">{t('level1')}</option>}
+                {(!userLevel || userLevel === 2) && <option value="2">{t('level2')}</option>}
+                {(!userLevel || userLevel === 3) && <option value="3">{t('level3')}</option>}
               </select>
             ) : (
               <Picker
@@ -191,11 +195,12 @@ export default function EditStudentListScreen({ route, navigation }) {
                 }}
                 style={styles.nativePicker}
                 dropdownIconColor="#2f4360"
+                enabled={!userLevel}
               >
-                <Picker.Item label={t('selectLevel')} value="" />
-                <Picker.Item label={t('level1')} value="1" />
-                <Picker.Item label={t('level2')} value="2" />
-                <Picker.Item label={t('level3')} value="3" />
+                {!userLevel && <Picker.Item label={t('selectLevel')} value="" />}
+                {(!userLevel || userLevel === 1) && <Picker.Item label={t('level1')} value="1" />}
+                {(!userLevel || userLevel === 2) && <Picker.Item label={t('level2')} value="2" />}
+                {(!userLevel || userLevel === 3) && <Picker.Item label={t('level3')} value="3" />}
               </Picker>
             )}
           </View>
