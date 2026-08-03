@@ -126,12 +126,7 @@ export default function ClassDisplayScreen({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      {}
-      {classData && (
-        <View style={styles.classInfo}>
-          <Text style={styles.classTitle}>{classData.className}</Text>
-        </View>
-      )}
+
 
       {}
       <ScrollView style={styles.studentsList} showsVerticalScrollIndicator={false}>
