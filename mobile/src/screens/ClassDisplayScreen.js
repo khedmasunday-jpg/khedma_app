@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIn
 import axios from 'axios';
 import { useLanguage } from '../utils/LanguageContext';
 import { logger } from '../utils/logger';
-import { getAuthToken } from '../config/authSession';
+import { getAuthToken, getAuthUser } from '../config/authSession';
 import { API_URL } from '../config/api';
 import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache } from '../utils/apiCache';
@@ -32,7 +32,43 @@ export default function ClassDisplayScreen({ route, navigation }) {
 
   useEffect(() => {
     fetchWithCache(`${API_URL}/classes?all=true`, { headers: { Authorization: token } })
-      .then(data => setClasses(data))
+      .then(data => {
+        let sortedClasses = Array.isArray(data) ? [...data] : [];
+        const user = getAuthUser() || {};
+        
+        const cleanUserClass = (user.assignedclass || '').replace(/^فصل\s+/, '').trim();
+        let year = null;
+        if (user.assignedlevel) {
+           year = [1,2,3].includes(user.assignedlevel) ? user.assignedlevel : Math.ceil(user.assignedlevel / 2);
+        }
+
+        sortedClasses.sort((a, b) => {
+          if (role === 'teacher') {
+            const isAAssigned = user.assignedclass && (a._id === user.assignedclass || (a.name || '').replace(/^فصل\s+/, '').trim() === cleanUserClass);
+            const isBAssigned = user.assignedclass && (b._id === user.assignedclass || (b.name || '').replace(/^فصل\s+/, '').trim() === cleanUserClass);
+            if (isAAssigned && !isBAssigned) return -1;
+            if (!isAAssigned && isBAssigned) return 1;
+          }
+          
+          if (role === 'teacher' || role === 'co-principal') {
+            const aYear = a.year || Math.ceil((a.level || 1)/2);
+            const bYear = b.year || Math.ceil((b.level || 1)/2);
+            const isASameLevel = year && (aYear === year);
+            const isBSameLevel = year && (bYear === year);
+            if (isASameLevel && !isBSameLevel) return -1;
+            if (!isASameLevel && isBSameLevel) return 1;
+          }
+          
+          return (a.level || 0) - (b.level || 0);
+        });
+
+        setClasses(sortedClasses);
+
+        if (role === 'teacher' && sortedClasses.length > 0) {
+           setSelectedClass(sortedClasses[0]._id);
+           fetchClassDetails(sortedClasses[0]._id);
+        }
+      })
       .catch(() => Alert.alert(t('error'), locale === 'ar' ? 'فشل تحميل الفصول' : 'Failed to fetch classes'));
   }, []);
 
