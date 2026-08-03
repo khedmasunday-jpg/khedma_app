@@ -115,7 +115,7 @@ function AppNavigator() {
           fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
           fontWeight: 'bold',
         },
-        
+        headerTitleAlign: 'center',
         headerBackVisible: false,
         headerLeft: ({ canGoBack }) => (
           <CustomBackButton

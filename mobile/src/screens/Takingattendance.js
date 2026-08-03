@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { API_URL } from '../config/api';
-import { getAuthToken } from '../config/authSession';
+import { getAuthToken, getAuthUser } from '../config/authSession';
 import { logger } from '../utils/logger';
 import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -62,7 +62,13 @@ export default function AttendanceScreen({ route, navigation }) {
       .then(data => {
         setClasses(data);
         if (data && data.length > 0) {
-          setSelectedClass(data[0]._id);
+          const user = getAuthUser() || {};
+          if (role === 'teacher' && user.assignedclass) {
+            const defaultClass = data.find(c => c._id === user.assignedclass || c.name === user.assignedclass);
+            setSelectedClass(defaultClass ? defaultClass._id : data[0]._id);
+          } else {
+            setSelectedClass(data[0]._id);
+          }
         }
       })
       .catch(err => {
@@ -79,7 +85,7 @@ export default function AttendanceScreen({ route, navigation }) {
       .then(data => {
         const list = Array.isArray(data?.students) ? data.students : (Array.isArray(data) ? data : []);
         setStudents(list);
-        setAttendance(Object.fromEntries(list.map(s => [s._id, 'present'])));
+        setAttendance(Object.fromEntries(list.map(s => [s._id, 'absent'])));
       })
       .catch(err => {
         const msg = err?.response?.data?.msg || err.message || t('error');
