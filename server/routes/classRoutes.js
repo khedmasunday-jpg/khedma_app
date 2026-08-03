@@ -7,9 +7,10 @@ const User = require('../models/User');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
 
 router.get('/', verifyToken, async (req, res) => {
-  try {    let classes;
+  try {    let classes;
+    const returnAll = req.query.all === 'true';
 
-    if (req.user.role === 'principal' || req.user.role === 'admin') {
+    if (returnAll || req.user.role === 'principal' || req.user.role === 'admin') {
       const all = await Class.find();
       classes = all.sort((a, b) => (a.level || 0) - (b.level || 0));
     } else if (req.user.role === 'co-principal') {

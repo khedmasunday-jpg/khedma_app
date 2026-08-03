@@ -31,7 +31,7 @@ export default function ClassDisplayScreen({ route, navigation }) {
   const [expandedStudent, setExpandedStudent] = useState(null);
 
   useEffect(() => {
-    fetchWithCache(`${API_URL}/classes`, { headers: { Authorization: token } })
+    fetchWithCache(`${API_URL}/classes?all=true`, { headers: { Authorization: token } })
       .then(data => setClasses(data))
       .catch(() => Alert.alert(t('error'), locale === 'ar' ? 'فشل تحميل الفصول' : 'Failed to fetch classes'));
   }, []);
