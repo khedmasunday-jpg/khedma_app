@@ -94,7 +94,7 @@ function AppNavigator() {
           }),
         }}
       >
-        <Ionicons name="arrow-back-outline" size={22} color="#2f4360" style={{ transform: [{ scaleX: locale === 'ar' ? -1 : 1 }] }} />
+        <Ionicons name="arrow-back-outline" size={22} color="#2f4360" />
       </TouchableOpacity>
     );
   };
