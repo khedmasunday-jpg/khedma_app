@@ -78,15 +78,15 @@ function AppNavigator() {
       <TouchableOpacity
         onPress={onPress}
         style={{
-          marginLeft: 12,
-          paddingVertical: 6,
-          paddingHorizontal: 12,
+          marginLeft: 15,
+          width: 44,
+          height: 44,
+          justifyContent: 'center',
+          alignItems: 'center',
           backgroundColor: '#ffffff',
-          borderRadius: 14,
+          borderRadius: 24,
           borderWidth: 1,
           borderColor: 'rgba(47, 67, 96, 0.18)',
-          flexDirection: 'row',
-          alignItems: 'center',
           ...Platform.select({
             web: { boxShadow: '0 2px 4px rgba(47, 67, 96, 0.05)', cursor: 'pointer' },
             ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
@@ -94,10 +94,7 @@ function AppNavigator() {
           }),
         }}
       >
-        <Text style={{ color: '#2f4360', fontWeight: 'bold', fontSize: 16, marginRight: 3 }}>←</Text>
-        <Text style={{ color: '#2f4360', fontWeight: 'bold', fontSize: 13, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }) }}>
-          {locale === 'ar' ? 'رجوع' : 'Back'}
-        </Text>
+        <Ionicons name="arrow-back-outline" size={22} color="#2f4360" style={{ transform: [{ scaleX: locale === 'ar' ? -1 : 1 }] }} />
       </TouchableOpacity>
     );
   };
