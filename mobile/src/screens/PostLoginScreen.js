@@ -255,36 +255,31 @@ export default function PostLoginScreen({ route, navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.contentWrapper}>
-        <View style={styles.topButtonsRow}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          style={{ width: '100%', marginBottom: 10, flexGrow: 0 }}
+          contentContainerStyle={{ flexDirection: locale === 'ar' ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'flex-end', paddingVertical: 10, flexGrow: 1 }}
+        >
           {role !== 'admin' && (
-            <TouchableOpacity style={styles.topBtn} onPress={() => handleButtonPress('notifications')}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="notifications-outline" size={16} color="#2f4360" style={{ marginRight: 4 }} />
-                <Text style={styles.topBtnText}>
-                  {locale === 'ar' ? 'الاشعارات' : 'Notifications'}
-                  {unreadCount > 0 ? ` (${unreadCount})` : ''}
-                </Text>
-              </View>
+            <TouchableOpacity style={styles.iconBtn} onPress={() => handleButtonPress('notifications')}>
+              <Ionicons name="notifications-outline" size={22} color="#2f4360" />
+              {unreadCount > 0 && <View style={styles.badgeDot} />}
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.topBtn} onPress={() => setProfileModalVisible(true)}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="person-circle-outline" size={16} color="#2f4360" style={{ marginRight: 4 }} />
-              <Text style={styles.topBtnText}>
-                {locale === 'ar' ? 'الملف الشخصي' : 'Profile'}
-              </Text>
-            </View>
+          <TouchableOpacity style={styles.iconBtn} onPress={() => setProfileModalVisible(true)}>
+            <Ionicons name="person-circle-outline" size={22} color="#2f4360" />
           </TouchableOpacity>
 
-          <View style={{ flex: 1 }} />
-          <TouchableOpacity style={styles.topBtn} onPress={toggleLanguage}>
-            <Text style={styles.topBtnText}>{locale === 'ar' ? 'English' : 'عربي'}</Text>
+          <TouchableOpacity style={styles.iconBtn} onPress={toggleLanguage}>
+            <Ionicons name="globe-outline" size={22} color="#2f4360" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.topBtn} onPress={handleLogout}>
-            <Text style={styles.topBtnText}>{locale === 'ar' ? 'خروج' : 'Logout'}</Text>
+          
+          <TouchableOpacity style={styles.iconBtn} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={22} color="#2f4360" />
           </TouchableOpacity>
-        </View>
+        </ScrollView>
 
         <View style={styles.header}>
           <View style={styles.logoWrap}>
@@ -428,21 +423,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(243, 237, 224, 0.75)',
     alignItems: 'center',
   },
-  topButtonsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    paddingVertical: 10,
-    marginBottom: 10,
-  },
-  topBtn: {
+  iconBtn: {
     backgroundColor: 'rgba(255, 252, 246, 0.95)',
     borderWidth: 1,
     borderColor: 'rgba(47, 67, 96, 0.2)',
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    borderRadius: 24,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginLeft: 8,
+    marginRight: 4,
+    position: 'relative',
     ...Platform.select({
       ios: {
         shadowColor: '#2f4360',
@@ -457,6 +449,15 @@ const styles = StyleSheet.create({
         boxShadow: '0 4px 6px rgba(47, 67, 96, 0.1)',
       }
     }),
+  },
+  badgeDot: {
+    position: 'absolute',
+    top: 10,
+    right: 12,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'red',
   },
   topBtnText: {
     color: '#2f4360',

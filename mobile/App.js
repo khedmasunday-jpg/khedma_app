@@ -7,6 +7,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 
 import { ActivityIndicator } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
   const style = document.createElement('style');
@@ -128,10 +129,12 @@ function AppNavigator() {
             onPress={toggleLanguage} 
             style={{ 
               marginRight: 15, 
-              paddingVertical: 6, 
-              paddingHorizontal: 12, 
+              width: 44,
+              height: 44,
+              justifyContent: 'center',
+              alignItems: 'center',
               backgroundColor: '#ffffff', 
-              borderRadius: 14,
+              borderRadius: 24,
               borderWidth: 1,
               borderColor: 'rgba(47, 67, 96, 0.18)',
               ...Platform.select({
@@ -150,9 +153,7 @@ function AppNavigator() {
               }),
             }}
           >
-            <Text style={{ color: '#2f4360', fontWeight: 'bold', fontSize: 13, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }) }}>
-              {locale === 'ar' ? 'English' : 'عربي'}
-            </Text>
+            <Ionicons name="globe-outline" size={22} color="#2f4360" />
           </TouchableOpacity>
         ),
         cardStyle: { flex: 1, backgroundColor: 'transparent' } 
