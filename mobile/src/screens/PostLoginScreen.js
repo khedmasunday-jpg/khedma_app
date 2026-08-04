@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity, Text, Alert, Platform, Modal, TextInput } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
@@ -57,6 +58,7 @@ export default function PostLoginScreen({ route, navigation }) {
   const [fullName, setFullName] = useState(initialFullName);
   const [unreadCount, setUnreadCount] = useState(0);
   const { t, locale, toggleLanguage } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
@@ -253,8 +255,9 @@ export default function PostLoginScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.contentWrapper}>
+    <View style={{ flex: 1, backgroundColor: 'rgba(243, 237, 224, 0.75)' }}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: Math.max(insets.top, 20) }]} showsVerticalScrollIndicator={false}>
+        <View style={styles.contentWrapper}>
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false} 
@@ -289,7 +292,7 @@ export default function PostLoginScreen({ route, navigation }) {
           <Text style={styles.roleLabel}>{getLocalizedRole(role).toUpperCase()}</Text>
         </View>
         
-        <View style={styles.gridContainer}>
+        <View style={[styles.gridContainer, { flexDirection: locale === 'ar' ? 'row-reverse' : 'row' }]}>
           {availableButtons.map((btn, idx) => {
             const iconInfo = BUTTON_ICONS[btn.labelKey] || { icon: 'apps-outline', color: '#2f4360' };
             const isNotification = btn.labelKey === 'notifications';
@@ -412,15 +415,16 @@ export default function PostLoginScreen({ route, navigation }) {
           </View>
         </Modal>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
-    backgroundColor: 'rgba(243, 237, 224, 0.75)',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     alignItems: 'center',
   },
   iconBtn: {

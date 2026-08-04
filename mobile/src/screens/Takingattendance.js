@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { API_URL } from '../config/api';
 import { getAuthToken, getAuthUser } from '../config/authSession';
@@ -31,8 +32,12 @@ export default function AttendanceScreen({ route, navigation }) {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const isRtl = locale === 'ar';
+  
+  const isIOSWeb = Platform.OS === 'web' && typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const safePaddingTop = Math.max(insets.top, isIOSWeb ? 50 : 16);
 
   const formatDateDDMMYYYY = (d) => {
     if (!d) return '-';
@@ -157,8 +162,8 @@ export default function AttendanceScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      {}
+    <View style={[styles.container, { paddingTop: safePaddingTop }]}>
+      {/* Class Selector */}
       <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>{t('selectClass')}</Text>
       <ScrollView horizontal style={styles.dropdown} showsHorizontalScrollIndicator={false}>
         {classes.map(cls => (
