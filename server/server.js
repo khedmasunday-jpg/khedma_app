@@ -90,6 +90,7 @@ app.use('/api/birthdays', require('./routes/birthdays'));
 app.use('/api/telegram', require('./routes/telegramRoutes')); 
 app.use('/api/tayo', require('./routes/tayo')); 
 app.use('/api/backup', require('./routes/backupRoutes')); 
+app.use('/api/cron', require('./routes/cronRoutes'));
 
 app.get('/ping', (req, res) => {
   res.json({ ok: true, time: Date.now() });
