@@ -56,17 +56,18 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.langToggle} onPress={toggleLanguage}>
-        <Text style={styles.langToggleText}>{locale === 'ar' ? 'English' : 'عربي'}</Text>
-      </TouchableOpacity>
+      <View style={[styles.langToggleContainer, { right: 20 }]}>
+        <TouchableOpacity style={styles.langToggle} onPress={toggleLanguage}>
+          <Ionicons name="globe-outline" size={22} color="#2f4360" />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.card}>
         <View style={styles.logoContainer}>
           <View style={styles.logoWrap}>
             <Ionicons name="book-outline" size={48} color="#2f4360" />
           </View>
-          <Text style={styles.title}>{locale === 'ar' ? 'تطبيق الخدمة' : 'Khedma App'}</Text>
-          <Text style={styles.subtitle}>{locale === 'ar' ? 'كنيستنا' : 'Service Management'}</Text>
+          <Text style={styles.title}>{locale === 'ar' ? 'خدمه اولي تانيه تالته ابتدائي الاحد' : 'Khedma 1-2-3 Sunday'}</Text>
         </View>
 
         <View style={styles.inputContainer}>
@@ -109,17 +110,20 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'rgba(243, 237, 224, 0.65)',
   },
-  langToggle: {
+  langToggleContainer: {
     position: 'absolute',
     top: Platform.OS === 'web' ? 20 : 50,
-    right: 20,
+    zIndex: 99,
+  },
+  langToggle: {
     backgroundColor: 'rgba(255, 252, 246, 0.95)',
     borderWidth: 1,
     borderColor: 'rgba(47, 67, 96, 0.2)',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    zIndex: 99,
+    borderRadius: 24,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
     ...Platform.select({
       ios: {
         shadowColor: '#2f4360',
@@ -134,12 +138,6 @@ const styles = StyleSheet.create({
         boxShadow: '0 4px 6px rgba(47, 67, 96, 0.1)',
       }
     }),
-  },
-  langToggleText: {
-    color: '#2f4360',
-    fontSize: 14,
-    fontWeight: 'bold',
-    fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   card: {
     width: '100%',
