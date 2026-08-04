@@ -26,7 +26,8 @@ export default function LogsScreen({ route }) {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeFilter, setSelectedTimeFilter] = useState('all');
-  const [amountFilter, setAmountFilter] = useState('50');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLive, setIsLive] = useState(true);
@@ -42,18 +43,9 @@ export default function LogsScreen({ route }) {
 
   const isRtl = locale === 'ar';
 
-  const amountFilters = [
-    { id: '50', label: isRtl ? 'آخر 50' : 'Last 50' },
-    { id: 'all', label: isRtl ? 'الكل' : 'All Logs' },
-  ];
-
-  const fetchLogs = (fetchAll = false, silent = false) => {
-    if (!silent) setLoading(true);
-    const endpoint = fetchAll ? `${API_URL}/users/logs/all?limit=all` : `${API_URL}/users/logs/all`;
-    
-    logger.log('API_URL:', API_URL);
-    logger.log('Full endpoint:', endpoint);
-    logger.log('Token:', token);
+  const fetchLogs = (pageNum = 1, silent = false) => {
+    if (!silent && pageNum === 1) setLoading(true);
+    const endpoint = `${API_URL}/users/logs/all?page=${pageNum}&limit=50`;
 
     axios.get(endpoint, {
       headers: {
@@ -63,43 +55,55 @@ export default function LogsScreen({ route }) {
       }
     })
       .then(res => {
-        logger.log('Logs response:', res.data);
         let logsData = [];
+        let fetchedHasMore = false;
+        
         if (Array.isArray(res.data)) {
           logsData = res.data;
+          fetchedHasMore = logsData.length === 50;
         } else if (res.data.logs && Array.isArray(res.data.logs)) {
           logsData = res.data.logs;
-        } else if (typeof res.data === 'string' && res.data.startsWith('<!DOCTYPE html>')) {
-          Alert.alert('Error', 'Received HTML instead of JSON. Check API_URL or server configuration.');
+          fetchedHasMore = res.data.pagination ? res.data.pagination.hasMore : (logsData.length === 50);
         } else {
           logger.error('Invalid logs format:', res.data);
           Alert.alert('Error', 'Invalid logs data format');
         }
-        setLogs(logsData);
+
+        if (pageNum === 1) {
+          setLogs(logsData);
+        } else {
+          setLogs(prev => {
+            const existingIds = new Set(prev.map(l => l._id || JSON.stringify(l)));
+            const newItems = logsData.filter(l => !existingIds.has(l._id || JSON.stringify(l)));
+            return [...prev, ...newItems];
+          });
+        }
+        setHasMore(fetchedHasMore);
       })
       .catch((err) => {
         logger.error('Failed to fetch logs:', err);
-        Alert.alert('Error', 'Failed to fetch logs');
-        setLogs([]);
+        if (pageNum === 1) setLogs([]);
       })
       .finally(() => {
-        if (!silent) setLoading(false);
+        if (!silent && pageNum === 1) setLoading(false);
       });
   };
 
   useEffect(() => {
-    fetchLogs(amountFilter === 'all');
-  }, [amountFilter]);
+    fetchLogs(page);
+  }, [page]);
 
   useEffect(() => {
     let interval;
     if (isLive) {
       interval = setInterval(() => {
-        fetchLogs(amountFilter === 'all', true);
+        if (page === 1) {
+          fetchLogs(1, true);
+        }
       }, 5000); 
     }
     return () => clearInterval(interval);
-  }, [isLive, amountFilter]);
+  }, [isLive, page]);
 
   const getLogCategory = (log) => {
     const action = (log.action || '').toLowerCase();
@@ -293,15 +297,38 @@ export default function LogsScreen({ route }) {
     const performerRole = log.performedByRole || log.actorRole || (log.performedBy && log.performedBy.role) || 'Unknown';
     const perfName = performerName.toLowerCase();
     const perfRole = performerRole.toLowerCase();
-    
-    const details = (log.details || '').toLowerCase();
-    const ip = (log.ip || log.ipAddress || log.clientIp || log.requestIp || log.remoteAddr || log.actorIp || '').toLowerCase();
 
-    const targetName = (log.targetUserName || (log.targetUser && (log.targetUser.fullName || log.targetUser.username)) || '').toLowerCase();
-    const targetClass = (log.targetClassName || '').toLowerCase();
+  const filteredLogs = logs.filter(l => {
+    if (selectedFilter !== 'all' && getLogCategory(l) !== selectedFilter) return false;
     
-    return action.includes(q) || desc.includes(q) || perfName.includes(q) || perfRole.includes(q) || details.includes(q) || ip.includes(q) || targetName.includes(q) || targetClass.includes(q);
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const a = (l.action || '').toLowerCase();
+      const d = (l.actionDescription || '').toLowerCase();
+      const det = (l.details || '').toLowerCase();
+      
+      const pn = (l.performedByName || l.actorName || '').toLowerCase();
+      const tn = (l.targetClassName || l.targetUserName || '').toLowerCase();
+      
+      if (!a.includes(q) && !d.includes(q) && !det.includes(q) && !pn.includes(q) && !tn.includes(q)) {
+        return false;
+      }
+    }
+
+    if (!matchesTimeFilter(l)) return false;
+
+    return true;
   });
+
+  const handleScroll = (event) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const paddingToBottom = 50;
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+      if (hasMore && !loading) {
+        setPage(prev => prev + 1);
+      }
+    }
+  };
 
   return (
     <ScrollView 
@@ -397,33 +424,7 @@ export default function LogsScreen({ route }) {
         })}
       </View>
 
-      {}
-      <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        {amountFilters.map((aFilter) => {
-          const isActive = amountFilter === aFilter.id;
-          return (
-            <TouchableOpacity
-              key={aFilter.id}
-              onPress={() => setAmountFilter(aFilter.id)}
-              style={[
-                styles.filterPill,
-                isActive ? styles.filterPillActive : styles.filterPillInactive,
-                { flexDirection: isRtl ? 'row-reverse' : 'row' }
-              ]}
-            >
-              <Ionicons 
-                name={aFilter.id === 'all' ? 'layers-outline' : 'list-circle-outline'} 
-                size={16} 
-                color={isActive ? '#fff' : '#2f4360'} 
-                style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
-              />
-              <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
-                {aFilter.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {/* amount filters removed */}
 
       {}
       {selectedTimeFilter === 'custom' && (
@@ -483,13 +484,7 @@ export default function LogsScreen({ route }) {
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#2f4360" />
           </View>
-        ) : filteredLogs.length === 0 ? (
-          <View style={styles.center}>
-            <Ionicons name="filter-outline" size={48} color="rgba(47, 67, 96, 0.3)" />
-            <Text style={styles.noLogsText}>{t('noLogsFound')}</Text>
-          </View>
-        ) : (
-          <View>
+        ) : filteredLogs.length === 0           <View>
             {filteredLogs.map((log, idx) => {
               const category = getLogCategory(log);
               const meta = getCategoryMeta(category);
@@ -558,6 +553,11 @@ export default function LogsScreen({ route }) {
                 </View>
               );
             })}
+            {hasMore && (
+              <View style={{ padding: 16, alignItems: 'center' }}>
+                <ActivityIndicator size="small" color="#2f4360" />
+              </View>
+            )}
           </View>
         )}
       </View>
