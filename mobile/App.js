@@ -15,6 +15,7 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
     body, html, #root {
       background-color: #ffffff !important;
       color-scheme: light !important;
+      height: 100dvh !important;
     }
   `;
   document.head.appendChild(style);
