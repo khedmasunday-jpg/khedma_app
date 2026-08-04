@@ -313,6 +313,7 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     padding: 16,
+    paddingBottom: Platform.OS === 'web' ? 80 : 16,
     backgroundColor: 'rgba(243, 237, 224, 0.75)'
   },
   label: { 
