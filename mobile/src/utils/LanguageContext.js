@@ -304,14 +304,30 @@ export const translations = {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [locale, setLocale] = useState('ar');
+  const [locale, setLocale] = useState(() => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const stored = window.localStorage.getItem('khedma_lang');
+        if (stored === 'en' || stored === 'ar') return stored;
+      }
+    } catch (e) {}
+    return 'ar';
+  });
 
   const t = (key) => {
     return translations[locale][key] || key;
   };
 
   const toggleLanguage = () => {
-    setLocale((prev) => (prev === 'ar' ? 'en' : 'ar'));
+    setLocale((prev) => {
+      const next = prev === 'ar' ? 'en' : 'ar';
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem('khedma_lang', next);
+        }
+      } catch (e) {}
+      return next;
+    });
   };
 
   return (
