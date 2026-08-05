@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, TextInput } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { API_URL } from '../config/api';
@@ -22,6 +22,9 @@ export default function EditStudentListScreen({ route, navigation }) {
   const [selectedClass, setSelectedClass] = useState('');
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
 
   const isRtl = locale === 'ar';
 
@@ -67,7 +70,11 @@ export default function EditStudentListScreen({ route, navigation }) {
   const filteredStudents = students.filter(student => {
     const matchesGrade = selectedGrade ? student.classLevel === Number(selectedGrade) : true;
     const matchesClass = selectedClass ? student.classname === selectedClass : true;
-    return matchesGrade && matchesClass;
+    const matchesSearch = searchQuery 
+      ? (student.fullName && student.fullName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (student.googlecode && student.googlecode.toLowerCase().includes(searchQuery.toLowerCase()))
+      : true;
+    return matchesGrade && matchesClass && matchesSearch;
   });
 
   const toggleSelect = (id) => {
@@ -137,31 +144,60 @@ export default function EditStudentListScreen({ route, navigation }) {
       <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <View />
         
-        {(role === 'principal' || role === 'admin') && students.length > 0 && (
-          <TouchableOpacity
-            style={styles.selectButton}
-            onPress={() => {
-              setSelectionMode(!selectionMode);
-              setSelectedStudentIds(new Set());
-            }}
-          >
-            <Ionicons
-              name={selectionMode ? "close-circle-outline" : "checkmark-circle-outline"}
-              size={18}
-              color="#2f4360"
-              style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }}
-            />
-            <Text style={styles.selectButtonText}>
-              {selectionMode 
-                ? (isRtl ? 'إلغاء التحديد' : 'Cancel') 
-                : (isRtl ? 'تحديد' : 'Select')}
-            </Text>
+        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+            <Ionicons name="search-outline" size={20} color="#2f4360" />
           </TouchableOpacity>
-        )}
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color="#2f4360" />
+          </TouchableOpacity>
+          
+          {(role === 'principal' || role === 'admin') && students.length > 0 && (
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => {
+                setSelectionMode(!selectionMode);
+                setSelectedStudentIds(new Set());
+              }}
+            >
+              <Ionicons
+                name={selectionMode ? "close-circle-outline" : "checkmark-circle-outline"}
+                size={18}
+                color="#2f4360"
+                style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }}
+              />
+              <Text style={styles.selectButtonText}>
+                {selectionMode 
+                  ? (isRtl ? 'إلغاء التحديد' : 'Cancel') 
+                  : (isRtl ? 'تحديد' : 'Select')}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
-      {}
-      <View style={styles.filterCard}>
+      {showSearch && (
+        <View style={styles.searchContainer}>
+          <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            <Ionicons name="search-outline" size={20} color="rgba(47, 67, 96, 0.5)" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+            <TextInput
+              style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+              placeholder={t('searchStudent') || (isRtl ? 'بحث...' : 'Search...')}
+              placeholderTextColor="rgba(47, 67, 96, 0.4)"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+                <Ionicons name="close-circle" size={18} color="rgba(47, 67, 96, 0.4)" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      )}
+
+      {showFilter && (
+        <View style={styles.filterCard}>
         <Text style={[styles.filterTitle, { textAlign: isRtl ? 'right' : 'left' }]}>
           {isRtl ? 'تصفية حسب الفصل:' : 'Filter by Class:'}
         </Text>
@@ -238,6 +274,7 @@ export default function EditStudentListScreen({ route, navigation }) {
           </View>
         </View>
       </View>
+      )}
       
       {loading ? (
         <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />
@@ -387,6 +424,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  iconButton: {
+    backgroundColor: 'rgba(47, 67, 96, 0.06)',
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchInputWrapper: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#333',
+    paddingVertical: 8,
+  },
+  clearButton: {
+    padding: 4,
   },
   selectButton: {
     flexDirection: 'row',
