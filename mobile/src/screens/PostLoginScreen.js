@@ -17,7 +17,7 @@ const BUTTONS = [
   { labelKey: 'activateDeactivate', label: 'activate / deactivate', minRank: 1, maxRank: 2, excludeRanks: [3,4] },
   { labelKey: 'editStaff', label: 'تعديل بينات الخدام', maxRank: 2 },
   { labelKey: 'editStudents', label: 'تعديل بينات المخدومين', maxRank: 3 },
-  { labelKey: 'tayo', label: 'طايو', minRank: 1 },
+  { labelKey: 'tayo', label: 'الطايو', minRank: 1 },
   { labelKey: 'logs', label: 'Logs', exactRank: 1 },
   { labelKey: 'reset', label: 'Reset', exactRank: 1 },
   { labelKey: 'whatsappTest', label: 'Telegram Test', exactRank: 1 },

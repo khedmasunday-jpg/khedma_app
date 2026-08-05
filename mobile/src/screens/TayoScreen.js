@@ -9,11 +9,6 @@ export default function TayoScreen({ navigation, route }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="star" size={48} color="#f39c12" />
-        <Text style={styles.title}>{t('manageTayo')}</Text>
-      </View>
-
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TayoGiveScreen')}>
           <Ionicons name="gift-outline" size={32} color="#2f4360" style={styles.icon} />

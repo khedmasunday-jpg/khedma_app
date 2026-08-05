@@ -257,9 +257,9 @@ function AppNavigator() {
         component={TelegramTestScreen}
         options={{ title: t('telegramTest') }}
       />
-      <Stack.Screen name="TayoScreen" component={TayoScreen} options={{ title: 'طايو' }} />
-      <Stack.Screen name="TayoGiveScreen" component={TayoGiveScreen} options={{ title: 'إعطاء طايو' }} />
-      <Stack.Screen name="TayoDisplayScreen" component={TayoDisplayScreen} options={{ title: 'عرض / خصم طايو' }} />
+      <Stack.Screen name="TayoScreen" component={TayoScreen} options={{ title: t('tayo') || 'الطايو' }} />
+      <Stack.Screen name="TayoGiveScreen" component={TayoGiveScreen} options={{ title: t('giveTayo') || 'إعطاء الطايو' }} />
+      <Stack.Screen name="TayoDisplayScreen" component={TayoDisplayScreen} options={{ title: t('displayDeductTayo') || 'عرض و خصم الطايو' }} />
       <Stack.Screen name="BackupScreen" component={BackupScreen} options={{ title: t('backupData') || 'النسخ الاحتياطي' }} />
     </Stack.Navigator>
   );
