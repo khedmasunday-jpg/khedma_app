@@ -280,24 +280,6 @@ export default function LogsScreen({ route }) {
     return true;
   };
 
-  const filteredLogs = logs.filter(log => {
-    const cat = getLogCategory(log);
-    const matchesFilter = selectedFilter === 'all' || cat === selectedFilter;
-    
-    if (!matchesFilter) return false;
-    if (!matchesTimeFilter(log)) return false;
-    
-    if (!searchQuery) return true;
-    
-    const q = searchQuery.toLowerCase();
-    const action = (log.action || '').toLowerCase();
-    const desc = (log.actionDescription || '').toLowerCase();
-
-    const performerName = log.performedByName || log.actorName || (log.performedBy && (log.performedBy.fullName || log.performedBy.username)) || 'Unknown';
-    const performerRole = log.performedByRole || log.actorRole || (log.performedBy && log.performedBy.role) || 'Unknown';
-    const perfName = performerName.toLowerCase();
-    const perfRole = performerRole.toLowerCase();
-
   const filteredLogs = logs.filter(l => {
     if (selectedFilter !== 'all' && getLogCategory(l) !== selectedFilter) return false;
     
@@ -484,7 +466,14 @@ export default function LogsScreen({ route }) {
           <View style={styles.center}>
             <ActivityIndicator size="large" color="#2f4360" />
           </View>
-        ) : filteredLogs.length === 0           <View>
+        ) : filteredLogs.length === 0 ? (
+          <View style={styles.center}>
+            <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>
+              {isRtl ? 'لا توجد سجلات' : 'No logs found'}
+            </Text>
+          </View>
+        ) : (
+          <View>
             {filteredLogs.map((log, idx) => {
               const category = getLogCategory(log);
               const meta = getCategoryMeta(category);
