@@ -135,9 +135,7 @@ export default function EditStudentListScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <Text style={styles.title}>
-          {t('editStudents')}
-        </Text>
+        <View />
         
         {(role === 'principal' || role === 'admin') && students.length > 0 && (
           <TouchableOpacity
