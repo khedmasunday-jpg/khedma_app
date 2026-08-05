@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity, Text, Alert, Platform, Modal, TextInput } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
@@ -58,7 +57,6 @@ export default function PostLoginScreen({ route, navigation }) {
   const [fullName, setFullName] = useState(initialFullName);
   const [unreadCount, setUnreadCount] = useState(0);
   const { t, locale, toggleLanguage } = useLanguage();
-  const insets = useSafeAreaInsets();
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
@@ -256,7 +254,7 @@ export default function PostLoginScreen({ route, navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'rgba(243, 237, 224, 0.75)' }}>
-      <ScrollView contentContainerStyle={[styles.container, { paddingTop: Math.max(insets.top, 20) }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.contentWrapper}>
         <ScrollView 
           horizontal 

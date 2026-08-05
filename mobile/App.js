@@ -266,9 +266,6 @@ function AppNavigator() {
 }
 
 export default function App() {
-  const isIOSWeb = Platform.OS === 'web' && typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const webSafeAreaStyle = isIOSWeb ? { paddingTop: 45, paddingBottom: 20 } : {};
-
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
@@ -279,11 +276,13 @@ export default function App() {
               style={styles.backgroundImage}
               resizeMode="cover"
             >
-              <SafeAreaView style={[{ flex: 1 }, webSafeAreaStyle]} edges={['top', 'bottom', 'left', 'right']}>
-                <NavigationContainer theme={MyTheme}>
-                  <AppNavigator />
-                </NavigationContainer>
-              </SafeAreaView>
+              <View style={{ flex: 1, paddingTop: Platform.OS === 'web' ? 60 : 0 }}>
+                <SafeAreaView style={{ flex: 1 }} edges={['bottom', 'left', 'right']}>
+                  <NavigationContainer theme={MyTheme}>
+                    <AppNavigator />
+                  </NavigationContainer>
+                </SafeAreaView>
+              </View>
             </ImageBackground>
           </View>
         </LanguageProvider>
