@@ -276,8 +276,8 @@ export default function App() {
               style={styles.backgroundImage}
               resizeMode="cover"
             >
-              <View style={{ flex: 1, paddingTop: Platform.OS === 'web' ? 60 : 0 }}>
-                <SafeAreaView style={{ flex: 1 }} edges={['bottom', 'left', 'right']}>
+              <View style={{ flex: 1 }}>
+                <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
                   <NavigationContainer theme={MyTheme}>
                     <AppNavigator />
                   </NavigationContainer>
