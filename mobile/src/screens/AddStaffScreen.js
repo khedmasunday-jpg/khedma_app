@@ -482,8 +482,6 @@ export default function AddStaffScreen({ route, navigation }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.headerText}>{t('addStaff')}</Text>
-
       <View style={styles.formCard}>
         {}
         <View style={styles.inputGroup}>
