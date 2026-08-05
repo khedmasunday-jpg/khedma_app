@@ -26,6 +26,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   const [customAlertVisible, setCustomAlertVisible] = useState(false);
   const [customAlertTitle, setCustomAlertTitle] = useState('');
@@ -129,8 +130,17 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {}
-      <View style={styles.searchContainer}>
+      <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View />
+        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+            <Ionicons name="search-outline" size={20} color="#2f4360" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {showSearch && (
+        <View style={styles.searchContainer}>
         <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <Ionicons name="search-outline" size={20} color="#666" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
           <TextInput
@@ -145,8 +155,9 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
               <Ionicons name="close-circle" size={18} color="#999" />
             </TouchableOpacity>
           ) : null}
+          </View>
         </View>
-      </View>
+      )}
 
       {}
       <ScrollView contentContainerStyle={styles.listContainer}>
@@ -246,33 +257,27 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#f7f9fc',
+  container: {
+    flex: 1,
+    backgroundColor: '#f3ede0',
+    padding: 16,
   },
-  headerBar: {
-    alignItems: 'center',
+  headerRow: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5eb',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 2,
-      },
-      web: {
-        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-      }
-    })
+    alignItems: 'center',
+    marginBottom: 16,
   },
+  iconButton: {
+    backgroundColor: 'rgba(47, 67, 96, 0.06)',
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   backButton: {
     padding: 4,
   },
@@ -282,14 +287,13 @@ const styles = StyleSheet.create({
     color: '#2f4360',
   },
   searchContainer: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e5eb',
+    marginBottom: 16,
   },
   searchInputWrapper: {
     alignItems: 'center',
-    backgroundColor: '#f0f2f5',
+    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.12)',
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,

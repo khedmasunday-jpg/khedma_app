@@ -14,6 +14,9 @@ export default function TayoDisplayScreen({ navigation }) {
   const [selectedLevel, setSelectedLevel] = useState('All');
   const [selectedClass, setSelectedClass] = useState('All');
   const [sortBy, setSortBy] = useState('balance'); 
+  const [showSearch, setShowSearch] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showSort, setShowSort] = useState(false);
 
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,27 +117,50 @@ export default function TayoDisplayScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#2f4360" style={styles.searchIcon} />
-        <TextInput 
-          style={styles.searchInput} 
-          placeholder={t('searchStudent')} 
-          placeholderTextColor="rgba(47, 67, 96, 0.5)"
-          value={search} 
-          onChangeText={setSearch} 
-        />
+      <View style={[styles.headerRow, { flexDirection: t('isRtl') ? 'row-reverse' : 'row' }]}>
+        <View />
+        <View style={{ flexDirection: t('isRtl') ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+            <Ionicons name="search-outline" size={20} color="#2f4360" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color="#2f4360" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSort(!showSort)}>
+            <Ionicons name={showSort ? "list" : "list-outline"} size={20} color="#2f4360" />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.filtersSection}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-          <Text style={styles.filterLabel}>{t('sortBy')}</Text>
-          <TouchableOpacity style={[styles.pill, sortBy === 'name' && styles.pillActive]} onPress={() => setSortBy('name')}>
-            <Text style={[styles.pillText, sortBy === 'name' && styles.pillTextActive]}>{t('alphabetical')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.pill, sortBy === 'balance' && styles.pillActive]} onPress={() => setSortBy('balance')}>
-            <Text style={[styles.pillText, sortBy === 'balance' && styles.pillTextActive]}>{t('balance')}</Text>
-          </TouchableOpacity>
-        </ScrollView>
+      {showSearch && (
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#2f4360" style={styles.searchIcon} />
+          <TextInput 
+            style={styles.searchInput} 
+            placeholder={t('searchStudent')} 
+            placeholderTextColor="rgba(47, 67, 96, 0.5)"
+            value={search} 
+            onChangeText={setSearch} 
+          />
+        </View>
+      )}
+
+      {showSort && (
+        <View style={styles.filtersSection}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+            <Text style={styles.filterLabel}>{t('sortBy')}</Text>
+            <TouchableOpacity style={[styles.pill, sortBy === 'name' && styles.pillActive]} onPress={() => setSortBy('name')}>
+              <Text style={[styles.pillText, sortBy === 'name' && styles.pillTextActive]}>{t('alphabetical')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.pill, sortBy === 'balance' && styles.pillActive]} onPress={() => setSortBy('balance')}>
+              <Text style={[styles.pillText, sortBy === 'balance' && styles.pillTextActive]}>{t('balance')}</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      )}
+
+      {showFilter && (
+        <View style={styles.filtersSection}>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
           <Text style={styles.filterLabel}>{t('level')}</Text>
@@ -153,7 +179,8 @@ export default function TayoDisplayScreen({ navigation }) {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+        </View>
+      )}
       
       <FlatList 
         data={filteredAndSorted}
@@ -243,7 +270,24 @@ export default function TayoDisplayScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f3ede0' },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', margin: 15, borderRadius: 12, paddingHorizontal: 15, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 15,
+    paddingHorizontal: 15,
+  },
+  iconButton: {
+    backgroundColor: 'rgba(47, 67, 96, 0.06)',
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 15, marginBottom: 15, borderRadius: 12, paddingHorizontal: 15, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
   searchIcon: { marginRight: 10 },
   searchInput: { flex: 1, paddingVertical: 12, fontSize: 16, color: '#2f4360', textAlign: 'right', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
   filtersSection: { paddingHorizontal: 15, paddingBottom: 10, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.05)' },

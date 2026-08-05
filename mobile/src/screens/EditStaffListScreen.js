@@ -14,6 +14,7 @@ export default function EditStaffListScreen({ route, navigation }) {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   const isRtl = locale === 'ar';
   const searchPlaceholder = isRtl ? 'بحث باسم الخادم...' : 'Search staff name...';
@@ -78,7 +79,17 @@ export default function EditStaffListScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
+      <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View />
+        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+            <Ionicons name="search-outline" size={20} color="#2f4360" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {showSearch && (
+        <View style={styles.searchContainer}>
         <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <Ionicons name="search-outline" size={20} color="#666" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
           <TextInput
@@ -95,6 +106,7 @@ export default function EditStaffListScreen({ route, navigation }) {
           ) : null}
         </View>
       </View>
+      )}
       {loading ? (
         <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />
       ) : filteredStaff.length === 0 ? (
@@ -118,6 +130,21 @@ const styles = StyleSheet.create({
     flex: 1, 
     padding: 16, 
     backgroundColor: 'rgba(243, 237, 224, 0.75)' 
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  iconButton: {
+    backgroundColor: 'rgba(47, 67, 96, 0.06)',
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 67, 96, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   searchContainer: {
     marginBottom: 16,
