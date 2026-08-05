@@ -452,8 +452,6 @@ export default function AddStudentsScreen({ route, navigation }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.headerText}>{t('addStudents')}</Text>
-
       <TouchableOpacity style={styles.excelButton} onPress={handlePickExcel}>
         <Ionicons name="document-text-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
         <Text style={styles.excelButtonText}>
