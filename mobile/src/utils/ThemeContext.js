@@ -21,13 +21,13 @@ export const darkTheme = {
   isDark: true,
   background: 'rgba(15, 23, 42, 0.85)',
   cardBackground: 'rgba(30, 41, 59, 0.96)',
-  text: '#f8fafc',
-  textMuted: 'rgba(248, 250, 252, 0.6)',
+  text: '#ffffff',
+  textMuted: '#ffffff',
   inputBackground: '#0f172a',
   borderColor: 'rgba(248, 250, 252, 0.15)',
   primary: '#38bdf8',
   headerBackground: '#0f172a',
-  iconColor: '#f8fafc',
+  iconColor: '#ffffff',
   shadowColor: '#000000',
 };
 
