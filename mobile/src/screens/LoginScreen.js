@@ -7,6 +7,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
+import { useTheme } from '../utils/ThemeContext';
 import { logger } from '../utils/logger';
 import { setAuthToken } from '../config/authSession';
 import { getApiBase } from '../config/api';
@@ -15,6 +16,7 @@ export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { t, locale, toggleLanguage } = useLanguage();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
 
   const handleLogin = async () => {
     const deviceId = Device.osInternalBuildId || Device.deviceName || 'unknown';
@@ -55,50 +57,56 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.langToggleContainer, { right: 20, flexDirection: 'row', gap: 10 }]}>
-        <TouchableOpacity style={styles.langToggle} onPress={() => alert('Dark mode coming soon!')}>
-          <Ionicons name="moon-outline" size={22} color="#2f4360" />
+        <TouchableOpacity 
+          style={[styles.langToggle, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} 
+          onPress={toggleTheme}
+        >
+          <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={22} color={theme.iconColor} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.langToggle} onPress={toggleLanguage}>
-          <Ionicons name="globe-outline" size={22} color="#2f4360" />
+        <TouchableOpacity 
+          style={[styles.langToggle, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} 
+          onPress={toggleLanguage}
+        >
+          <Ionicons name="globe-outline" size={22} color={theme.iconColor} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.logoContainer}>
-          <View style={styles.logoWrap}>
-            <Ionicons name="book-outline" size={48} color="#2f4360" />
+          <View style={[styles.logoWrap, { backgroundColor: isDarkMode ? '#1e293b' : 'rgba(255, 255, 255, 0.78)', borderColor: theme.borderColor }]}>
+            <Ionicons name="book-outline" size={48} color={theme.iconColor} />
           </View>
-          <Text style={styles.title}>{locale === 'ar' ? 'خدمه اولي تانيه تالته ابتدائي الاحد' : 'Khedma 1-2-3 Sunday'}</Text>
+          <Text style={[styles.title, { color: theme.text }]}>{locale === 'ar' ? 'خدمه اولي تانيه تالته ابتدائي الاحد' : 'Khedma 1-2-3 Sunday'}</Text>
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="person-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]}>
+          <Ionicons name="person-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
           <TextInput 
             placeholder={t('username')} 
-            placeholderTextColor="rgba(36, 54, 79, 0.4)"
+            placeholderTextColor={theme.textMuted}
             value={username} 
             onChangeText={setUsername} 
             autoCapitalize="none"
-            style={styles.input}
+            style={[styles.input, { color: theme.text }]}
           />
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+        <View style={[styles.inputContainer, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]}>
+          <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
           <TextInput 
             placeholder={t('password')} 
-            placeholderTextColor="rgba(36, 54, 79, 0.4)"
+            placeholderTextColor={theme.textMuted}
             value={password} 
             onChangeText={setPassword} 
             secureTextEntry 
-            style={styles.input}
+            style={[styles.input, { color: theme.text }]}
           />
         </View>
         
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>{t('login')}</Text>
+        <TouchableOpacity style={[styles.loginButton, { backgroundColor: theme.primary }]} onPress={handleLogin}>
+          <Text style={[styles.loginButtonText, { color: isDarkMode ? '#1e293b' : '#ffffff' }]}>{t('login')}</Text>
         </TouchableOpacity>
       </View>
     </View>

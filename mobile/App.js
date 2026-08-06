@@ -3,6 +3,7 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ImageBackground, View, Platform, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { LanguageProvider, useLanguage } from './src/utils/LanguageContext';
+import { ThemeProvider, useTheme } from './src/utils/ThemeContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 import { ActivityIndicator } from 'react-native';
@@ -72,6 +73,7 @@ const MyTheme = {
 
 function AppNavigator() {
   const { t, locale, toggleLanguage } = useLanguage();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
 
   const CustomBackButton = ({ onPress, canGoBack }) => {
     if (!canGoBack) return null;
@@ -84,18 +86,18 @@ function AppNavigator() {
           height: 44,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#ffffff',
+          backgroundColor: theme.inputBackground,
           borderRadius: 24,
           borderWidth: 1,
-          borderColor: 'rgba(47, 67, 96, 0.18)',
+          borderColor: theme.borderColor,
           ...Platform.select({
-            web: { boxShadow: '0 2px 4px rgba(47, 67, 96, 0.05)', cursor: 'pointer' },
-            ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+            web: { boxShadow: `0 2px 4px ${theme.shadowColor}10`, cursor: 'pointer' },
+            ios: { shadowColor: theme.shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
             android: { elevation: 2 },
           }),
         }}
       >
-        <Ionicons name="arrow-back-outline" size={22} color="#2f4360" />
+        <Ionicons name="arrow-back-outline" size={22} color={theme.iconColor} />
       </TouchableOpacity>
     );
   };
@@ -105,11 +107,11 @@ function AppNavigator() {
       initialRouteName="Login"
       screenOptions={({ navigation }) => ({ 
         headerStyle: {
-          backgroundColor: '#efe5d2',
+          backgroundColor: theme.headerBackground,
           borderBottomWidth: 1,
-          borderBottomColor: 'rgba(47, 67, 96, 0.16)',
+          borderBottomColor: theme.borderColor,
         },
-        headerTintColor: '#2f4360',
+        headerTintColor: theme.text,
         headerTitleStyle: {
           fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
           fontWeight: 'bold',
@@ -125,24 +127,24 @@ function AppNavigator() {
         headerRight: () => (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15, gap: 10 }}>
             <TouchableOpacity 
-              onPress={() => alert('Dark mode coming soon!')} 
+              onPress={toggleTheme} 
               style={{ 
                 width: 44,
                 height: 44,
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: '#ffffff', 
+                backgroundColor: theme.inputBackground, 
                 borderRadius: 24,
                 borderWidth: 1,
-                borderColor: 'rgba(47, 67, 96, 0.18)',
+                borderColor: theme.borderColor,
                 ...Platform.select({
-                  ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+                  ios: { shadowColor: theme.shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
                   android: { elevation: 2 },
-                  web: { boxShadow: '0 2px 4px rgba(47, 67, 96, 0.05)' }
+                  web: { boxShadow: `0 2px 4px ${theme.shadowColor}10` }
                 }),
               }}
             >
-              <Ionicons name="moon-outline" size={22} color="#2f4360" />
+              <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={22} color={theme.iconColor} />
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={toggleLanguage} 
@@ -151,18 +153,18 @@ function AppNavigator() {
                 height: 44,
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: '#ffffff', 
+                backgroundColor: theme.inputBackground, 
                 borderRadius: 24,
                 borderWidth: 1,
-                borderColor: 'rgba(47, 67, 96, 0.18)',
+                borderColor: theme.borderColor,
                 ...Platform.select({
-                  ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+                  ios: { shadowColor: theme.shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
                   android: { elevation: 2 },
-                  web: { boxShadow: '0 2px 4px rgba(47, 67, 96, 0.05)' }
+                  web: { boxShadow: `0 2px 4px ${theme.shadowColor}10` }
                 }),
               }}
             >
-              <Ionicons name="globe-outline" size={22} color="#2f4360" />
+              <Ionicons name="globe-outline" size={22} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         ),
@@ -281,7 +283,8 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
           <View style={styles.rootView}>
             <ImageBackground 
               source={require('./assets/pattern.webp')} 
@@ -297,7 +300,8 @@ export default function App() {
               </View>
             </ImageBackground>
           </View>
-        </LanguageProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );
