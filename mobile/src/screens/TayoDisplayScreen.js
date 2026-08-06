@@ -7,8 +7,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function TayoDisplayScreen({ navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function TayoDisplayScreen({ navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { t, locale } = useLanguage();
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState('');
@@ -139,7 +139,7 @@ export default function TayoDisplayScreen({ navigation }) {
           <TextInput 
             style={styles.searchInput} 
             placeholder={t('searchStudent')} 
-            placeholderTextColor="rgba(47, 67, 96, 0.5)"
+            placeholderTextColor={theme.textMuted}
             value={search} 
             onChangeText={setSearch} 
           />
@@ -191,7 +191,7 @@ export default function TayoDisplayScreen({ navigation }) {
           <TouchableOpacity style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]} onPress={() => openModal(item)}>
             <View style={styles.cardLeft}>
               <View style={styles.avatar}>
-                <Ionicons name="person" size={24} color="#f3ede0" />
+                <Ionicons name="person" size={24} color={theme.iconColor} />
               </View>
               <View style={styles.infoWrapper}>
                 <Text style={styles.name}>{item.fullName}</Text>
@@ -269,8 +269,8 @@ export default function TayoDisplayScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3ede0' },
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.background },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -284,50 +284,50 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 15, marginBottom: 15, borderRadius: 12, paddingHorizontal: 15, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.cardBackground, marginHorizontal: 15, marginBottom: 15, borderRadius: 12, paddingHorizontal: 15, borderWidth: 1, borderColor: theme.borderColor },
   searchIcon: { marginRight: 10 },
-  searchInput: { flex: 1, paddingVertical: 12, fontSize: 16, color: '#2f4360', textAlign: 'right', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
-  filtersSection: { paddingHorizontal: 15, paddingBottom: 10, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.05)' },
+  searchInput: { flex: 1, paddingVertical: 12, fontSize: 16, color: theme.text, textAlign: 'right', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  filtersSection: { paddingHorizontal: 15, paddingBottom: 10, borderBottomWidth: 1, borderColor: theme.borderColor },
   filterScroll: { flexDirection: 'row', marginBottom: 12 },
-  filterLabel: { color: '#2f4360', fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
-  pill: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
-  pillActive: { backgroundColor: '#2f4360', borderColor: '#2f4360' },
-  pillText: { color: '#2f4360', fontWeight: '600' },
+  filterLabel: { color: theme.text, fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  pill: { backgroundColor: theme.cardBackground, paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: theme.borderColor },
+  pillActive: { backgroundColor: theme.primary, borderColor: '#2f4360' },
+  pillText: { color: theme.text, fontWeight: '600' },
   pillTextActive: { color: '#fff' },
-  card: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fffcf7', marginHorizontal: 15, marginTop: 12, padding: 15, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)', ...Platform.select({ ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8 }, android: { elevation: 3 } }) },
+  card: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fffcf7', marginHorizontal: 15, marginTop: 12, padding: 15, borderRadius: 16, borderWidth: 1, borderColor: theme.borderColor, ...Platform.select({ ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8 }, android: { elevation: 3 } }) },
   cardLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 10 },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#2f4360', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.primary, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   infoWrapper: { flex: 1 },
-  name: { fontSize: 16, fontWeight: 'bold', color: '#2f4360', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }), flexWrap: 'wrap' },
+  name: { fontSize: 16, fontWeight: 'bold', color: theme.text, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }), flexWrap: 'wrap' },
   info: { fontSize: 12, color: '#7f8c8d', marginTop: 4 },
-  cardRight: { alignItems: 'center', paddingLeft: 10, borderLeftWidth: 1, borderColor: 'rgba(47,67,96,0.1)', minWidth: 60 },
+  cardRight: { alignItems: 'center', paddingLeft: 10, borderLeftWidth: 1, borderColor: theme.borderColor, minWidth: 60 },
   balanceLabel: { fontSize: 10, color: '#7f8c8d', marginBottom: 2 },
   balance: { fontSize: 20, fontWeight: 'bold' },
   modalContainer: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: { backgroundColor: '#fffcf7', padding: 25, borderTopLeftRadius: 25, borderTopRightRadius: 25, minHeight: '60%', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.1, shadowRadius: 10 }, android: { elevation: 10 } }) },
-  modalHeaderInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 15, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#2f4360', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  modalHeaderInfo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 15, borderBottomWidth: 1, borderColor: theme.borderColor },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', color: theme.text, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
   modalBalance: { fontSize: 24, fontWeight: 'bold' },
   tabRow: { flexDirection: 'row', backgroundColor: 'rgba(47,67,96,0.05)', borderRadius: 12, padding: 4 },
   tabBtn: { flex: 1, padding: 12, alignItems: 'center', borderRadius: 8 },
-  activeTab: { backgroundColor: '#fff', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 1 } }) },
+  activeTab: { backgroundColor: theme.cardBackground, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 1 } }) },
   tabText: { color: '#7f8c8d', fontWeight: 'bold', fontSize: 15 },
-  activeTabText: { color: '#2f4360' },
-  logCard: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.05)' },
+  activeTabText: { color: theme.text },
+  logCard: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: theme.borderColor },
   logIconWrapper: { marginRight: 12 },
   logDetails: { flex: 1 },
-  logReason: { fontSize: 15, color: '#2f4360', fontWeight: '600' },
+  logReason: { fontSize: 15, color: theme.text, fontWeight: '600' },
   logDate: { fontSize: 11, color: '#95a5a6', marginTop: 4 },
   logAmount: { fontSize: 16, fontWeight: 'bold', marginLeft: 10 },
-  inputLabel: { fontSize: 14, fontWeight: 'bold', color: '#2f4360', marginBottom: 6, textAlign: 'right' },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: 'rgba(47,67,96,0.2)', borderRadius: 12, padding: 12, marginBottom: 15, textAlign: 'right', fontSize: 16, color: '#2f4360' },
+  inputLabel: { fontSize: 14, fontWeight: 'bold', color: theme.text, marginBottom: 6, textAlign: 'right' },
+  input: { backgroundColor: theme.cardBackground, borderWidth: 1, borderColor: theme.borderColor, borderRadius: 12, padding: 12, marginBottom: 15, textAlign: 'right', fontSize: 16, color: theme.text },
   btn: { padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 10 },
   save: { backgroundColor: '#e74c3c' },
   saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   closeModalBtn: { marginTop: 20, padding: 15, alignItems: 'center', backgroundColor: '#ebe6da', borderRadius: 12 },
-  closeModalText: { color: '#2f4360', fontWeight: 'bold', fontSize: 16 }
+  closeModalText: { color: theme.text, fontWeight: 'bold', fontSize: 16 }
 });

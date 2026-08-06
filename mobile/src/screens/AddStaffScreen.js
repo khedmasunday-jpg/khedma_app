@@ -65,8 +65,8 @@ const classTranslations = {
   'الملاك غبريال': 'classGabriel',
 };
 
-export default function AddStaffScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function AddStaffScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role: requesterRole } = route?.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -808,7 +808,7 @@ export default function AddStaffScreen({ route, navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
-            <Ionicons name="cloud-upload-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+            <Ionicons name="cloud-upload-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
             <Text style={styles.primaryButtonText}>{t('submitAll')}</Text>
           </TouchableOpacity>
         </View>
@@ -875,7 +875,7 @@ export default function AddStaffScreen({ route, navigation }) {
                   }
                 }}
               >
-                <Ionicons name="copy-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+                <Ionicons name="copy-outline" size={18} color={theme.iconColor} style={{ marginRight: 6 }} />
                 <Text style={styles.modalPrimaryBtnText}>{t('copyClipboard')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalSecondaryBtn} onPress={() => setCredModalVisible(false)}>
@@ -960,7 +960,7 @@ export default function AddStaffScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     backgroundColor: '#f8f5ee',
   },
@@ -971,17 +971,17 @@ const styles = StyleSheet.create({
   headerText: {
     fontWeight: 'bold',
     fontSize: 24,
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 24,
     textAlign: 'center',
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   formCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.1)',
+    borderColor: theme.borderColor,
     ...Platform.select({
       ios: {
         shadowColor: '#2f4360',
@@ -1003,25 +1003,25 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 8,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.16)',
+    borderColor: theme.borderColor,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
   },
   pickerWrapper: {
     position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.16)',
+    borderColor: theme.borderColor,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     overflow: 'hidden',
     height: 45,
   },
@@ -1034,7 +1034,7 @@ const styles = StyleSheet.create({
     paddingRight: 12,
     paddingLeft: 12,
     fontSize: 15,
-    color: '#333333',
+    color: theme.text,
     borderWidth: 0,
     outlineStyle: 'none',
   },
@@ -1044,7 +1044,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     backgroundColor: 'transparent',
     fontSize: 15,
-    color: '#333333',
+    color: theme.text,
     outlineStyle: 'none',
     height: '100%',
   },
@@ -1073,14 +1073,14 @@ const styles = StyleSheet.create({
   },
   datePickerBtnText: {
     fontSize: 15,
-    color: '#333333',
+    color: theme.text,
   },
   promptBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(47, 67, 96, 0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.08)',
+    borderColor: theme.borderColor,
     borderRadius: 8,
     padding: 12,
     marginBottom: 18,
@@ -1092,7 +1092,7 @@ const styles = StyleSheet.create({
   promptText: {
     flex: 1,
     fontSize: 13,
-    color: '#666666',
+    color: theme.textMuted,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -1105,7 +1105,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     paddingVertical: 12,
     borderRadius: 8,
   },
@@ -1121,12 +1121,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(47, 67, 96, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.16)',
+    borderColor: theme.borderColor,
     paddingVertical: 12,
     borderRadius: 8,
   },
   secondaryButtonText: {
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: 'bold',
     fontSize: 15,
   },
@@ -1139,7 +1139,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     textAlign: 'center',
-    color: '#666666',
+    color: theme.textMuted,
     marginTop: 16,
     fontSize: 14,
   },
@@ -1150,7 +1150,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 24,
     width: '85%',
@@ -1165,7 +1165,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   modalBody: {
     marginBottom: 20,
@@ -1179,12 +1179,12 @@ const styles = StyleSheet.create({
   },
   credLabel: {
     fontSize: 14,
-    color: '#666666',
+    color: theme.textMuted,
     fontWeight: '500',
   },
   credValue: {
     fontSize: 14,
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: 'bold',
   },
   modalFooter: {
@@ -1195,7 +1195,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     paddingVertical: 12,
     borderRadius: 8,
   },
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   modalSecondaryBtnText: {
-    color: '#666666',
+    color: theme.textMuted,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -1218,20 +1218,20 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 180,
     borderWidth: 1,
-    borderColor: '#cccccc',
+    borderColor: theme.borderColor,
     borderRadius: 8,
     padding: 10,
     backgroundColor: '#f9f9f9',
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     fontSize: 13,
-    color: '#333333',
+    color: theme.text,
     textAlign: 'left',
     textAlignVertical: 'top',
     marginTop: 10,
   },
   credInstruction: {
     fontSize: 13,
-    color: '#666666',
+    color: theme.textMuted,
     lineHeight: 18,
     marginBottom: 8,
   },
@@ -1245,7 +1245,7 @@ const styles = StyleSheet.create({
   },
   contactHint: {
     fontSize: 11,
-    color: '#888888',
+    color: theme.textMuted,
     marginTop: 4,
     marginLeft: 4,
   },
@@ -1258,7 +1258,7 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 4,
   },
   contactPhone: {
@@ -1272,11 +1272,11 @@ const styles = StyleSheet.create({
   },
   contactPhoneText: {
     fontSize: 13,
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: '600',
   },
   contactPhoneLabel: {
     fontSize: 12,
-    color: '#888888',
+    color: theme.textMuted,
   },
 });

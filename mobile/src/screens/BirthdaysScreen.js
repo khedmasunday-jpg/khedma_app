@@ -8,8 +8,8 @@ import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 import { getAuthToken } from '../config/authSession';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function BirthdaysScreen({ route }) {
-  const { theme, isDarkMode } = useTheme();
+export default function BirthdaysScreen({ route }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -82,7 +82,7 @@ export default function BirthdaysScreen({ route }) {
               </Text>
             </View>
             <View style={styles.giftIconWrapper}>
-              <Ionicons name="gift" size={24} color="#e5a93b" />
+              <Ionicons name="gift" size={24} color={theme.iconColor} />
             </View>
           </View>
 
@@ -99,29 +99,29 @@ export default function BirthdaysScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     padding: 16,
-    backgroundColor: 'rgba(243, 237, 224, 0.75)',
+    backgroundColor: theme.background,
     flexGrow: 1,
   },
   center: { 
     flex: 1, 
     justifyContent: 'center', 
     alignItems: 'center',
-    backgroundColor: '#f3ede0',
+    backgroundColor: theme.background,
   },
   noDataText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: 'bold',
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   card: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 16, 
     padding: 16,
     marginBottom: 12, 
@@ -161,11 +161,11 @@ const styles = StyleSheet.create({
   name: { 
     fontSize: 17, 
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   meta: { 
-    color: 'rgba(36, 54, 79, 0.7)', 
+    color: theme.textMuted, 
     marginTop: 4,
     fontSize: 13,
   },
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   date: { 
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 13,
     fontWeight: '600',
   },

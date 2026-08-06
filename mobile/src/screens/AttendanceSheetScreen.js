@@ -17,8 +17,8 @@ if (Platform.OS !== 'web') {
   }
 }
 
-export default function AttendanceSheetScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function AttendanceSheetScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role, classId, className } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -220,7 +220,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {
             style={styles.refreshBtn} 
             onPress={() => fetchAttendanceForDate(selectedDate)}
           >
-            <Ionicons name="refresh" size={18} color="#ffffff" />
+            <Ionicons name="refresh" size={18} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
       </View>
@@ -268,18 +268,18 @@ export default function AttendanceSheetScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     padding: 16, 
-    backgroundColor: 'rgba(243, 237, 224, 0.75)' 
+    backgroundColor: theme.background 
   },
   headerPanel: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.98)', 
+    backgroundColor: theme.cardBackground, 
     padding: 16, 
     borderRadius: 20, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     marginBottom: 16,
     ...Platform.select({
       ios: {
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   title: { 
     fontSize: 20, 
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   classSelector: {
@@ -309,20 +309,20 @@ const styles = StyleSheet.create({
   classBtn: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: 'rgba(243, 237, 224, 0.4)',
+    backgroundColor: theme.background,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 8,
     marginRight: 8,
     justifyContent: 'center',
   },
   classBtnSelected: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderColor: '#2f4360',
   },
   classBtnText: {
     fontSize: 13,
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: '600',
   },
   classBtnTextSelected: {
@@ -337,9 +337,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     flex: 1,
     alignItems: 'center',
-    backgroundColor: 'rgba(243, 237, 224, 0.4)',
+    backgroundColor: theme.background,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 0,
     backgroundColor: 'transparent',
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 14,
     fontWeight: '600',
     outlineWidth: 0,
@@ -361,10 +361,10 @@ const styles = StyleSheet.create({
   datePickerText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2f4360',
+    color: theme.text,
   },
   refreshBtn: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     padding: 10,
     borderRadius: 10,
     alignItems: 'center',
@@ -380,14 +380,14 @@ const styles = StyleSheet.create({
   },
   noStudentsText: {
     textAlign: 'center',
-    color: 'rgba(36, 54, 79, 0.6)',
+    color: theme.textMuted,
     marginTop: 20,
     fontSize: 15,
   },
   studentCard: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 16, 
     marginBottom: 10, 
     padding: 14,
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   studentName: { 
     fontSize: 16, 
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
     flex: 1,
   },
@@ -448,11 +448,11 @@ const styles = StyleSheet.create({
   },
   detailLabel: { 
     fontWeight: '600', 
-    color: 'rgba(36, 54, 79, 0.7)',
+    color: theme.textMuted,
     fontSize: 13,
   },
   detailValue: { 
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 13,
     fontWeight: '600',
   }

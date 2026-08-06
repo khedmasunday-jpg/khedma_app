@@ -9,8 +9,8 @@ import { getApiBase } from '../config/api';
 import { getAuthToken } from '../config/authSession';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function StaffListScreen({ route }) {
-  const { theme, isDarkMode } = useTheme();
+export default function StaffListScreen({ route }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const [staff, setStaff] = useState([]);
@@ -57,11 +57,11 @@ export default function StaffListScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: 'transparent' },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
-  card: { backgroundColor: '#fff', borderRadius: 8, padding: 16, marginBottom: 12, elevation: 2 },
+  card: { backgroundColor: theme.cardBackground, borderRadius: 8, padding: 16, marginBottom: 12, elevation: 2 },
   name: { fontSize: 18, fontWeight: 'bold' },
   role: { fontSize: 16, color: '#007bff', marginBottom: 4 },
-  info: { fontSize: 14, color: '#555' },
+  info: { fontSize: 14, color: theme.textMuted },
 });

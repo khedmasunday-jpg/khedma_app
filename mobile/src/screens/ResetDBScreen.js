@@ -13,8 +13,8 @@ if (Platform.OS !== 'web') {
   try { DateTimePickerModal = require('react-native-modal-datetime-picker').default; } catch (e) { DateTimePickerModal = null; }
 }
 
-export default function ResetDBScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function ResetDBScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { locale } = useLanguage();
@@ -242,7 +242,7 @@ export default function ResetDBScreen({ route, navigation }) {
       {}
       <View style={styles.headerCard}>
         <View style={styles.iconCircle}>
-          <Ionicons name="refresh-circle-outline" size={40} color="#d9534f" />
+          <Ionicons name="refresh-circle-outline" size={40} color={theme.iconColor} />
         </View>
         <Text style={[styles.headerTitle, { color: theme.text }, { color: theme.text }]}>
           {isAr ? 'إعادة ضبط البيانات وتصفير الحضور' : 'Database Reset & Operations'}
@@ -341,7 +341,7 @@ export default function ResetDBScreen({ route, navigation }) {
       {}
       <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, styles.dangerCard]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="trash-bin-outline" size={22} color="#d9534f" style={{ marginRight: 8 }} />
+          <Ionicons name="trash-bin-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={[styles.cardTitle, { color: '#d9534f' }]}>
             {isAr ? 'إعادة الضبط الشاملة (Master Reset)' : 'Master Reset All Data'}
           </Text>
@@ -360,7 +360,7 @@ export default function ResetDBScreen({ route, navigation }) {
             <ActivityIndicator color="#fff" size="small" />
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="flame-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+              <Ionicons name="flame-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
               <Text style={styles.btnText}>
                 {isAr ? 'مسح وإعادة ضبط جميع البيانات' : 'Wipe & Reset All Data'}
               </Text>
@@ -443,7 +443,7 @@ export default function ResetDBScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     padding: 16,
     alignItems: 'center',
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   headerCard: {
     width: '100%',
     maxWidth: 500,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -471,24 +471,24 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     textAlign: 'center',
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: '#666',
+    color: theme.textMuted,
     textAlign: 'center',
   },
   card: {
     width: '100%',
     maxWidth: 500,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 18,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
   },
   dangerCard: {
     borderColor: 'rgba(217, 83, 79, 0.3)',
@@ -505,11 +505,11 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   cardDesc: {
     fontSize: 13,
-    color: '#555',
+    color: theme.textMuted,
     lineHeight: 18,
     marginBottom: 14,
   },
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   secondaryBtn: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#444',
+    color: theme.text,
     marginBottom: 6,
   },
   classPill: {
@@ -557,11 +557,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   classPillSelected: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
   },
   classPillText: {
     fontSize: 13,
-    color: '#444',
+    color: theme.text,
   },
   classPillTextSelected: {
     color: '#ffffff',
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     height: 42,
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: theme.borderColor,
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
     paddingLeft: 12,

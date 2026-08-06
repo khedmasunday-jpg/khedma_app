@@ -33,8 +33,8 @@ if (Platform.OS !== 'web') {
   }
 }
 
-export default function EditStudentDetailScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function EditStudentDetailScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, studentId } = route.params || {};
   const token = routeToken || getAuthToken();
   const [student, setStudent] = useState(null);
@@ -596,7 +596,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
               onPress={handleSave}
               disabled={saving || deleting}
             >
-              <Ionicons name="checkmark-done" size={20} color="#fff" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+              <Ionicons name="checkmark-done" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
               <Text style={styles.btnText}>{saving ? t('loading') : t('save')}</Text>
             </TouchableOpacity>
 
@@ -606,7 +606,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                 onPress={handleDelete}
                 disabled={saving || deleting}
               >
-                <Ionicons name="trash-outline" size={20} color="#fff" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+                <Ionicons name="trash-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
                 <Text style={styles.btnText}>{deleting ? t('loading') : t('deleteLabel')}</Text>
               </TouchableOpacity>
             )}
@@ -622,7 +622,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{locale === 'ar' ? 'اختر تليفون جهة الاتصال' : 'Pick Contact Phone'}</Text>
             <TouchableOpacity onPress={() => setContactPickerVisible(false)}>
-              <Ionicons name="close-circle-outline" size={24} color="#666" />
+              <Ionicons name="close-circle-outline" size={24} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
           {loadingContacts ? (
@@ -670,7 +670,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: 'transparent' 
@@ -690,14 +690,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', 
     marginBottom: 16, 
     textAlign: 'center',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   summaryHeader: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     paddingVertical: 12, 
     paddingHorizontal: 16, 
     marginBottom: 16,
@@ -728,10 +728,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   formContainer: {
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     padding: 16,
     ...Platform.select({
       ios: {
@@ -754,16 +754,16 @@ const styles = StyleSheet.create({
   label: { 
     fontWeight: '700', 
     fontSize: 14,
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     width: '100%',
   },
   inputIcon: {
@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10, 
     paddingRight: 14, 
     paddingLeft: 14, 
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 15,
     borderWidth: 0,
     backgroundColor: 'transparent',
@@ -786,7 +786,7 @@ const styles = StyleSheet.create({
   },
   nativePicker: {
     width: '100%',
-    color: '#2f4360',
+    color: theme.text,
     height: 45,
   },
   webSelectWrapper: {
@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 0,
     backgroundColor: 'transparent',
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 15,
     appearance: 'none',
     WebkitAppearance: 'none',
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   btnPicker: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderWidth: 0,
     borderRadius: 10,
     padding: 12,
@@ -843,7 +843,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnPickerText: {
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -875,7 +875,7 @@ const styles = StyleSheet.create({
     }),
   },
   btnSave: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
   },
   btnDelete: {
     backgroundColor: '#dc3545',
@@ -895,7 +895,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 20,
     width: '85%',
@@ -910,11 +910,11 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   contactRow: {
     padding: 12,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderColor: theme.borderColor,
   },
 });

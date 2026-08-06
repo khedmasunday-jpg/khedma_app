@@ -10,8 +10,8 @@ import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache, invalidateCache } from '../utils/apiCache';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function TayoGiveScreen({ navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function TayoGiveScreen({ navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { t } = useLanguage();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +139,7 @@ export default function TayoGiveScreen({ navigation }) {
           <TextInput 
             style={styles.searchInput} 
             placeholder={t('searchStudent')} 
-            placeholderTextColor="rgba(47, 67, 96, 0.5)"
+            placeholderTextColor={theme.textMuted}
             value={search} 
             onChangeText={setSearch} 
           />
@@ -193,7 +193,7 @@ export default function TayoGiveScreen({ navigation }) {
             <TouchableOpacity style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]} onPress={() => openModal(item)}>
               <View style={styles.cardLeft}>
                 <View style={styles.avatar}>
-                  <Ionicons name="person" size={24} color="#f3ede0" />
+                  <Ionicons name="person" size={24} color={theme.iconColor} />
                 </View>
                 <View style={styles.infoWrapper}>
                   <Text style={styles.name}>{item.fullName}</Text>
@@ -243,8 +243,8 @@ export default function TayoGiveScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3ede0' },
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.background },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -258,40 +258,40 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', marginHorizontal: 15, marginBottom: 15, borderRadius: 12, paddingHorizontal: 15, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.cardBackground, marginHorizontal: 15, marginBottom: 15, borderRadius: 12, paddingHorizontal: 15, borderWidth: 1, borderColor: theme.borderColor },
   searchIcon: { marginRight: 10 },
-  searchInput: { flex: 1, paddingVertical: 12, fontSize: 16, color: '#2f4360', textAlign: 'right', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
-  filtersSection: { paddingHorizontal: 15, paddingBottom: 10, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.05)' },
+  searchInput: { flex: 1, paddingVertical: 12, fontSize: 16, color: theme.text, textAlign: 'right', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  filtersSection: { paddingHorizontal: 15, paddingBottom: 10, borderBottomWidth: 1, borderColor: theme.borderColor },
   filterScroll: { flexDirection: 'row', marginBottom: 12 },
-  filterLabel: { color: '#2f4360', fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
-  pill: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
-  pillActive: { backgroundColor: '#2f4360', borderColor: '#2f4360' },
-  pillText: { color: '#2f4360', fontWeight: '600' },
+  filterLabel: { color: theme.text, fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  pill: { backgroundColor: theme.cardBackground, paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: theme.borderColor },
+  pillActive: { backgroundColor: theme.primary, borderColor: '#2f4360' },
+  pillText: { color: theme.text, fontWeight: '600' },
   pillTextActive: { color: '#fff' },
-  card: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fffcf7', marginHorizontal: 15, marginTop: 12, padding: 15, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)', ...Platform.select({ ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8 }, android: { elevation: 3 } }) },
+  card: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fffcf7', marginHorizontal: 15, marginTop: 12, padding: 15, borderRadius: 16, borderWidth: 1, borderColor: theme.borderColor, ...Platform.select({ ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8 }, android: { elevation: 3 } }) },
   cardLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 10 },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#2f4360', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: theme.primary, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   infoWrapper: { flex: 1 },
-  name: { fontSize: 16, fontWeight: 'bold', color: '#2f4360', fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }), flexWrap: 'wrap' },
+  name: { fontSize: 16, fontWeight: 'bold', color: theme.text, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }), flexWrap: 'wrap' },
   info: { fontSize: 12, color: '#7f8c8d', marginTop: 4 },
-  cardRight: { alignItems: 'center', paddingLeft: 10, borderLeftWidth: 1, borderColor: 'rgba(47,67,96,0.1)', minWidth: 60 },
+  cardRight: { alignItems: 'center', paddingLeft: 10, borderLeftWidth: 1, borderColor: theme.borderColor, minWidth: 60 },
   balanceLabel: { fontSize: 10, color: '#7f8c8d', marginBottom: 2 },
   balance: { fontSize: 20, fontWeight: 'bold', color: '#f39c12' },
   modalContainer: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: { backgroundColor: '#fffcf7', padding: 25, borderTopLeftRadius: 25, borderTopRightRadius: 25, ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.1, shadowRadius: 10 }, android: { elevation: 10 } }) },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 5 },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', color: '#2f4360', marginLeft: 8, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', color: theme.text, marginLeft: 8, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
   modalSubtitle: { fontSize: 16, color: '#7f8c8d', textAlign: 'center', marginBottom: 20 },
-  inputLabel: { fontSize: 14, fontWeight: 'bold', color: '#2f4360', marginBottom: 6, textAlign: 'right' },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: 'rgba(47,67,96,0.2)', borderRadius: 12, padding: 12, marginBottom: 15, textAlign: 'right', fontSize: 16, color: '#2f4360' },
+  inputLabel: { fontSize: 14, fontWeight: 'bold', color: theme.text, marginBottom: 6, textAlign: 'right' },
+  input: { backgroundColor: theme.cardBackground, borderWidth: 1, borderColor: theme.borderColor, borderRadius: 12, padding: 12, marginBottom: 15, textAlign: 'right', fontSize: 16, color: theme.text },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
   btn: { flex: 1, padding: 15, borderRadius: 12, alignItems: 'center', marginHorizontal: 5 },
   cancel: { backgroundColor: '#ebe6da' },
-  cancelBtnText: { color: '#2f4360', fontWeight: 'bold', fontSize: 16 },
-  save: { backgroundColor: '#2f4360' },
+  cancelBtnText: { color: theme.text, fontWeight: 'bold', fontSize: 16 },
+  save: { backgroundColor: theme.primary },
   saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
 });

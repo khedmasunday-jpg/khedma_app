@@ -20,8 +20,8 @@ import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache, invalidateCache } from '../utils/apiCache';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function ActivateDeactivateScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function ActivateDeactivateScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -193,17 +193,17 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
       {showSearch && (
         <View style={styles.searchContainer}>
         <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          <Ionicons name="search-outline" size={20} color="#666" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+          <Ionicons name="search-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
           <TextInput
             style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
             placeholder={searchPlaceholder}
-            placeholderTextColor="#999"
+            placeholderTextColor={theme.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery ? (
             <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-              <Ionicons name="close-circle" size={18} color="#999" />
+              <Ionicons name="close-circle" size={18} color={theme.iconColor} />
             </TouchableOpacity>
           ) : null}
           </View>
@@ -216,7 +216,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
           <SkeletonList count={6} />
         ) : filteredStaff.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="people-outline" size={60} color="#ccc" />
+            <Ionicons name="people-outline" size={60} color={theme.iconColor} />
             <Text style={[styles.emptyText, { color: theme.textMuted }, { color: theme.textMuted }]}>{noStaffText}</Text>
           </View>
         ) : (
@@ -259,7 +259,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
                     <Ionicons 
                       name={user.isActive ? "close-circle-outline" : "checkmark-circle-outline"} 
                       size={16} 
-                      color="#fff" 
+                      color={theme.iconColor} 
                       style={isRtl ? { marginLeft: 4 } : { marginRight: 4 }} 
                     />
                     <Text style={styles.toggleBtnText}>
@@ -307,10 +307,10 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3ede0',
+    backgroundColor: theme.background,
     padding: 16,
   },
   headerRow: {
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -335,16 +335,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   searchContainer: {
     marginBottom: 16,
   },
   searchInputWrapper: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#333',
+    color: theme.text,
     paddingVertical: 8,
   },
   clearButton: {
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   },
   card: {
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 4,
   },
   badgeRow: {
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 15,
-    color: '#999',
+    color: theme.textMuted,
     marginTop: 10,
   },
   loader: {
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 12,
     width: '90%',
     maxWidth: 400,
@@ -497,21 +497,21 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 17,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   modalBody: {
     marginVertical: 14,
   },
   modalBodyText: {
     fontSize: 15,
-    color: '#333333',
+    color: theme.text,
     lineHeight: 22,
   },
   modalFooter: {
     flexDirection: 'row',
   },
   modalPrimaryBtn: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 8,
@@ -521,11 +521,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
-  filtersSection: { paddingHorizontal: 15, paddingBottom: 10, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.05)' },
+  filtersSection: { paddingHorizontal: 15, paddingBottom: 10, borderBottomWidth: 1, borderColor: theme.borderColor },
   filterScroll: { flexDirection: 'row', marginBottom: 12 },
-  filterLabel: { color: '#2f4360', fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
-  pill: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
-  pillActive: { backgroundColor: '#2f4360', borderColor: '#2f4360' },
-  pillText: { color: '#2f4360', fontWeight: '600' },
+  filterLabel: { color: theme.text, fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  pill: { backgroundColor: theme.cardBackground, paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: theme.borderColor },
+  pillActive: { backgroundColor: theme.primary, borderColor: '#2f4360' },
+  pillText: { color: theme.text, fontWeight: '600' },
   pillTextActive: { color: '#fff' },
 });

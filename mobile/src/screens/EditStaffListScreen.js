@@ -8,8 +8,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getAuthToken } from '../config/authSession';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function EditStaffListScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function EditStaffListScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -142,17 +142,17 @@ export default function EditStaffListScreen({ route, navigation }) {
       {showSearch && (
         <View style={styles.searchContainer}>
         <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          <Ionicons name="search-outline" size={20} color="#666" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+          <Ionicons name="search-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
           <TextInput
             style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
             placeholder={searchPlaceholder}
-            placeholderTextColor="#999"
+            placeholderTextColor={theme.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery ? (
             <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-              <Ionicons name="close-circle" size={18} color="#999" />
+              <Ionicons name="close-circle" size={18} color={theme.iconColor} />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -176,11 +176,11 @@ export default function EditStaffListScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     padding: 16, 
-    backgroundColor: 'rgba(243, 237, 224, 0.75)' 
+    backgroundColor: theme.background 
   },
   headerRow: {
     flexDirection: 'row',
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -202,9 +202,9 @@ const styles = StyleSheet.create({
   },
   searchInputWrapper: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#333',
+    color: theme.text,
     paddingVertical: 8,
   },
   clearButton: {
@@ -220,14 +220,14 @@ const styles = StyleSheet.create({
   },
   noStaffText: {
     textAlign: 'center',
-    color: 'rgba(36, 54, 79, 0.6)',
+    color: theme.textMuted,
     marginTop: 20,
     fontSize: 15,
   },
   card: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 16, 
     padding: 16, 
     marginBottom: 12,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   name: { 
     fontSize: 17, 
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   roleLabel: { 
@@ -265,11 +265,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontWeight: '600',
   },
-  filtersSection: { paddingBottom: 10, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.05)', marginBottom: 16 },
+  filtersSection: { paddingBottom: 10, borderBottomWidth: 1, borderColor: theme.borderColor, marginBottom: 16 },
   filterScroll: { flexDirection: 'row', marginBottom: 12 },
-  filterLabel: { color: '#2f4360', fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
-  pill: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
-  pillActive: { backgroundColor: '#2f4360', borderColor: '#2f4360' },
-  pillText: { color: '#2f4360', fontWeight: '600' },
+  filterLabel: { color: theme.text, fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  pill: { backgroundColor: theme.cardBackground, paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: theme.borderColor },
+  pillActive: { backgroundColor: theme.primary, borderColor: '#2f4360' },
+  pillText: { color: theme.text, fontWeight: '600' },
   pillTextActive: { color: '#fff' },
 });

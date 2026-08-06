@@ -9,8 +9,8 @@ import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache } from '../utils/apiCache';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function ClassDisplayScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function ClassDisplayScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -181,17 +181,17 @@ export default function ClassDisplayScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     padding: 16, 
-    backgroundColor: 'rgba(243, 237, 224, 0.75)' 
+    backgroundColor: theme.background 
   },
   label: { 
     fontWeight: 'bold', 
     fontSize: 18, 
     marginBottom: 10,
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   dropdown: { 
@@ -202,9 +202,9 @@ const styles = StyleSheet.create({
   classBtn: { 
     paddingVertical: 10,
     paddingHorizontal: 16, 
-    backgroundColor: 'rgba(255, 252, 246, 0.9)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     borderRadius: 12, 
     marginRight: 8,
     justifyContent: 'center',
@@ -225,11 +225,11 @@ const styles = StyleSheet.create({
     }),
   },
   classBtnSelected: { 
-    backgroundColor: '#2f4360', 
+    backgroundColor: theme.primary, 
     borderColor: '#2f4360', 
   },
   classBtnText: {
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 15,
     fontWeight: '600',
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   attendanceActionBtn: {
     width: '100%',
     padding: 14,
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -269,25 +269,25 @@ const styles = StyleSheet.create({
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   classInfo: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     padding: 16, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.14)',
+    borderColor: theme.borderColor,
     borderRadius: 16, 
     marginBottom: 16,
   },
   classTitle: { 
     fontSize: 20, 
     fontWeight: 'bold', 
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
     textAlign: 'center',
   },
   studentsList: { flex: 1 },
   studentCard: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.14)',
+    borderColor: theme.borderColor,
     borderRadius: 16, 
     marginBottom: 12,
     overflow: 'hidden',
@@ -309,23 +309,23 @@ const styles = StyleSheet.create({
   studentHeader: { 
     alignItems: 'center', 
     padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: theme.cardBackground,
   },
   studentInfo: { flex: 1 },
   studentName: { 
     fontSize: 16, 
     fontWeight: 'bold', 
-    color: '#24364f',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   expandIcon: { 
     fontSize: 14, 
-    color: 'rgba(36, 54, 79, 0.6)',
+    color: theme.textMuted,
     paddingHorizontal: 8,
   },
   studentDetails: { 
     padding: 16, 
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderTopWidth: 1,
     borderTopColor: 'rgba(47, 67, 96, 0.08)',
   },
@@ -339,11 +339,11 @@ const styles = StyleSheet.create({
   },
   detailLabel: { 
     fontWeight: 'bold', 
-    color: '#2f4360', 
+    color: theme.text, 
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   detailValue: { 
-    color: '#24364f',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
 });

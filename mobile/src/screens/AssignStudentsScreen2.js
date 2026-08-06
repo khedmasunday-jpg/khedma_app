@@ -79,8 +79,8 @@ const localTranslations = {
   }
 };
 
-export default function AssignStudentsScreen2({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function AssignStudentsScreen2({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, teacher } = route.params || {};
   const token = routeToken || getAuthToken();
   const [students, setStudents] = useState([]);
@@ -386,18 +386,18 @@ export default function AssignStudentsScreen2({ route, navigation }) {
               <View style={styles.adminButtonsGrid}>
                 {assignedStudents.length > 0 && (
                   <TouchableOpacity style={[styles.adminBtn, styles.btnRedOutline]} onPress={removeStudents}>
-                    <Ionicons name="person-remove-outline" size={16} color="#d32f2f" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                    <Ionicons name="person-remove-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                     <Text style={styles.btnTextRed}>{localT('unassignAll')}</Text>
                   </TouchableOpacity>
                 )}
 
                 <TouchableOpacity style={[styles.adminBtn, styles.btnOrangeOutline]} onPress={confirmAndResetClass}>
-                  <Ionicons name="refresh-outline" size={16} color="#ef6c00" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="refresh-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={styles.btnTextOrange}>{localT('resetClass')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.adminBtn, styles.btnDarkRedOutline]} onPress={confirmAndResetAll}>
-                  <Ionicons name="alert-circle-outline" size={16} color="#c62828" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="alert-circle-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={styles.btnTextDarkRed}>{localT('masterReset')}</Text>
                 </TouchableOpacity>
               </View>
@@ -405,7 +405,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
               {}
               {assignedSelectedCount > 0 && (
                 <TouchableOpacity style={[styles.adminBtn, styles.btnRemoveSelected, { marginTop: 12 }]} onPress={removeSelected}>
-                  <Ionicons name="trash-outline" size={18} color="#fff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="trash-outline" size={18} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={styles.btnTextWhite}>
                     {isRtl 
                       ? `إزالة ${assignedSelectedCount} من المخدومين الموزعين` 
@@ -430,11 +430,11 @@ export default function AssignStudentsScreen2({ route, navigation }) {
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder={localT('searchPlaceholder')}
-              placeholderTextColor="rgba(47, 67, 96, 0.4)"
+              placeholderTextColor={theme.textMuted}
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={18} color="#666" style={{ paddingHorizontal: 8 }} />
+                <Ionicons name="close-circle" size={18} color={theme.iconColor} style={{ paddingHorizontal: 8 }} />
               </TouchableOpacity>
             )}
           </View>
@@ -516,7 +516,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
         {newSelectedCount > 0 && (
           <View style={styles.footerPanel}>
             <TouchableOpacity style={styles.btnAssign} onPress={assign}>
-              <Ionicons name="checkmark-done" size={20} color="#fff" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+              <Ionicons name="checkmark-done" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
               <Text style={styles.btnAssignText}>
                 {isRtl 
                   ? `حفظ توزيع ${newSelectedCount} مخدوم(ين) جدد` 
@@ -531,20 +531,20 @@ export default function AssignStudentsScreen2({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(243, 237, 224, 0.75)',
+    backgroundColor: theme.background,
   },
   scrollContent: {
     padding: 16,
     paddingBottom: 100, 
   },
   headerCard: {
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     padding: 18,
     marginBottom: 16,
     ...Platform.select({
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   headerSubtitle: {
@@ -582,10 +582,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   adminCard: {
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     padding: 16,
     marginBottom: 20,
     ...Platform.select({
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   adminTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#2f4360',
+    color: theme.text,
   },
   adminButtonsGrid: {
     flexDirection: 'column',
@@ -657,16 +657,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 10,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   searchWrapper: {
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     width: '100%',
     marginBottom: 12,
   },
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingRight: 12,
     paddingLeft: 12,
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 15,
     borderWidth: 0,
     backgroundColor: 'transparent',
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   selectionBadgeText: {
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: '700',
     fontSize: 13,
   },
@@ -703,9 +703,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   studentCard: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 14,
     padding: 14,
     justifyContent: 'space-between',
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatarSelected: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
   },
   studentTextWrapper: {
     flex: 1,
@@ -744,14 +744,14 @@ const styles = StyleSheet.create({
   studentName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#2f4360',
+    color: theme.text,
   },
   studentTextSelected: {
-    color: '#2f4360',
+    color: theme.text,
   },
   studentDetails: {
     fontSize: 12,
-    color: '#666',
+    color: theme.textMuted,
     marginTop: 2,
   },
   checkboxContainer: {
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(255, 252, 246, 0.98)',
+    backgroundColor: theme.cardBackground,
     borderTopWidth: 1,
     borderTopColor: 'rgba(47, 67, 96, 0.12)',
     padding: 16,
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderRadius: 12,
     paddingVertical: 14,
     ...Platform.select({

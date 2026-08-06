@@ -46,8 +46,8 @@ const localTranslations = {
   }
 };
 
-export default function NotificationCenterScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function NotificationCenterScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const [notifications, setNotifications] = useState([]);
@@ -156,7 +156,7 @@ export default function NotificationCenterScreen({ route, navigation }) {
             style={[styles.clearBtn, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
             onPress={handleClearAll}
           >
-            <Ionicons name="trash-outline" size={16} color="#d32f2f" style={isRtl ? { marginLeft: 4 } : { marginRight: 4 }} />
+            <Ionicons name="trash-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 4 } : { marginRight: 4 }} />
             <Text style={styles.clearBtnText}>{localT('clearAll')}</Text>
           </TouchableOpacity>
         )}
@@ -212,10 +212,10 @@ export default function NotificationCenterScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: 'rgba(243, 237, 224, 0.75)',
+    backgroundColor: theme.background,
     padding: 16,
   },
   headerRow: {
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   clearBtn: {
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 6,
     textAlign: 'center',
   },
@@ -288,9 +288,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   notifCard: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 16, 
     padding: 16, 
     marginBottom: 12,
@@ -329,11 +329,11 @@ const styles = StyleSheet.create({
   notifType: { 
     fontWeight: 'bold', 
     fontSize: 15, 
-    color: '#2f4360',
+    color: theme.text,
   },
   notifMsg: { 
     fontSize: 14, 
-    color: 'rgba(36, 54, 79, 0.85)',
+    color: theme.textMuted,
     lineHeight: 20,
   },
   notifDate: { 

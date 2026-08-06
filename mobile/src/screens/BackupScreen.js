@@ -18,8 +18,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function BackupScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function BackupScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { locale } = useLanguage();
@@ -213,7 +213,7 @@ export default function BackupScreen({ route, navigation }) {
       {}
       <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="shield-checkmark-outline" size={22} color="#27ae60" style={{ marginRight: 8 }} />
+          <Ionicons name="shield-checkmark-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
             {isAr ? 'حالة آخر نسخة احتياطية' : 'Last Backup Details'}
           </Text>
@@ -267,7 +267,7 @@ export default function BackupScreen({ route, navigation }) {
       {}
       <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="flash-outline" size={22} color="#e67e22" style={{ marginRight: 8 }} />
+          <Ionicons name="flash-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
             {isAr ? 'تشغيل نسخ احتياطي فوري' : 'Manual Immediate Backup'}
           </Text>
@@ -293,7 +293,7 @@ export default function BackupScreen({ route, navigation }) {
             </View>
           ) : (
             <View style={styles.btnRow}>
-              <Ionicons name="play-circle-outline" size={22} color="#ffffff" style={{ marginRight: 6 }} />
+              <Ionicons name="play-circle-outline" size={22} color={theme.iconColor} style={{ marginRight: 6 }} />
               <Text style={styles.primaryButtonText}>
                 {isAr ? 'بدء النسخ الاحتياطي الآن' : 'Start Backup Now'}
               </Text>
@@ -305,7 +305,7 @@ export default function BackupScreen({ route, navigation }) {
       {}
       <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { borderColor: 'rgba(39, 174, 96, 0.3)', backgroundColor: '#fbfefc' }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="cloud-download-outline" size={22} color="#27ae60" style={{ marginRight: 8 }} />
+          <Ionicons name="cloud-download-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={[styles.cardTitle, { color: '#27ae60' }]}>
             {isAr ? 'استعادة ملف نسخة احتياطية (JSON Restore)' : 'Restore JSON Backup File'}
           </Text>
@@ -331,7 +331,7 @@ export default function BackupScreen({ route, navigation }) {
             </View>
           ) : (
             <View style={styles.btnRow}>
-              <Ionicons name="folder-open-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
+              <Ionicons name="folder-open-outline" size={20} color={theme.iconColor} style={{ marginRight: 8 }} />
               <Text style={styles.primaryButtonText}>
                 {isAr ? 'اختيار ملف JSON واستعادة كافة الحسابات' : 'Pick JSON File & Restore All Accounts'}
               </Text>
@@ -343,7 +343,7 @@ export default function BackupScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     padding: 16,
     alignItems: 'center',
@@ -351,13 +351,13 @@ const styles = StyleSheet.create({
   headerCard: {
     width: '100%',
     maxWidth: 500,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     ...Platform.select({
       web: { boxShadow: '0 4px 12px rgba(0,0,0,0.05)' },
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
@@ -376,25 +376,25 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     textAlign: 'center',
     marginBottom: 6,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: '#666',
+    color: theme.textMuted,
     textAlign: 'center',
     lineHeight: 18,
   },
   card: {
     width: '100%',
     maxWidth: 500,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 18,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     ...Platform.select({
       web: { boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
@@ -412,17 +412,17 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   scheduleText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: theme.text,
     marginBottom: 6,
   },
   scheduleSubtext: {
     fontSize: 12,
-    color: '#777',
+    color: theme.textMuted,
     lineHeight: 17,
   },
   statusDetails: {
@@ -437,31 +437,31 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 13,
-    color: '#666',
+    color: theme.textMuted,
     fontWeight: '500',
   },
   statusValue: {
     fontSize: 13,
-    color: '#222',
+    color: theme.text,
     fontWeight: '600',
     maxWidth: '65%',
     textAlign: 'right',
   },
   noStatusText: {
     fontSize: 13,
-    color: '#888',
+    color: theme.textMuted,
     fontStyle: 'italic',
     textAlign: 'center',
     paddingVertical: 8,
   },
   actionDescription: {
     fontSize: 13,
-    color: '#555',
+    color: theme.textMuted,
     marginBottom: 14,
     lineHeight: 18,
   },
   primaryButton: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 20,

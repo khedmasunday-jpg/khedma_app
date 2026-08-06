@@ -9,8 +9,8 @@ import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function EditStudentListScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function EditStudentListScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -185,7 +185,7 @@ export default function EditStudentListScreen({ route, navigation }) {
             <TextInput
               style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
               placeholder={t('searchStudent') || (isRtl ? 'بحث...' : 'Search...')}
-              placeholderTextColor="rgba(47, 67, 96, 0.4)"
+              placeholderTextColor={theme.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -345,7 +345,7 @@ export default function EditStudentListScreen({ route, navigation }) {
               : `${selectedStudentIds.size} selected`}
           </Text>
           <TouchableOpacity style={styles.deleteBulkButton} onPress={handleBulkDelete}>
-            <Ionicons name="trash-outline" size={18} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+            <Ionicons name="trash-outline" size={18} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
             <Text style={styles.deleteBulkButtonText}>
               {isRtl ? 'حذف المحدد' : 'Delete Selected'}
             </Text>
@@ -356,29 +356,29 @@ export default function EditStudentListScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     padding: 16, 
-    backgroundColor: 'rgba(243, 237, 224, 0.75)' 
+    backgroundColor: theme.background 
   },
   title: { 
     fontSize: 22, 
     fontWeight: 'bold', 
     marginBottom: 16,
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   noStudentsText: {
     textAlign: 'center',
-    color: 'rgba(36, 54, 79, 0.6)',
+    color: theme.textMuted,
     marginTop: 20,
     fontSize: 15,
   },
   card: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 16, 
     padding: 16, 
     marginBottom: 12,
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   name: { 
     fontSize: 17, 
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   level: { 
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   },
   classname: { 
     fontSize: 13, 
-    color: 'rgba(36, 54, 79, 0.7)',
+    color: theme.textMuted,
     marginTop: 2,
   },
   headerRow: {
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -441,9 +441,9 @@ const styles = StyleSheet.create({
   },
   searchInputWrapper: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#333',
+    color: theme.text,
     paddingVertical: 8,
   },
   clearButton: {
@@ -465,10 +465,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
   },
   selectButtonText: {
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 13,
     fontWeight: 'bold',
   },
@@ -526,17 +526,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   filterCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 12,
     padding: 14,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.1)',
+    borderColor: theme.borderColor,
   },
   filterTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 8,
   },
   pickerRow: {
@@ -546,9 +546,9 @@ const styles = StyleSheet.create({
   pickerWrapper: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.16)',
+    borderColor: theme.borderColor,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.cardBackground,
     overflow: 'hidden',
   },
   webSelect: {
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     backgroundColor: 'transparent',
     fontSize: 14,
-    color: '#333333',
+    color: theme.text,
     outlineStyle: 'none',
   },
   nativePicker: {

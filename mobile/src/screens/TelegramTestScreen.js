@@ -8,8 +8,8 @@ import { getAuthToken } from '../config/authSession';
 import { useLanguage } from '../utils/LanguageContext';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function TelegramTestScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function TelegramTestScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -238,7 +238,7 @@ export default function TelegramTestScreen({ route, navigation }) {
       <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.header}>
           <View style={styles.logoWrap}>
-            <Ionicons name="paper-plane" size={40} color="#25D366" />
+            <Ionicons name="paper-plane" size={40} color={theme.iconColor} />
           </View>
           <Text style={[styles.title, { color: theme.text }, { color: theme.text }]}>{isRtl ? 'تجربة إرسال التليجرام' : 'Telegram API Testing'}</Text>
           <Text style={styles.subtitle}>
@@ -270,7 +270,7 @@ export default function TelegramTestScreen({ route, navigation }) {
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <View style={styles.btnRow}>
-                  <Ionicons name="log-out-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+                  <Ionicons name="log-out-outline" size={16} color={theme.iconColor} style={{ marginRight: 6 }} />
                   <Text style={styles.disconnectButtonText}>
                     {isRtl ? 'تسجيل الخروج (قطع اتصال التليجرام)' : 'Disconnect Telegram (Log Out)'}
                   </Text>
@@ -325,7 +325,7 @@ export default function TelegramTestScreen({ route, navigation }) {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <View style={styles.btnRow}>
-                  <Ionicons name="refresh-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+                  <Ionicons name="refresh-outline" size={18} color={theme.iconColor} style={{ marginRight: 6 }} />
                   <Text style={styles.reconnectButtonText}>
                     {isRtl ? 'إعادة تشغيل الاتصال وتوليد رمز جديد' : 'Restart Connection & Regenerate QR'}
                   </Text>
@@ -364,7 +364,7 @@ export default function TelegramTestScreen({ route, navigation }) {
             onChangeText={setPhoneNumber}
             placeholder="e.g. 201000000000"
             keyboardType="phone-pad"
-            placeholderTextColor="#888"
+            placeholderTextColor={theme.textMuted}
           />
 
           {}
@@ -376,7 +376,7 @@ export default function TelegramTestScreen({ route, navigation }) {
             placeholder={isRtl ? 'اكتب الرسالة التجريبية هنا...' : 'Type your test message here...'}
             multiline
             numberOfLines={4}
-            placeholderTextColor="#888"
+            placeholderTextColor={theme.textMuted}
           />
 
           {}
@@ -389,7 +389,7 @@ export default function TelegramTestScreen({ route, navigation }) {
               <ActivityIndicator color="#fff" />
             ) : (
               <View style={styles.btnRow}>
-                <Ionicons name="paper-plane-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+                <Ionicons name="paper-plane-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
                 <Text style={styles.sendButtonText}>{isRtl ? 'إرسال لخادم محدد' : 'Send to Selected Person'}</Text>
               </View>
             )}
@@ -405,7 +405,7 @@ export default function TelegramTestScreen({ route, navigation }) {
               <ActivityIndicator color="#fff" />
             ) : (
               <View style={styles.btnRow}>
-                <Ionicons name="megaphone-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+                <Ionicons name="megaphone-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
                 <Text style={styles.sendButtonText}>
                   {isRtl ? `إرسال تعميم لجميع الخدام (${staffList.length} خادم)` : `Broadcast to All Staff (${staffList.length} Members)`}
                 </Text>
@@ -418,11 +418,11 @@ export default function TelegramTestScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
-    backgroundColor: 'rgba(243, 237, 224, 0.75)',
+    backgroundColor: theme.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     maxWidth: 550,
     backgroundColor: '#fffcf6',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.14)',
+    borderColor: theme.borderColor,
     borderRadius: 24,
     padding: 24,
     ...Platform.select({
@@ -457,9 +457,9 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
     textAlign: 'center',
   },
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   statusBox: {
     backgroundColor: 'rgba(47, 67, 96, 0.04)',
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.08)',
+    borderColor: theme.borderColor,
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 10,
   },
   statusRow: {
@@ -515,11 +515,11 @@ const styles = StyleSheet.create({
   },
   modeText: {
     fontSize: 12,
-    color: '#555',
+    color: theme.textMuted,
   },
   modeHighlight: {
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   form: {
     width: '100%',
@@ -527,15 +527,15 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 6,
     marginTop: 14,
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.2)',
+    borderColor: theme.borderColor,
     borderRadius: 12,
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     overflow: 'hidden',
   },
   picker: {
@@ -544,26 +544,26 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.2)',
+    borderColor: theme.borderColor,
     borderRadius: 12,
     padding: 12,
-    backgroundColor: '#fff',
-    color: '#333',
+    backgroundColor: theme.cardBackground,
+    color: theme.text,
     fontSize: 15,
   },
   textArea: {
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.2)',
+    borderColor: theme.borderColor,
     borderRadius: 12,
     padding: 12,
-    backgroundColor: '#fff',
-    color: '#333',
+    backgroundColor: theme.cardBackground,
+    color: theme.text,
     fontSize: 15,
     height: 100,
     textAlignVertical: 'top',
   },
   sendButton: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderRadius: 12,
     padding: 15,
     alignItems: 'center',
@@ -583,9 +583,9 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   qrBox: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
   qrSectionTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 12,
     alignSelf: 'stretch',
     textAlign: 'center',
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   },
   qrInstruction: {
     fontSize: 12,
-    color: '#555',
+    color: theme.textMuted,
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 18,
@@ -614,9 +614,9 @@ const styles = StyleSheet.create({
   },
   qrWrapper: {
     padding: 8,
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.08)',
+    borderColor: theme.borderColor,
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
   },
   qrFooterText: {
     fontSize: 10,
-    color: '#888',
+    color: theme.textMuted,
     marginTop: 8,
     marginBottom: 16,
   },
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   reconnectButton: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 16,

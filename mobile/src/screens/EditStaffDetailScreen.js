@@ -28,8 +28,8 @@ if (Platform.OS !== 'web') {
 const PICKER_YEAR = 2000;
 const API_URL = `${getApiBase()}/users`;
 
-export default function EditStaffDetailScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function EditStaffDetailScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, userId, role: requesterRole } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -608,7 +608,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
               onPress={handleSave} 
               disabled={saving}
             >
-              <Ionicons name="checkmark-circle-outline" size={20} color="#fff" style={{ marginHorizontal: 6 }} />
+              <Ionicons name="checkmark-circle-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
               <Text style={styles.btnText}>
                 {saving ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ' : 'Save')}
               </Text>
@@ -634,7 +634,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                 }}
                 disabled={deleting}
               >
-                <Ionicons name="trash-outline" size={20} color="#fff" style={{ marginHorizontal: 6 }} />
+                <Ionicons name="trash-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
                 <Text style={styles.btnText}>
                   {deleting ? (isRtl ? 'جاري الحذف...' : 'Deleting...') : (isRtl ? 'حذف الخادم' : 'Delete Staff')}
                 </Text>
@@ -688,7 +688,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: 'transparent' 
@@ -709,18 +709,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', 
     marginBottom: 20, 
     textAlign: 'center',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   formContainer: { 
     width: '100%', 
     maxWidth: 600, 
     alignSelf: 'center',
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderRadius: 18, 
     padding: 20, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     ...Platform.select({
       ios: {
         shadowColor: '#24364f',
@@ -742,17 +742,17 @@ const styles = StyleSheet.create({
   label: { 
     fontWeight: '700', 
     fontSize: 14,
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 6,
   },
   input: { 
     borderWidth: 1, 
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     borderRadius: 10, 
     paddingHorizontal: 14, 
     paddingVertical: 10, 
-    backgroundColor: '#fff', 
-    color: '#2f4360',
+    backgroundColor: theme.cardBackground, 
+    color: theme.text,
     fontSize: 15,
     width: '100%',
     ...Platform.select({
@@ -763,14 +763,14 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     borderWidth: 1, 
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     overflow: 'hidden',
   },
   nativePicker: {
     width: '100%',
-    color: '#2f4360',
+    color: theme.text,
   },
   webSelectWrapper: {
     position: 'relative',
@@ -784,7 +784,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 0,
     backgroundColor: 'transparent',
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 15,
     appearance: 'none',
     WebkitAppearance: 'none',
@@ -801,8 +801,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderRadius: 10,
-    borderColor: 'rgba(47, 67, 96, 0.15)',
-    backgroundColor: '#fff',
+    borderColor: theme.borderColor,
+    backgroundColor: theme.cardBackground,
     overflow: 'hidden',
   },
   webDateInput: {
@@ -825,16 +825,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   btnPicker: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnPickerText: {
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
     }),
   },
   btnSave: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
   },
   btnDelete: {
     backgroundColor: '#dc3545',

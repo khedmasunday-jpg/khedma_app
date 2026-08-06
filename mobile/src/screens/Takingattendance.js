@@ -20,8 +20,8 @@ if (Platform.OS !== 'web') {
   }
 }
 
-export default function AttendanceScreen({ route, navigation }) {
-  const { theme, isDarkMode } = useTheme();
+export default function AttendanceScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken, role, userId, userName } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -287,11 +287,11 @@ export default function AttendanceScreen({ route, navigation }) {
         {}
         <View style={[styles.bulkActionsRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <TouchableOpacity style={[styles.bulkBtn, styles.btnPresent]} onPress={() => setAll('present')}>
-            <Ionicons name="checkmark-done" size={18} color="#ffffff" style={{ marginHorizontal: 4 }} />
+            <Ionicons name="checkmark-done" size={18} color={theme.iconColor} style={{ marginHorizontal: 4 }} />
             <Text style={styles.bulkBtnText}>{t('allPresent')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.bulkBtn, styles.btnAbsent]} onPress={() => setAll('absent')}>
-            <Ionicons name="close" size={18} color="#ffffff" style={{ marginHorizontal: 4 }} />
+            <Ionicons name="close" size={18} color={theme.iconColor} style={{ marginHorizontal: 4 }} />
             <Text style={styles.bulkBtnText}>{t('allAbsent')}</Text>
           </TouchableOpacity>
         </View>
@@ -301,7 +301,7 @@ export default function AttendanceScreen({ route, navigation }) {
             <ActivityIndicator size="small" color="#ffffff" />
           ) : (
             <>
-              <Ionicons name="cloud-upload-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
+              <Ionicons name="cloud-upload-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
               <Text style={styles.submitBtnText}>{t('registerAttendance')}</Text>
             </>
           )}
@@ -311,18 +311,18 @@ export default function AttendanceScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     padding: 16,
     paddingBottom: Platform.OS === 'web' ? 80 : 16,
-    backgroundColor: 'rgba(243, 237, 224, 0.75)'
+    backgroundColor: theme.background
   },
   label: { 
     fontWeight: 'bold', 
     fontSize: 16, 
     marginBottom: 8,
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   dropdown: { 
@@ -333,9 +333,9 @@ const styles = StyleSheet.create({
   classBtn: { 
     paddingVertical: 8,
     paddingHorizontal: 16, 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     marginRight: 8,
     justifyContent: 'center',
@@ -356,11 +356,11 @@ const styles = StyleSheet.create({
     }),
   },
   classBtnSelected: { 
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderColor: '#2f4360',
   },
   classBtnText: {
-    color: '#2f4360',
+    color: theme.text,
     fontWeight: '600',
     fontSize: 14,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
@@ -374,14 +374,14 @@ const styles = StyleSheet.create({
   },
   noStudentsText: {
     textAlign: 'center',
-    color: 'rgba(36, 54, 79, 0.6)',
+    color: theme.textMuted,
     marginTop: 20,
     fontSize: 15,
   },
   studentCard: {
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
@@ -408,13 +408,13 @@ const styles = StyleSheet.create({
   studentName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 4,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   statsText: {
     fontSize: 12,
-    color: 'rgba(36, 54, 79, 0.7)',
+    color: theme.textMuted,
     marginTop: 2,
   },
   statusToggle: {
@@ -440,9 +440,9 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   controlPanel: {
-    backgroundColor: 'rgba(255, 252, 246, 0.98)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.16)',
+    borderColor: theme.borderColor,
     borderRadius: 20,
     padding: 16,
     marginTop: 12,
@@ -464,15 +464,15 @@ const styles = StyleSheet.create({
   dateLabel: {
     fontWeight: 'bold',
     fontSize: 14,
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 6,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   dateSelectorRow: {
     alignItems: 'center',
-    backgroundColor: 'rgba(243, 237, 224, 0.4)',
+    backgroundColor: theme.background,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     padding: 8,
     marginBottom: 12,
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 0,
     backgroundColor: 'transparent',
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 14,
     fontWeight: '600',
     outlineWidth: 0,
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   datePickerText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2f4360',
+    color: theme.text,
   },
   bulkActionsRow: {
     justifyContent: 'space-between',
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   submitBtn: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     paddingVertical: 14,
     borderRadius: 12,
     flexDirection: 'row',

@@ -18,8 +18,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getAuthToken } from '../config/authSession';
 
 import { useTheme } from '../utils/ThemeContext';
-export default function LogsScreen({ route }) {
-  const { theme, isDarkMode } = useTheme();
+export default function LogsScreen({ route }) {const { theme, isDarkMode } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -342,7 +342,7 @@ export default function LogsScreen({ route }) {
         <TextInput
           style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
           placeholder={t('search')}
-          placeholderTextColor="rgba(47, 67, 96, 0.5)"
+          placeholderTextColor={theme.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -427,7 +427,7 @@ export default function LogsScreen({ route }) {
             ) : (
               <TextInput
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="rgba(47, 67, 96, 0.4)"
+                placeholderTextColor={theme.textMuted}
                 value={startDate}
                 onChangeText={setStartDate}
                 style={{ color: '#2f4360', fontSize: 13, minWidth: 80, padding: 0 }}
@@ -446,7 +446,7 @@ export default function LogsScreen({ route }) {
             ) : (
               <TextInput
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="rgba(47, 67, 96, 0.4)"
+                placeholderTextColor={theme.textMuted}
                 value={endDate}
                 onChangeText={setEndDate}
                 style={{ color: '#2f4360', fontSize: 13, minWidth: 80, padding: 0 }}
@@ -458,7 +458,7 @@ export default function LogsScreen({ route }) {
               style={styles.clearCustomBtn} 
               onPress={() => { setStartDate(''); setEndDate(''); }}
             >
-              <Ionicons name="trash-outline" size={16} color="#d9534f" />
+              <Ionicons name="trash-outline" size={16} color={theme.iconColor} />
             </TouchableOpacity>
           )}
         </View>
@@ -558,7 +558,7 @@ export default function LogsScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: 'transparent' 
@@ -572,15 +572,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', 
     marginBottom: 16, 
     textAlign: 'center',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
   searchContainer: {
     height: 48,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     alignItems: 'center',
     paddingHorizontal: 12,
     marginBottom: 12,
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 15,
-    color: '#2f4360',
+    color: theme.text,
     paddingHorizontal: 8,
   },
   clearSearchButton: {
@@ -645,12 +645,12 @@ const styles = StyleSheet.create({
     }),
   },
   filterPillActive: {
-    backgroundColor: '#2f4360',
+    backgroundColor: theme.primary,
     borderColor: '#2f4360',
   },
   filterPillInactive: {
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
-    borderColor: 'rgba(47, 67, 96, 0.15)',
+    backgroundColor: theme.cardBackground,
+    borderColor: theme.borderColor,
   },
   filterPillText: {
     fontSize: 13,
@@ -660,14 +660,14 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   filterPillTextInactive: {
-    color: '#2f4360',
+    color: theme.text,
   },
   box: { 
-    backgroundColor: 'rgba(255, 252, 246, 0.95)', 
+    backgroundColor: theme.cardBackground, 
     borderRadius: 18, 
     padding: 14, 
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     marginBottom: 16,
     ...Platform.select({
       ios: {
@@ -697,10 +697,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   logCard: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.cardBackground,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.08)',
+    borderColor: theme.borderColor,
     padding: 12,
     marginBottom: 10,
     alignItems: 'flex-start',
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 4,
   },
   performer: {
@@ -749,20 +749,20 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '600',
-    color: '#2f4360',
+    color: theme.text,
   },
   detailsBox: {
-    backgroundColor: 'rgba(243, 237, 224, 0.35)',
+    backgroundColor: theme.background,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.06)',
+    borderColor: theme.borderColor,
     padding: 8,
     marginTop: 6,
     marginBottom: 4,
   },
   detailsText: {
     fontSize: 12.5,
-    color: '#555',
+    color: theme.textMuted,
     lineHeight: 16,
   },
   cardFooter: {
@@ -792,9 +792,9 @@ const styles = StyleSheet.create({
   customDateWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 252, 246, 0.95)',
+    backgroundColor: theme.cardBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 67, 96, 0.12)',
+    borderColor: theme.borderColor,
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -803,13 +803,13 @@ const styles = StyleSheet.create({
   customDateLabel: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
   },
   customDateInput: {
     borderWidth: 0,
     backgroundColor: 'transparent',
     fontSize: 13,
-    color: '#2f4360',
+    color: theme.text,
     outlineStyle: 'none',
     cursor: 'pointer',
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
   },
   liveBtnInactive: {
     backgroundColor: 'rgba(47, 67, 96, 0.05)',
-    borderColor: 'rgba(47, 67, 96, 0.1)',
+    borderColor: theme.borderColor,
   },
   liveBtnText: {
     fontSize: 12,
