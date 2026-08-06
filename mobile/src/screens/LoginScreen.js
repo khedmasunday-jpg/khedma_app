@@ -56,7 +56,10 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.langToggleContainer, { right: 20 }]}>
+      <View style={[styles.langToggleContainer, { right: 20, flexDirection: 'row', gap: 10 }]}>
+        <TouchableOpacity style={styles.langToggle} onPress={() => alert('Dark mode coming soon!')}>
+          <Ionicons name="moon-outline" size={22} color="#2f4360" />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.langToggle} onPress={toggleLanguage}>
           <Ionicons name="globe-outline" size={22} color="#2f4360" />
         </TouchableOpacity>

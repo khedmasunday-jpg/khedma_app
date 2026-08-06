@@ -117,8 +117,7 @@ export default function TayoDisplayScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.headerRow, { flexDirection: t('isRtl') ? 'row-reverse' : 'row' }]}>
-        <View />
+      <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
         <View style={{ flexDirection: t('isRtl') ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color="#2f4360" />

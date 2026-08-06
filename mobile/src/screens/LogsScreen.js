@@ -317,6 +317,8 @@ export default function LogsScreen({ route }) {
       style={styles.container} 
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
     >
       {}
       <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>

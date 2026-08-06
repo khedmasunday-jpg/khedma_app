@@ -123,36 +123,48 @@ function AppNavigator() {
           />
         ),
         headerRight: () => (
-          <TouchableOpacity 
-            onPress={toggleLanguage} 
-            style={{ 
-              marginRight: 15, 
-              width: 44,
-              height: 44,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: '#ffffff', 
-              borderRadius: 24,
-              borderWidth: 1,
-              borderColor: 'rgba(47, 67, 96, 0.18)',
-              ...Platform.select({
-                ios: {
-                  shadowColor: '#2f4360',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                },
-                android: {
-                  elevation: 2,
-                },
-                web: {
-                  boxShadow: '0 2px 4px rgba(47, 67, 96, 0.05)',
-                }
-              }),
-            }}
-          >
-            <Ionicons name="globe-outline" size={22} color="#2f4360" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15, gap: 10 }}>
+            <TouchableOpacity 
+              onPress={() => alert('Dark mode coming soon!')} 
+              style={{ 
+                width: 44,
+                height: 44,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#ffffff', 
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: 'rgba(47, 67, 96, 0.18)',
+                ...Platform.select({
+                  ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+                  android: { elevation: 2 },
+                  web: { boxShadow: '0 2px 4px rgba(47, 67, 96, 0.05)' }
+                }),
+              }}
+            >
+              <Ionicons name="moon-outline" size={22} color="#2f4360" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={toggleLanguage} 
+              style={{ 
+                width: 44,
+                height: 44,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: '#ffffff', 
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: 'rgba(47, 67, 96, 0.18)',
+                ...Platform.select({
+                  ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+                  android: { elevation: 2 },
+                  web: { boxShadow: '0 2px 4px rgba(47, 67, 96, 0.05)' }
+                }),
+              }}
+            >
+              <Ionicons name="globe-outline" size={22} color="#2f4360" />
+            </TouchableOpacity>
+          </View>
         ),
         cardStyle: { flex: 1, backgroundColor: 'transparent' } 
       })}

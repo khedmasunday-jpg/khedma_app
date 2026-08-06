@@ -273,6 +273,10 @@ export default function PostLoginScreen({ route, navigation }) {
             <Ionicons name="person-circle-outline" size={22} color="#2f4360" />
           </TouchableOpacity>
 
+          <TouchableOpacity style={styles.iconBtn} onPress={() => alert('Dark mode coming soon!')}>
+            <Ionicons name="moon-outline" size={22} color="#2f4360" />
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.iconBtn} onPress={toggleLanguage}>
             <Ionicons name="globe-outline" size={22} color="#2f4360" />
           </TouchableOpacity>
