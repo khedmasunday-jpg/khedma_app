@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, TextInput } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform, TextInput, ScrollView } from 'react-native';
 import axios from 'axios';
 import { API_URL } from '../config/api';
 import { logger } from '../utils/logger';
@@ -15,15 +15,34 @@ export default function EditStaffListScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('All');
+  const [selectedClass, setSelectedClass] = useState('All');
 
   const isRtl = locale === 'ar';
   const searchPlaceholder = isRtl ? 'بحث باسم الخادم...' : 'Search staff name...';
 
+  const availableRoles = React.useMemo(() => {
+    const roles = [...new Set(staff.map(s => s.role).filter(Boolean))];
+    return ['All', ...roles];
+  }, [staff]);
+
+  const availableClasses = React.useMemo(() => {
+    const classes = [...new Set(staff.map(s => s.assignedclass || s.classname).filter(Boolean))];
+    return ['All', ...classes];
+  }, [staff]);
+
   const filteredStaff = staff.filter(user => {
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return true;
-    return (user.fullName || '').toLowerCase().includes(q) || 
-           (user.username || '').toLowerCase().includes(q);
+    const matchSearch = !q || (user.fullName || '').toLowerCase().includes(q) || (user.username || '').toLowerCase().includes(q);
+    const matchRole = selectedRole === 'All' || user.role === selectedRole;
+    
+    let matchClass = true;
+    if (selectedRole === 'teacher' && selectedClass !== 'All') {
+      matchClass = (user.assignedclass || user.classname) === selectedClass;
+    }
+
+    return matchSearch && matchRole && matchClass;
   });
 
   const fetchStaff = async () => {
@@ -79,14 +98,44 @@ export default function EditStaffListScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <View />
+      <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
         <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color="#2f4360" />
           </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color="#2f4360" />
+          </TouchableOpacity>
         </View>
       </View>
+
+      {showFilter && (
+        <View style={styles.filtersSection}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+            <Text style={styles.filterLabel}>{t('role') || (isRtl ? 'الرتبة' : 'Role')}</Text>
+            {availableRoles.map(r => (
+              <TouchableOpacity key={r} style={[styles.pill, selectedRole === r && styles.pillActive]} onPress={() => setSelectedRole(r)}>
+                <Text style={[styles.pillText, selectedRole === r && styles.pillTextActive]}>
+                  {r === 'All' ? (t('all') || (isRtl ? 'الكل' : 'All')) : getLocalizedRole(r)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {selectedRole === 'teacher' && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+              <Text style={styles.filterLabel}>{t('classFilter') || (isRtl ? 'الفصل:' : 'Class:')}</Text>
+              {availableClasses.map(cls => (
+                <TouchableOpacity key={cls} style={[styles.pill, selectedClass === cls && styles.pillActive]} onPress={() => setSelectedClass(cls)}>
+                  <Text style={[styles.pillText, selectedClass === cls && styles.pillTextActive]}>
+                    {cls === 'All' ? (t('all') || (isRtl ? 'الكل' : 'All')) : cls}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+      )}
 
       {showSearch && (
         <View style={styles.searchContainer}>
@@ -214,4 +263,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontWeight: '600',
   },
+  filtersSection: { paddingBottom: 10, borderBottomWidth: 1, borderColor: 'rgba(47,67,96,0.05)', marginBottom: 16 },
+  filterScroll: { flexDirection: 'row', marginBottom: 12 },
+  filterLabel: { color: '#2f4360', fontWeight: 'bold', alignSelf: 'center', marginRight: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
+  pill: { backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: 'rgba(47,67,96,0.1)' },
+  pillActive: { backgroundColor: '#2f4360', borderColor: '#2f4360' },
+  pillText: { color: '#2f4360', fontWeight: '600' },
+  pillTextActive: { color: '#fff' },
 });
