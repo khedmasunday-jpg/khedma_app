@@ -26,6 +26,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as XLSX from 'xlsx';
 
+import { useTheme } from '../utils/ThemeContext';
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -48,6 +49,7 @@ const initialStudent = {
 };
 
 export default function AddStudentsScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route?.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -451,7 +453,7 @@ export default function AddStudentsScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]} contentContainerStyle={styles.scrollContent}>
       <TouchableOpacity style={styles.excelButton} onPress={handlePickExcel}>
         <Ionicons name="document-text-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
         <Text style={styles.excelButtonText}>
@@ -464,7 +466,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('studentName')}</Text>
           <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="person-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput
               value={student.fullName}
               onChangeText={(v) => handleChange('fullName', v)}
@@ -479,7 +481,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gender')}</Text>
           <View style={styles.pickerWrapper}>
-            <Ionicons name="male-female-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="male-female-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform.OS === 'web' ? (
               <select
                 value={student.gender}
@@ -507,7 +509,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gradeLevel')}</Text>
           <View style={styles.pickerWrapper}>
-            <Ionicons name="school-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="school-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform.OS === 'web' ? (
               <select
                 value={student.classLevel}
@@ -542,7 +544,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('selectClass')}</Text>
           <View style={styles.pickerWrapper}>
-            <Ionicons name="people-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="people-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {student.classLevel ? (
               Platform.OS === 'web' ? (
                 <select
@@ -589,7 +591,7 @@ export default function AddStudentsScreen({ route, navigation }) {
               style={styles.inputIcon}
               activeOpacity={0.6}
             >
-              <Ionicons name="call-outline" size={20} color="#2f4360" />
+              <Ionicons name="call-outline" size={20} color={theme.iconColor} />
             </TouchableOpacity>
             <TextInput
               value={student.mother_phonenumber}
@@ -614,7 +616,7 @@ export default function AddStudentsScreen({ route, navigation }) {
               style={styles.inputIcon}
               activeOpacity={0.6}
             >
-              <Ionicons name="call-outline" size={20} color="#2f4360" />
+              <Ionicons name="call-outline" size={20} color={theme.iconColor} />
             </TouchableOpacity>
             <TextInput
               value={student.father_phonenumber}
@@ -634,7 +636,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('birthdate')}</Text>
           <View style={styles.pickerWrapper}>
-            <Ionicons name="calendar-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="calendar-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform.OS === 'web' ? (
               <WebDateInput
                 value={student.birthdate}
@@ -670,7 +672,7 @@ export default function AddStudentsScreen({ route, navigation }) {
         {}
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.secondaryButton} onPress={handleAddStudent}>
-            <Ionicons name="add-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
+            <Ionicons name="add-circle-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
             <Text style={styles.secondaryButtonText}>{t('addToQueue')}</Text>
           </TouchableOpacity>
 
@@ -688,16 +690,16 @@ export default function AddStudentsScreen({ route, navigation }) {
       {}
       <Modal visible={contactPickerVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{locale === 'ar' ? 'اختر تليفون جهة الاتصال' : 'Pick Contact Phone'}</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{locale === 'ar' ? 'اختر تليفون جهة الاتصال' : 'Pick Contact Phone'}</Text>
               <TouchableOpacity onPress={() => setContactPickerVisible(false)}>
                 <Ionicons name="close-circle-outline" size={24} color="#666" />
               </TouchableOpacity>
             </View>
             {loadingContacts ? (
               <View style={{ padding: 30, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#2f4360" />
+                <ActivityIndicator size="large" color={theme.iconColor} />
               </View>
             ) : (
               <FlatList
@@ -740,15 +742,15 @@ export default function AddStudentsScreen({ route, navigation }) {
       {}
       <Modal visible={customAlertVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.modalHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Ionicons 
                   name={customAlertTitle.includes('نجاح') || customAlertTitle.includes('Success') || customAlertTitle.includes('تم') ? 'checkmark-circle-outline' : 'information-circle-outline'} 
                   size={24} 
-                  color="#2f4360" 
+                  color={theme.iconColor} 
                 />
-                <Text style={styles.modalTitle}>{customAlertTitle}</Text>
+                <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{customAlertTitle}</Text>
               </View>
             </View>
             <View style={{ marginBottom: 16 }}>

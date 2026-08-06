@@ -10,6 +10,7 @@ import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache, invalidateCache } from '../utils/apiCache';
 
+import { useTheme } from '../utils/ThemeContext';
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -20,6 +21,7 @@ if (Platform.OS !== 'web') {
 }
 
 export default function AttendanceScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role, userId, userName } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -157,7 +159,7 @@ export default function AttendanceScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {/* Class Selector */}
       <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>{t('selectClass')}</Text>
       <ScrollView horizontal style={styles.dropdown} showsHorizontalScrollIndicator={false}>
@@ -224,7 +226,7 @@ export default function AttendanceScreen({ route, navigation }) {
       <View style={styles.controlPanel}>
         <Text style={[styles.dateLabel, { textAlign: isRtl ? 'right' : 'left' }]}>{t('attendanceDate')}</Text>
         <View style={[styles.dateSelectorRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          <Ionicons name="calendar-outline" size={20} color="#2f4360" style={{ marginHorizontal: 8 }} />
+          <Ionicons name="calendar-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 8 }} />
           {Platform.OS === 'web' ? (
             <View style={{ flex: 1, position: 'relative', minHeight: 40, justifyContent: 'center' }}>
               <View style={{ paddingLeft: 12 }} pointerEvents="none">

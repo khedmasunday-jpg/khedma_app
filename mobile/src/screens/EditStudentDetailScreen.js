@@ -23,6 +23,7 @@ import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 
+import { useTheme } from '../utils/ThemeContext';
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -33,6 +34,7 @@ if (Platform.OS !== 'web') {
 }
 
 export default function EditStudentDetailScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, studentId } = route.params || {};
   const token = routeToken || getAuthToken();
   const [student, setStudent] = useState(null);
@@ -322,7 +324,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
 
   if (loading || !student) return (
     <View style={styles.center}>
-      <ActivityIndicator size="large" color="#2f4360" />
+      <ActivityIndicator size="large" color={theme.iconColor} />
     </View>
   );
 
@@ -340,11 +342,11 @@ export default function EditStudentDetailScreen({ route, navigation }) {
     <View style={{ flex: 1 }}>
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView 
-        style={styles.container} 
+        style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]} 
         contentContainerStyle={styles.scrollContent} 
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{student.fullName}</Text>
+        <Text style={[styles.title, { color: theme.text }, { color: theme.text }]}>{student.fullName}</Text>
 
         {}
         <View style={styles.summaryHeader}>
@@ -366,7 +368,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
 
               {key === "yearLevel" ? (
                 <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                  <Ionicons name={getFieldIcon(key)} size={20} color="#2f4360" style={styles.inputIcon} />
+                  <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                   <View style={{ flex: 1 }}>
                     {Platform.OS === 'web' ? (
                       <View style={styles.webSelectWrapper}>
@@ -383,7 +385,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                         <Ionicons 
                           name="chevron-down-outline" 
                           size={18} 
-                          color="#2f4360" 
+                          color={theme.iconColor} 
                           style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
                         />
                       </View>
@@ -404,7 +406,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                 </View>
               ) : key === "gender" ? (
                 <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                  <Ionicons name={getFieldIcon(key)} size={20} color="#2f4360" style={styles.inputIcon} />
+                  <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                   <View style={{ flex: 1 }}>
                     {Platform.OS === 'web' ? (
                       <View style={styles.webSelectWrapper}>
@@ -419,7 +421,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                         <Ionicons 
                           name="chevron-down-outline" 
                           size={18} 
-                          color="#2f4360" 
+                          color={theme.iconColor} 
                           style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
                         />
                       </View>
@@ -438,7 +440,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                 </View>
               ) : key === "classname" ? (
                 <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                  <Ionicons name={getFieldIcon(key)} size={20} color="#2f4360" style={styles.inputIcon} />
+                  <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                   <View style={{ flex: 1 }}>
                     {student.yearLevel ? (
                       Platform.OS === 'web' ? (
@@ -462,7 +464,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                           <Ionicons 
                             name="chevron-down-outline" 
                             size={18} 
-                            color="#2f4360" 
+                            color={theme.iconColor} 
                             style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
                           />
                         </View>
@@ -496,7 +498,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                 <View style={{ marginBottom: 4 }}>
                   {Platform.OS === 'web' ? (
                     <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                      <Ionicons name={getFieldIcon(key)} size={20} color="#2f4360" style={styles.inputIcon} />
+                      <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                       <View style={styles.webDateWrapper}>
                         <View 
                           pointerEvents="none" 
@@ -535,7 +537,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {
                     </View>
                   ) : (
                     <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                      <Ionicons name={getFieldIcon(key)} size={20} color="#2f4360" style={styles.inputIcon} />
+                      <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                       <TouchableOpacity 
                         style={[styles.btnPicker, { flex: 1, flexDirection: isRtl ? 'row-reverse' : 'row', borderWidth: 0 }]} 
                         onPress={() => setShowCalendar(true)}
@@ -616,16 +618,16 @@ export default function EditStudentDetailScreen({ route, navigation }) {
     {}
     <Modal visible={contactPickerVisible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{locale === 'ar' ? 'اختر تليفون جهة الاتصال' : 'Pick Contact Phone'}</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{locale === 'ar' ? 'اختر تليفون جهة الاتصال' : 'Pick Contact Phone'}</Text>
             <TouchableOpacity onPress={() => setContactPickerVisible(false)}>
               <Ionicons name="close-circle-outline" size={24} color="#666" />
             </TouchableOpacity>
           </View>
           {loadingContacts ? (
             <View style={{ padding: 30, justifyContent: 'center', alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#2f4360" />
+              <ActivityIndicator size="large" color={theme.iconColor} />
             </View>
           ) : (
             <FlatList

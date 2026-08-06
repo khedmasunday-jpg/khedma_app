@@ -5,7 +5,9 @@ import { getAuthToken } from '../config/authSession';
 import { createApiClient } from '../config/api';
 import { logger } from '../utils/logger';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function AssignStudentsScreen1({ navigation, route }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const [teachers, setTeachers] = useState([]);

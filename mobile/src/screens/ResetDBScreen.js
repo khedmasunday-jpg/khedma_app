@@ -7,12 +7,14 @@ import { useLanguage } from '../utils/LanguageContext';
 import { logger } from '../utils/logger';
 import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 
+import { useTheme } from '../utils/ThemeContext';
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try { DateTimePickerModal = require('react-native-modal-datetime-picker').default; } catch (e) { DateTimePickerModal = null; }
 }
 
 export default function ResetDBScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { locale } = useLanguage();
@@ -242,7 +244,7 @@ export default function ResetDBScreen({ route, navigation }) {
         <View style={styles.iconCircle}>
           <Ionicons name="refresh-circle-outline" size={40} color="#d9534f" />
         </View>
-        <Text style={styles.headerTitle}>
+        <Text style={[styles.headerTitle, { color: theme.text }, { color: theme.text }]}>
           {isAr ? 'إعادة ضبط البيانات وتصفير الحضور' : 'Database Reset & Operations'}
         </Text>
         <Text style={styles.headerSubtitle}>
@@ -253,9 +255,9 @@ export default function ResetDBScreen({ route, navigation }) {
       </View>
 
       {}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="stats-chart-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Ionicons name="stats-chart-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
             {isAr ? 'تصفير عداد الحضور فقط' : 'Reset Attendance Counters'}
           </Text>
@@ -281,9 +283,9 @@ export default function ResetDBScreen({ route, navigation }) {
       </View>
 
       {/* Reset Logs Card */}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="document-text-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Ionicons name="document-text-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
             {isAr ? 'مسح سجلات النظام' : 'Reset Logs'}
           </Text>
@@ -309,9 +311,9 @@ export default function ResetDBScreen({ route, navigation }) {
       </View>
 
       {/* Reset Tayo Card */}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="star-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Ionicons name="star-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
             {isAr ? 'تصفير طايو' : 'Reset Taio'}
           </Text>
@@ -337,7 +339,7 @@ export default function ResetDBScreen({ route, navigation }) {
       </View>
 
       {}
-      <View style={[styles.card, styles.dangerCard]}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, styles.dangerCard]}>
         <View style={styles.cardHeader}>
           <Ionicons name="trash-bin-outline" size={22} color="#d9534f" style={{ marginRight: 8 }} />
           <Text style={[styles.cardTitle, { color: '#d9534f' }]}>
@@ -368,9 +370,9 @@ export default function ResetDBScreen({ route, navigation }) {
       </View>
 
       {}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="calendar-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Ionicons name="calendar-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
             {isAr ? 'مسح حضور فصل في تاريخ معين' : 'Reset Class for Specific Date'}
           </Text>

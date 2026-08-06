@@ -33,7 +33,7 @@ export const darkTheme = {
 
 export const ThemeProvider = ({ children }) => {
   const systemColorScheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === 'dark');
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // To support web dark mode styling on the body
   useEffect(() => {

@@ -21,6 +21,7 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import { Picker } from '@react-native-picker/picker';
 
+import { useTheme } from '../utils/ThemeContext';
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -65,6 +66,7 @@ const classTranslations = {
 };
 
 export default function AddStaffScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role: requesterRole } = route?.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -481,13 +483,13 @@ export default function AddStaffScreen({ route, navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]} contentContainerStyle={styles.scrollContent}>
       <View style={styles.formCard}>
         {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('fullNameLabel')}</Text>
           <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="person-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.fullName} 
               onChangeText={val => handleChange('fullName', val)} 
@@ -502,7 +504,7 @@ export default function AddStaffScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('roleLabel')}</Text>
           <View style={styles.pickerWrapper}>
-            <Ionicons name="ribbon-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="ribbon-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform && Platform.OS === 'web' ? (
               <select
                 value={staff.role}
@@ -542,7 +544,7 @@ export default function AddStaffScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('telegramChatIdLabel')}</Text>
           <View style={styles.inputWrapper}>
-            <Ionicons name="paper-plane-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="paper-plane-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.telegramChatId} 
               onChangeText={val => handleChange('telegramChatId', val)} 
@@ -561,7 +563,7 @@ export default function AddStaffScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('birthdate')}</Text>
           <View style={styles.pickerWrapper}>
-            <Ionicons name="calendar-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="calendar-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform.OS === 'web' ? (
               <>
                 <View style={{ flex: 1, minHeight: 40, justifyContent: 'center', paddingLeft: 12 }} pointerEvents="none">
@@ -622,7 +624,7 @@ export default function AddStaffScreen({ route, navigation }) {
         {}
         {!staff.role ? (
           <View style={styles.promptBox}>
-            <Ionicons name="information-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
+            <Ionicons name="information-circle-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
             <Text style={styles.promptText}>{t('chooseRoleFirstPrompt')}</Text>
           </View>
         ) : (staff.role === 'teacher' || staff.role === 'co-principal') ? (
@@ -631,7 +633,7 @@ export default function AddStaffScreen({ route, navigation }) {
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gradeLevel')}</Text>
               <View style={styles.pickerWrapper}>
-                <Ionicons name="school-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+                <Ionicons name="school-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
                 {(() => {
                   const levelOptions = [
                     { label: locale === 'ar' ? 'سنة أولى' : 'Year 1', value: 1 },
@@ -691,7 +693,7 @@ export default function AddStaffScreen({ route, navigation }) {
                 <View style={styles.inputGroup}>
                   <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('selectClass')}</Text>
                   <View style={styles.pickerWrapper}>
-                    <Ionicons name="people-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+                    <Ionicons name="people-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
                     {staff.assignedlevel ? (
                       Platform.OS === 'web' ? (
                         <select
@@ -733,7 +735,7 @@ export default function AddStaffScreen({ route, navigation }) {
                 {}
                 <View style={[styles.inputGroup, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#f0f0f0', marginTop: 10 }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Ionicons name="star-outline" size={20} color="#2f4360" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+                    <Ionicons name="star-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
                     <Text style={[styles.label, { marginBottom: 0 }]}>
                       {locale === 'ar' ? 'أمين الفصل' : 'Class Leader'}
                     </Text>
@@ -750,7 +752,7 @@ export default function AddStaffScreen({ route, navigation }) {
           </>
         ) : staff.role === 'principal' ? (
           <View style={styles.promptBox}>
-            <Ionicons name="information-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
+            <Ionicons name="information-circle-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
             <Text style={styles.promptText}>{t('principalNoLevelPrompt')}</Text>
           </View>
         ) : null}
@@ -759,7 +761,7 @@ export default function AddStaffScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('usernameLabel')}</Text>
           <View style={styles.inputWrapper}>
-            <Ionicons name="keypad-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="keypad-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.username} 
               onChangeText={val => handleChange('username', val)} 
@@ -771,7 +773,7 @@ export default function AddStaffScreen({ route, navigation }) {
               onPress={generateUsernameOnDemand} 
               style={styles.inlineActionBtn}
             >
-              <Ionicons name="sparkles-outline" size={18} color="#2f4360" />
+              <Ionicons name="sparkles-outline" size={18} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         </View>
@@ -780,7 +782,7 @@ export default function AddStaffScreen({ route, navigation }) {
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('passwordLabel')}</Text>
           <View style={styles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#2f4360" style={styles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.password} 
               onChangeText={val => handleChange('password', val)} 
@@ -793,7 +795,7 @@ export default function AddStaffScreen({ route, navigation }) {
               onPress={generatePasswordOnDemand} 
               style={styles.inlineActionBtn}
             >
-              <Ionicons name="refresh-outline" size={18} color="#2f4360" />
+              <Ionicons name="refresh-outline" size={18} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         </View>
@@ -801,7 +803,7 @@ export default function AddStaffScreen({ route, navigation }) {
         {}
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.secondaryButton} onPress={handleAddOne}>
-            <Ionicons name="add-circle-outline" size={20} color="#2f4360" style={{ marginRight: 6 }} />
+            <Ionicons name="add-circle-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
             <Text style={styles.secondaryButtonText}>{t('addToQueue')}</Text>
           </TouchableOpacity>
 
@@ -819,10 +821,10 @@ export default function AddStaffScreen({ route, navigation }) {
       {}
       <Modal visible={credModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.modalHeader}>
-              <Ionicons name="key-outline" size={24} color="#2f4360" />
-              <Text style={styles.modalTitle}>{t('credentialsTitle')}</Text>
+              <Ionicons name="key-outline" size={24} color={theme.iconColor} />
+              <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{t('credentialsTitle')}</Text>
             </View>
             <View style={styles.modalBody}>
               {generatedCreds && generatedCreds.length > 1 ? (
@@ -887,14 +889,14 @@ export default function AddStaffScreen({ route, navigation }) {
       {}
       <Modal visible={customAlertVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.modalHeader}>
               <Ionicons 
                 name={customAlertTitle.includes('نجاح') || customAlertTitle.includes('Success') || customAlertTitle.includes('تم') ? 'checkmark-circle-outline' : 'information-circle-outline'} 
                 size={24} 
-                color="#2f4360" 
+                color={theme.iconColor} 
               />
-              <Text style={styles.modalTitle}>{customAlertTitle}</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{customAlertTitle}</Text>
             </View>
             <View style={styles.modalBody}>
               <Text style={{ fontSize: 15, color: '#333333', lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
@@ -914,14 +916,14 @@ export default function AddStaffScreen({ route, navigation }) {
       {}
       <Modal visible={contactPickerVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '80%', padding: 0 }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { maxHeight: '80%', padding: 0 }]}>
             <View style={[styles.modalHeader, { paddingHorizontal: 16, paddingTop: 16 }]}>
-              <Ionicons name="people-outline" size={22} color="#2f4360" />
-              <Text style={styles.modalTitle}>
+              <Ionicons name="people-outline" size={22} color={theme.iconColor} />
+              <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>
                 {locale === 'ar' ? 'اختر جهة اتصال' : 'Pick a Contact'}
               </Text>
               <TouchableOpacity onPress={() => setContactPickerVisible(false)} style={{ marginLeft: 'auto' }}>
-                <Ionicons name="close-circle-outline" size={24} color="#2f4360" />
+                <Ionicons name="close-circle-outline" size={24} color={theme.iconColor} />
               </TouchableOpacity>
             </View>
             {loadingContacts ? (
@@ -942,7 +944,7 @@ export default function AddStaffScreen({ route, navigation }) {
                           setContactPickerVisible(false);
                         }}
                       >
-                        <Ionicons name="call-outline" size={14} color="#2f4360" style={{ marginRight: 6 }} />
+                        <Ionicons name="call-outline" size={14} color={theme.iconColor} style={{ marginRight: 6 }} />
                         <Text style={styles.contactPhoneText}>{p.number}</Text>
                         <Text style={styles.contactPhoneLabel}> ({p.label})</Text>
                       </TouchableOpacity>

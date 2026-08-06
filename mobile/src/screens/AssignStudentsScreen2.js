@@ -19,6 +19,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 import { getAuthToken } from '../config/authSession';
 
+import { useTheme } from '../utils/ThemeContext';
 const localTranslations = {
   en: {
     assignTo: "Assign Students to",
@@ -79,6 +80,7 @@ const localTranslations = {
 };
 
 export default function AssignStudentsScreen2({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, teacher } = route.params || {};
   const token = routeToken || getAuthToken();
   const [students, setStudents] = useState([]);
@@ -353,7 +355,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
         <ScrollView 
           contentContainerStyle={styles.scrollContent} 
           showsVerticalScrollIndicator={false}
@@ -361,9 +363,9 @@ export default function AssignStudentsScreen2({ route, navigation }) {
           {}
           <View style={styles.headerCard}>
             <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-              <Ionicons name="school" size={28} color="#2f4360" />
+              <Ionicons name="school" size={28} color={theme.iconColor} />
               <View style={[styles.headerTextContainer, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
-                <Text style={styles.headerTitle}>
+                <Text style={[styles.headerTitle, { color: theme.text }, { color: theme.text }]}>
                   {localT('assignTo')} {teacher.fullName}
                 </Text>
                 <Text style={styles.headerSubtitle}>
@@ -377,7 +379,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
           {isCoPrincipal && (
             <View style={styles.adminCard}>
               <View style={[styles.adminHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                <Ionicons name="construct-outline" size={20} color="#2f4360" />
+                <Ionicons name="construct-outline" size={20} color={theme.iconColor} />
                 <Text style={styles.adminTitle}>{localT('adminActions')}</Text>
               </View>
 
@@ -422,7 +424,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
 
           {}
           <View style={[styles.searchWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <Ionicons name="search-outline" size={20} color="#2f4360" style={styles.searchIcon} />
+            <Ionicons name="search-outline" size={20} color={theme.iconColor} style={styles.searchIcon} />
             <TextInput
               style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
               value={searchQuery}
@@ -440,7 +442,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
           {}
           {selected.length > 0 && (
             <View style={[styles.selectionBadge, { alignSelf: isRtl ? 'flex-end' : 'flex-start', flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-              <Ionicons name="checkmark-circle" size={16} color="#2f4360" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+              <Ionicons name="checkmark-circle" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
               <Text style={styles.selectionBadgeText}>
                 {selected.length} {localT('selectedCount')} ({newSelectedCount} {isRtl ? 'جديد' : 'new'}, {assignedSelectedCount} {isRtl ? 'موزع' : 'assigned'})
               </Text>
@@ -450,12 +452,12 @@ export default function AssignStudentsScreen2({ route, navigation }) {
           {}
           {loading ? (
             <View style={{ paddingVertical: 40 }}>
-              <ActivityIndicator size="large" color="#2f4360" />
+              <ActivityIndicator size="large" color={theme.iconColor} />
             </View>
           ) : filteredStudents.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Ionicons name="people-outline" size={48} color="rgba(47, 67, 96, 0.2)" />
-              <Text style={styles.emptyText}>{localT('noAvailable')}</Text>
+              <Text style={[styles.emptyText, { color: theme.textMuted }, { color: theme.textMuted }]}>{localT('noAvailable')}</Text>
             </View>
           ) : (
             <View style={styles.listWrapper}>
@@ -498,7 +500,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {
                     {}
                     <View style={styles.checkboxContainer}>
                       {isSelected ? (
-                        <Ionicons name="checkbox" size={24} color="#2f4360" />
+                        <Ionicons name="checkbox" size={24} color={theme.iconColor} />
                       ) : (
                         <Ionicons name="square-outline" size={24} color="rgba(47, 67, 96, 0.3)" />
                       )}

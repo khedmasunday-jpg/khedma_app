@@ -3,6 +3,7 @@ import { View, ScrollView, StyleSheet, TouchableOpacity, Text, Alert, Platform, 
 import Axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
+import { useTheme } from '../utils/ThemeContext';
 import { API_URL } from '../config/api';
 import { getAuthToken } from '../config/authSession';
 import { logger } from '../utils/logger';
@@ -57,6 +58,7 @@ export default function PostLoginScreen({ route, navigation }) {
   const [fullName, setFullName] = useState(initialFullName);
   const [unreadCount, setUnreadCount] = useState(0);
   const { t, locale, toggleLanguage } = useLanguage();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
@@ -253,7 +255,7 @@ export default function PostLoginScreen({ route, navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'rgba(243, 237, 224, 0.75)' }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.contentWrapper}>
         <ScrollView 
@@ -263,35 +265,35 @@ export default function PostLoginScreen({ route, navigation }) {
           contentContainerStyle={{ flexDirection: locale === 'ar' ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'flex-end', paddingVertical: 10, flexGrow: 1 }}
         >
           {role !== 'admin' && (
-            <TouchableOpacity style={styles.iconBtn} onPress={() => handleButtonPress('notifications')}>
-              <Ionicons name="notifications-outline" size={22} color="#2f4360" />
+            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => handleButtonPress('notifications')}>
+              <Ionicons name="notifications-outline" size={22} color={theme.iconColor} />
               {unreadCount > 0 && <View style={styles.badgeDot} />}
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setProfileModalVisible(true)}>
-            <Ionicons name="person-circle-outline" size={22} color="#2f4360" />
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => setProfileModalVisible(true)}>
+            <Ionicons name="person-circle-outline" size={22} color={theme.iconColor} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconBtn} onPress={() => alert('Dark mode coming soon!')}>
-            <Ionicons name="moon-outline" size={22} color="#2f4360" />
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={toggleTheme}>
+            <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={22} color={theme.iconColor} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconBtn} onPress={toggleLanguage}>
-            <Ionicons name="globe-outline" size={22} color="#2f4360" />
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={toggleLanguage}>
+            <Ionicons name="globe-outline" size={22} color={theme.iconColor} />
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.iconBtn} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={22} color="#2f4360" />
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={22} color={theme.iconColor} />
           </TouchableOpacity>
         </ScrollView>
 
         <View style={styles.header}>
-          <View style={styles.logoWrap}>
-            <Ionicons name="book" size={32} color="#2f4360" />
+          <View style={[styles.logoWrap, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
+            <Ionicons name="book" size={32} color={theme.iconColor} />
           </View>
-          <Text style={styles.welcome}>{t('welcome')}، {fullName || role}</Text>
-          <Text style={styles.roleLabel}>{getLocalizedRole(role).toUpperCase()}</Text>
+          <Text style={[styles.welcome, { color: theme.text }]}>{t('welcome')}، {fullName || role}</Text>
+          <Text style={[styles.roleLabel, { color: theme.textMuted }]}>{getLocalizedRole(role).toUpperCase()}</Text>
         </View>
         
         <View style={[styles.gridContainer, { flexDirection: locale === 'ar' ? 'row-reverse' : 'row' }]}>
@@ -302,18 +304,18 @@ export default function PostLoginScreen({ route, navigation }) {
             return (
               <TouchableOpacity
                 key={idx}
-                style={styles.cardButton}
+                style={[styles.cardButton, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}
                 onPress={() => handleButtonPress(btn.labelKey)}
               >
                 <View style={styles.iconContainer}>
-                  <Ionicons name={iconInfo.icon} size={36} color={iconInfo.color} />
+                  <Ionicons name={iconInfo.icon} size={36} color={iconInfo.color === '#2f4360' ? theme.iconColor : iconInfo.color} />
                   {isNotification && unreadCount > 0 && (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>{unreadCount}</Text>
                     </View>
                   )}
                 </View>
-                <Text style={styles.buttonLabel}>{t(btn.labelKey)}</Text>
+                <Text style={[styles.buttonLabel, { color: theme.text }]}>{t(btn.labelKey)}</Text>
               </TouchableOpacity>
             );
           })}
@@ -326,32 +328,32 @@ export default function PostLoginScreen({ route, navigation }) {
           onRequestClose={() => setProfileModalVisible(false)}
         >
           <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
+            <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }]}>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
                 {locale === 'ar' ? 'الملف الشخصي' : 'Edit Profile'}
               </Text>
               
-              <Text style={styles.inputLabel}>
+              <Text style={[styles.inputLabel, { color: theme.text }]}>
                 {locale === 'ar' ? 'اسم المستخدم الجديد' : 'New Username'}
               </Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.borderColor }]}
                 value={newUsername}
                 onChangeText={setNewUsername}
                 placeholder={locale === 'ar' ? 'أدخل اسم المستخدم' : 'Enter username'}
-                placeholderTextColor="rgba(47, 67, 96, 0.4)"
+                placeholderTextColor={theme.textMuted}
                 autoCapitalize="none"
               />
 
-              <Text style={styles.inputLabel}>
+              <Text style={[styles.inputLabel, { color: theme.text }]}>
                 {t('telegramChatIdLabel')}
               </Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.borderColor }]}
                 value={telegramChatId}
                 onChangeText={setTelegramChatId}
                 placeholder={t('telegramChatIdPlaceholder')}
-                placeholderTextColor="rgba(47, 67, 96, 0.4)"
+                placeholderTextColor={theme.textMuted}
                 keyboardType="numeric"
                 autoCapitalize="none"
               />
@@ -359,28 +361,28 @@ export default function PostLoginScreen({ route, navigation }) {
                 💡 {t('telegramChatIdHint')}
               </Text>
 
-              <Text style={styles.inputLabel}>
+              <Text style={[styles.inputLabel, { color: theme.text }]}>
                 {locale === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}
               </Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.borderColor }]}
                 value={newPassword}
                 onChangeText={setNewPassword}
                 placeholder={locale === 'ar' ? 'أدخل كلمة مرور جديدة' : 'Enter new password'}
-                placeholderTextColor="rgba(47, 67, 96, 0.4)"
+                placeholderTextColor={theme.textMuted}
                 secureTextEntry={true}
                 autoCapitalize="none"
               />
 
-              <Text style={styles.inputLabel}>
+              <Text style={[styles.inputLabel, { color: theme.text }]}>
                 {locale === 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password'}
               </Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.borderColor }]}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder={locale === 'ar' ? 'أعد كتابة كلمة المرور' : 'Retype new password'}
-                placeholderTextColor="rgba(47, 67, 96, 0.4)"
+                placeholderTextColor={theme.textMuted}
                 secureTextEntry={true}
                 autoCapitalize="none"
               />

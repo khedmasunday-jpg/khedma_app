@@ -17,7 +17,9 @@ import { logger } from '../utils/logger';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function BackupScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { locale } = useLanguage();
@@ -177,9 +179,9 @@ export default function BackupScreen({ route, navigation }) {
       {}
       <View style={styles.headerCard}>
         <View style={styles.iconCircle}>
-          <Ionicons name="cloud-upload-outline" size={36} color="#2f4360" />
+          <Ionicons name="cloud-upload-outline" size={36} color={theme.iconColor} />
         </View>
-        <Text style={styles.headerTitle}>
+        <Text style={[styles.headerTitle, { color: theme.text }, { color: theme.text }]}>
           {isAr ? 'نظام النسخ الاحتياطي والاستعادة' : 'Database Backup & Restore'}
         </Text>
         <Text style={styles.headerSubtitle}>
@@ -190,9 +192,9 @@ export default function BackupScreen({ route, navigation }) {
       </View>
 
       {}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
-          <Ionicons name="time-outline" size={22} color="#2f4360" style={{ marginRight: 8 }} />
+          <Ionicons name="time-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
             {isAr ? 'جدولة النسخ الدوري التلقائي' : 'Automated Monthly Schedule'}
           </Text>
@@ -209,7 +211,7 @@ export default function BackupScreen({ route, navigation }) {
       </View>
 
       {}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
           <Ionicons name="shield-checkmark-outline" size={22} color="#27ae60" style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
@@ -218,7 +220,7 @@ export default function BackupScreen({ route, navigation }) {
         </View>
 
         {loadingStatus ? (
-          <ActivityIndicator size="small" color="#2f4360" style={{ marginVertical: 12 }} />
+          <ActivityIndicator size="small" color={theme.iconColor} style={{ marginVertical: 12 }} />
         ) : backupStatus?.lastBackup ? (
           <View style={styles.statusDetails}>
             <View style={styles.statusRow}>
@@ -263,7 +265,7 @@ export default function BackupScreen({ route, navigation }) {
       </View>
 
       {}
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.cardHeader}>
           <Ionicons name="flash-outline" size={22} color="#e67e22" style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
@@ -301,7 +303,7 @@ export default function BackupScreen({ route, navigation }) {
       </View>
 
       {}
-      <View style={[styles.card, { borderColor: 'rgba(39, 174, 96, 0.3)', backgroundColor: '#fbfefc' }]}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { borderColor: 'rgba(39, 174, 96, 0.3)', backgroundColor: '#fbfefc' }]}>
         <View style={styles.cardHeader}>
           <Ionicons name="cloud-download-outline" size={22} color="#27ae60" style={{ marginRight: 8 }} />
           <Text style={[styles.cardTitle, { color: '#27ae60' }]}>

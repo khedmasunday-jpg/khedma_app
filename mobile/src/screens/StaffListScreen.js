@@ -8,7 +8,9 @@ import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 import { getApiBase } from '../config/api';
 import { getAuthToken } from '../config/authSession';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function StaffListScreen({ route }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const [staff, setStaff] = useState([]);
@@ -35,12 +37,12 @@ export default function StaffListScreen({ route }) {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Teachers & Stage Servants</Text>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
+      <Text style={[styles.title, { color: theme.text }, { color: theme.text }]}>Teachers & Stage Servants</Text>
       {loading ? <ActivityIndicator /> : (
         <ScrollView>
           {staff.map(user => (
-            <View key={user._id} style={styles.card}>
+            <View key={user._id} style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
               <Text style={styles.name}>{user.fullName}</Text>
               <Text style={styles.role}>{user.role === 'teacher' ? 'Teacher' : 'Stage Servant'}</Text>
               {}

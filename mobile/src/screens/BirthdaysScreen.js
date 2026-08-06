@@ -7,7 +7,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { formatDateDDMMYYYY } from '../utils/dateFormatter';
 import { getAuthToken } from '../config/authSession';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function BirthdaysScreen({ route }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -49,7 +51,7 @@ export default function BirthdaysScreen({ route }) {
   };
 
   if (loading) return (
-    <View style={styles.center}><ActivityIndicator size="large" color="#2f4360"/></View>
+    <View style={styles.center}><ActivityIndicator size="large" color={theme.iconColor}/></View>
   );
 
   if (error) return (
@@ -68,7 +70,7 @@ export default function BirthdaysScreen({ route }) {
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       {items.map((it) => (
-        <View key={String(it.id)} style={styles.card}>
+        <View key={String(it.id)} style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
           <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
             <View style={[styles.infoWrapper, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.name}>{it.name}</Text>

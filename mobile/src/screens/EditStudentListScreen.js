@@ -8,7 +8,9 @@ import { logger } from '../utils/logger';
 import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function EditStudentListScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -140,16 +142,16 @@ export default function EditStudentListScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <View />
         
         <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
-            <Ionicons name="search-outline" size={20} color="#2f4360" />
+            <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
-            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color="#2f4360" />
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color={theme.iconColor} />
           </TouchableOpacity>
           
           {(role === 'principal' || role === 'admin') && students.length > 0 && (
@@ -163,7 +165,7 @@ export default function EditStudentListScreen({ route, navigation }) {
               <Ionicons
                 name={selectionMode ? "close-circle-outline" : "checkmark-circle-outline"}
                 size={18}
-                color="#2f4360"
+                color={theme.iconColor}
                 style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }}
               />
               <Text style={styles.selectButtonText}>
@@ -277,7 +279,7 @@ export default function EditStudentListScreen({ route, navigation }) {
       )}
       
       {loading ? (
-        <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" color={theme.iconColor} style={{ marginTop: 20 }} />
       ) : filteredStudents.length === 0 ? (
         <Text style={styles.noStudentsText}>
           {selectedGrade || selectedClass 
@@ -291,7 +293,7 @@ export default function EditStudentListScreen({ route, navigation }) {
             return (
               <TouchableOpacity
                 key={student._id}
-                style={[styles.card, selectionMode && isSelected && styles.selectedCard]}
+                style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, selectionMode && isSelected && styles.selectedCard]}
                 onPress={() => {
                   if (selectionMode) {
                     toggleSelect(student._id);

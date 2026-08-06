@@ -7,7 +7,9 @@ import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getAuthToken } from '../config/authSession';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function EditStaffListScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -79,7 +81,7 @@ export default function EditStaffListScreen({ route, navigation }) {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}
       onPress={() => navigation.navigate('EditStaffDetailScreen', { token, role, userId: item._id })}
     >
       <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
@@ -97,14 +99,14 @@ export default function EditStaffListScreen({ route, navigation }) {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
         <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
-            <Ionicons name="search-outline" size={20} color="#2f4360" />
+            <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
-            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color="#2f4360" />
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
       </View>
@@ -157,7 +159,7 @@ export default function EditStaffListScreen({ route, navigation }) {
       </View>
       )}
       {loading ? (
-        <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" color={theme.iconColor} style={{ marginTop: 20 }} />
       ) : filteredStaff.length === 0 ? (
         <Text style={styles.noStaffText}>No staff found.</Text>
       ) : (

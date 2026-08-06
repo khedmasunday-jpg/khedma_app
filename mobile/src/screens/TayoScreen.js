@@ -3,7 +3,9 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from '
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function TayoScreen({ navigation, route }) {
+  const { theme, isDarkMode } = useTheme();
   const { role } = route.params || {};
   const { t } = useLanguage();
 
@@ -11,12 +13,12 @@ export default function TayoScreen({ navigation, route }) {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TayoGiveScreen')}>
-          <Ionicons name="gift-outline" size={32} color="#2f4360" style={styles.icon} />
+          <Ionicons name="gift-outline" size={32} color={theme.iconColor} style={styles.icon} />
           <Text style={styles.buttonText}>{t('giveTayo')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TayoDisplayScreen')}>
-          <Ionicons name="list-outline" size={32} color="#2f4360" style={styles.icon} />
+          <Ionicons name="list-outline" size={32} color={theme.iconColor} style={styles.icon} />
           <Text style={styles.buttonText}>{t('displayDeductTayo')}</Text>
         </TouchableOpacity>
       </View>

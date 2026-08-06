@@ -7,6 +7,7 @@ import { getAuthToken } from '../config/authSession';
 import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { useTheme } from '../utils/ThemeContext';
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -17,6 +18,7 @@ if (Platform.OS !== 'web') {
 }
 
 export default function AttendanceSheetScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role, classId, className } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -132,10 +134,10 @@ export default function AttendanceSheetScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
       <View style={styles.headerPanel}>
-        <Text style={[styles.title, { textAlign: isRtl ? 'right' : 'left' }]}>
+        <Text style={[styles.title, { color: theme.text }, { textAlign: isRtl ? 'right' : 'left' }]}>
           {currentClassName || t('selectClass')}
         </Text>
         
@@ -159,7 +161,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {
         {}
         <View style={[styles.dateRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <View style={[styles.dateInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <Ionicons name="calendar-outline" size={18} color="#2f4360" style={{ marginHorizontal: 6 }} />
+            <Ionicons name="calendar-outline" size={18} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
             {Platform.OS === 'web' ? (
               <>
                 <View style={{ flex: 1, minHeight: 40, justifyContent: 'center', paddingLeft: 6 }} pointerEvents="none">
@@ -226,7 +228,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {
       {}
       <ScrollView style={styles.studentsList} showsVerticalScrollIndicator={false}>
         {loading ? (
-          <ActivityIndicator size="large" color="#2f4360" style={{ marginTop: 20 }} />
+          <ActivityIndicator size="large" color={theme.iconColor} style={{ marginTop: 20 }} />
         ) : students.length === 0 ? (
           <Text style={styles.noStudentsText}>{t('noStudents')}</Text>
         ) : (

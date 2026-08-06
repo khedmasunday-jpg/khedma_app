@@ -17,7 +17,9 @@ import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getAuthToken } from '../config/authSession';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function LogsScreen({ route }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -314,7 +316,7 @@ export default function LogsScreen({ route }) {
 
   return (
     <ScrollView 
-      style={styles.container} 
+      style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]} 
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
       onScroll={handleScroll}
@@ -322,7 +324,7 @@ export default function LogsScreen({ route }) {
     >
       {}
       <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <Text style={styles.title}>{t('logs')}</Text>
+        <Text style={[styles.title, { color: theme.text }, { color: theme.text }]}>{t('logs')}</Text>
         <TouchableOpacity 
           style={[styles.liveBtn, isLive ? styles.liveBtnActive : styles.liveBtnInactive, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
           onPress={() => setIsLive(!isLive)}
@@ -336,7 +338,7 @@ export default function LogsScreen({ route }) {
 
       {}
       <View style={[styles.searchContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <Ionicons name="search-outline" size={20} color="#2f4360" style={styles.searchIcon} />
+        <Ionicons name="search-outline" size={20} color={theme.iconColor} style={styles.searchIcon} />
         <TextInput
           style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
           placeholder={t('search')}
@@ -466,7 +468,7 @@ export default function LogsScreen({ route }) {
       <View style={styles.box}>
         {loading ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color="#2f4360" />
+            <ActivityIndicator size="large" color={theme.iconColor} />
           </View>
         ) : filteredLogs.length === 0 ? (
           <View style={styles.center}>
@@ -546,7 +548,7 @@ export default function LogsScreen({ route }) {
             })}
             {hasMore && (
               <View style={{ padding: 16, alignItems: 'center' }}>
-                <ActivityIndicator size="small" color="#2f4360" />
+                <ActivityIndicator size="small" color={theme.iconColor} />
               </View>
             )}
           </View>
@@ -893,4 +895,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold',
   },
-});
+});

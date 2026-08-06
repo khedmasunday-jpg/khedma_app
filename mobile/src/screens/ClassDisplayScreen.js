@@ -8,7 +8,9 @@ import { API_URL } from '../config/api';
 import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache } from '../utils/apiCache';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function ClassDisplayScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -92,7 +94,7 @@ export default function ClassDisplayScreen({ route, navigation }) {
   const isRtl = locale === 'ar';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
       <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>{t('selectClass')}</Text>
       <ScrollView horizontal style={styles.dropdown} showsHorizontalScrollIndicator={false}>

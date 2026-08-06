@@ -19,7 +19,9 @@ import { getAuthToken } from '../config/authSession';
 import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache, invalidateCache } from '../utils/apiCache';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function ActivateDeactivateScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, role } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -148,14 +150,14 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
         <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
-            <Ionicons name="search-outline" size={20} color="#2f4360" />
+            <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
-            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color="#2f4360" />
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
       </View>
@@ -215,11 +217,11 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
         ) : filteredStaff.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="people-outline" size={60} color="#ccc" />
-            <Text style={styles.emptyText}>{noStaffText}</Text>
+            <Text style={[styles.emptyText, { color: theme.textMuted }, { color: theme.textMuted }]}>{noStaffText}</Text>
           </View>
         ) : (
           filteredStaff.map(user => (
-            <View key={user._id} style={[styles.card, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            <View key={user._id} style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
               {}
               <View style={isRtl ? { marginLeft: 12 } : { marginRight: 12 }}>
                 <View style={[styles.avatarCircle, { backgroundColor: getRoleColor(user.role) + '15' }]}>
@@ -229,7 +231,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
 
               {}
               <View style={styles.cardMiddle}>
-                <Text style={[styles.nameText, { textAlign: isRtl ? 'right' : 'left' }]}>
+                <Text style={[styles.nameText, { color: theme.text }, { textAlign: isRtl ? 'right' : 'left' }]}>
                   {user.fullName}
                 </Text>
                 <View style={[styles.badgeRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
@@ -274,19 +276,19 @@ export default function ActivateDeactivateScreen({ route, navigation }) {
       {}
       <Modal visible={customAlertVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={[styles.modalHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
               <Ionicons 
                 name={customAlertTitle === successTitle ? 'checkmark-circle-outline' : 'information-circle-outline'} 
                 size={24} 
                 color={customAlertTitle === successTitle ? '#137333' : '#2f4360'} 
               />
-              <Text style={[styles.modalTitle, isRtl ? { marginRight: 8 } : { marginLeft: 8 }]}>
+              <Text style={[styles.modalTitle, { color: theme.text }, isRtl ? { marginRight: 8 } : { marginLeft: 8 }]}>
                 {customAlertTitle}
               </Text>
             </View>
             <View style={styles.modalBody}>
-              <Text style={[styles.modalBodyText, { textAlign: isRtl ? 'right' : 'left' }]}>
+              <Text style={[styles.modalBodyText, { color: theme.text }, { textAlign: isRtl ? 'right' : 'left' }]}>
                 {customAlertMessage}
               </Text>
             </View>

@@ -16,6 +16,7 @@ import { logger } from '../utils/logger';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 
+import { useTheme } from '../utils/ThemeContext';
 const localTranslations = {
   en: {
     clearAll: "Clear All",
@@ -46,6 +47,7 @@ const localTranslations = {
 };
 
 export default function NotificationCenterScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const [notifications, setNotifications] = useState([]);
@@ -145,7 +147,7 @@ export default function NotificationCenterScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
       <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <Text style={styles.screenTitle}>{t('notifications')}</Text>
@@ -168,7 +170,7 @@ export default function NotificationCenterScreen({ route, navigation }) {
       >
         {loading ? (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color="#2f4360" />
+            <ActivityIndicator size="large" color={theme.iconColor} />
           </View>
         ) : notifications.length === 0 ? (
           <View style={styles.emptyContainer}>

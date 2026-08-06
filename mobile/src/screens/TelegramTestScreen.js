@@ -7,7 +7,9 @@ import { API_URL } from '../config/api';
 import { getAuthToken } from '../config/authSession';
 import { useLanguage } from '../utils/LanguageContext';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function TelegramTestScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -233,12 +235,12 @@ export default function TelegramTestScreen({ route, navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.header}>
           <View style={styles.logoWrap}>
             <Ionicons name="paper-plane" size={40} color="#25D366" />
           </View>
-          <Text style={styles.title}>{isRtl ? 'تجربة إرسال التليجرام' : 'Telegram API Testing'}</Text>
+          <Text style={[styles.title, { color: theme.text }, { color: theme.text }]}>{isRtl ? 'تجربة إرسال التليجرام' : 'Telegram API Testing'}</Text>
           <Text style={styles.subtitle}>
             {isRtl ? 'أداة اختبار إرسال الرسائل الفورية والمجدولة' : 'Instant & Scheduled Telegram message testing utility'}
           </Text>
@@ -304,7 +306,7 @@ export default function TelegramTestScreen({ route, navigation }) {
               </View>
             ) : (
               <View style={styles.qrLoadingBox}>
-                <ActivityIndicator size="small" color="#2f4360" />
+                <ActivityIndicator size="small" color={theme.iconColor} />
                 <Text style={styles.qrLoadingText}>
                   {isRtl 
                     ? 'جاري توليد رمز QR... قد يستغرق ذلك نصف دقيقة.' 
@@ -338,7 +340,7 @@ export default function TelegramTestScreen({ route, navigation }) {
           {}
           <Text style={styles.inputLabel}>{isRtl ? 'اختار الخادم (المستلم)' : 'Select Servant (Recipient)'}</Text>
           {fetchingStaff ? (
-            <ActivityIndicator size="small" color="#2f4360" style={styles.loader} />
+            <ActivityIndicator size="small" color={theme.iconColor} style={styles.loader} />
           ) : (
             <View style={styles.pickerContainer}>
               <Picker

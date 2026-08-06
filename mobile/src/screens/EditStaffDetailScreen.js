@@ -15,6 +15,7 @@ import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { loadContactsForPicker } from '../utils/contactPicker';
 
+import { useTheme } from '../utils/ThemeContext';
 let DateTimePickerModal = null;
 if (Platform.OS !== 'web') {
   try {
@@ -28,6 +29,7 @@ const PICKER_YEAR = 2000;
 const API_URL = `${getApiBase()}/users`;
 
 export default function EditStaffDetailScreen({ route, navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { token: routeToken, userId, role: requesterRole } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
@@ -237,7 +239,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
 
   if (loading || !user) return (
     <View style={styles.center}>
-      <ActivityIndicator size="large" color="#2f4360" />
+      <ActivityIndicator size="large" color={theme.iconColor} />
     </View>
   );
 
@@ -277,9 +279,9 @@ export default function EditStaffDetailScreen({ route, navigation }) {
   return (
     <>
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {}
-        <Text style={styles.title}>{getSafeField('fullName') || 'Unknown Name'}</Text>
+        <Text style={[styles.title, { color: theme.text }, { color: theme.text }]}>{getSafeField('fullName') || 'Unknown Name'}</Text>
         
         {}
         <View style={styles.formContainer}>
@@ -312,7 +314,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                           <Ionicons 
                             name="calendar-outline" 
                             size={18} 
-                            color="#2f4360" 
+                            color={theme.iconColor} 
                           />
                         </View>
                         <input
@@ -341,7 +343,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                         style={[styles.btnPicker, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
                         onPress={() => setShowCalendar(true)}
                       >
-                        <Ionicons name="calendar-outline" size={18} color="#2f4360" style={{ marginHorizontal: 6 }} />
+                        <Ionicons name="calendar-outline" size={18} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
                         <Text style={styles.btnPickerText}>
                           {getSafeField('birthdate') ? `${t('birthdate')}: ${formatDateNoYear(getSafeField('birthdate'))}` : t('pickBirthdate')}
                         </Text>
@@ -370,7 +372,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                         style={{ paddingHorizontal: 12, paddingVertical: 10, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderRightColor: 'rgba(47,67,96,0.15)' }}
                         activeOpacity={0.6}
                       >
-                        <Ionicons name="call-outline" size={20} color="#2f4360" />
+                        <Ionicons name="call-outline" size={20} color={theme.iconColor} />
                       </TouchableOpacity>
                       <TextInput
                         value={getSafeField(key) ? String(getSafeField(key)) : ''}
@@ -435,7 +437,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                     <Ionicons 
                       name="chevron-down-outline" 
                       size={18} 
-                      color="#2f4360" 
+                      color={theme.iconColor} 
                       style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
                     />
                   </View>
@@ -499,7 +501,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                       <Ionicons 
                         name="chevron-down-outline" 
                         size={18} 
-                        color="#2f4360" 
+                        color={theme.iconColor} 
                         style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
                       />
                     </View>
@@ -548,7 +550,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                     <Ionicons 
                       name="chevron-down-outline" 
                       size={18} 
-                      color="#2f4360" 
+                      color={theme.iconColor} 
                       style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
                     />
                   </View>
@@ -648,12 +650,12 @@ export default function EditStaffDetailScreen({ route, navigation }) {
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}>
           <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '75%' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(47,67,96,0.1)' }}>
-              <Ionicons name="people-outline" size={22} color="#2f4360" />
+              <Ionicons name="people-outline" size={22} color={theme.iconColor} />
               <Text style={{ flex: 1, marginLeft: 10, fontWeight: 'bold', fontSize: 16, color: '#2f4360' }}>
                 {isRtl ? 'اختر جهة اتصال' : 'Pick a Contact'}
               </Text>
               <TouchableOpacity onPress={() => setContactPickerVisible(false)}>
-                <Ionicons name="close-circle-outline" size={26} color="#2f4360" />
+                <Ionicons name="close-circle-outline" size={26} color={theme.iconColor} />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -671,7 +673,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {
                         setContactPickerVisible(false);
                       }}
                     >
-                      <Ionicons name="call-outline" size={14} color="#2f4360" style={{ marginRight: 6 }} />
+                      <Ionicons name="call-outline" size={14} color={theme.iconColor} style={{ marginRight: 6 }} />
                       <Text style={{ fontSize: 13, color: '#2f4360', fontWeight: '600' }}>{p.number}</Text>
                       <Text style={{ fontSize: 12, color: '#888' }}> ({p.label})</Text>
                     </TouchableOpacity>

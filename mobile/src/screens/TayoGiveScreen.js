@@ -9,7 +9,9 @@ import { useLanguage } from '../utils/LanguageContext';
 import SkeletonList from '../components/SkeletonLoader';
 import { fetchWithCache, invalidateCache } from '../utils/apiCache';
 
+import { useTheme } from '../utils/ThemeContext';
 export default function TayoGiveScreen({ navigation }) {
+  const { theme, isDarkMode } = useTheme();
   const { t } = useLanguage();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,24 +118,24 @@ export default function TayoGiveScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
         <View style={{ flexDirection: t('isRtl') ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
-            <Ionicons name="search-outline" size={20} color="#2f4360" />
+            <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
-            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color="#2f4360" />
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color={theme.iconColor} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSort(!showSort)}>
-            <Ionicons name={showSort ? "list" : "list-outline"} size={20} color="#2f4360" />
+            <Ionicons name={showSort ? "list" : "list-outline"} size={20} color={theme.iconColor} />
           </TouchableOpacity>
         </View>
       </View>
 
       {showSearch && (
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#2f4360" style={styles.searchIcon} />
+          <Ionicons name="search" size={20} color={theme.iconColor} style={styles.searchIcon} />
           <TextInput 
             style={styles.searchInput} 
             placeholder={t('searchStudent')} 
@@ -188,7 +190,7 @@ export default function TayoGiveScreen({ navigation }) {
           keyExtractor={item => item._id}
           contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card} onPress={() => openModal(item)}>
+            <TouchableOpacity style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]} onPress={() => openModal(item)}>
               <View style={styles.cardLeft}>
                 <View style={styles.avatar}>
                   <Ionicons name="person" size={24} color="#f3ede0" />
@@ -209,10 +211,10 @@ export default function TayoGiveScreen({ navigation }) {
 
       <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.modalHeader}>
-              <Ionicons name="gift" size={28} color="#2f4360" />
-              <Text style={styles.modalTitle}>{t('giveTayo')}</Text>
+              <Ionicons name="gift" size={28} color={theme.iconColor} />
+              <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{t('giveTayo')}</Text>
             </View>
             <Text style={styles.modalSubtitle}>{selectedStudent?.fullName}</Text>
             
