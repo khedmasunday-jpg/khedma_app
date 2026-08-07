@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
     textAlign: 'center',
     marginBottom: 4,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(47, 67, 96, 0.1)',
   },
   cardLangToggleText: {
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 14,
     fontWeight: 'bold',
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),

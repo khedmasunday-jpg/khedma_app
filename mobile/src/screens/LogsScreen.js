@@ -430,7 +430,7 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                 placeholderTextColor={theme.textMuted}
                 value={startDate}
                 onChangeText={setStartDate}
-                style={{ color: '#2f4360', fontSize: 13, minWidth: 80, padding: 0 }}
+                style={{ color: theme.text, fontSize: 13, minWidth: 80, padding: 0 }}
               />
             )}
           </View>
@@ -449,7 +449,7 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                 placeholderTextColor={theme.textMuted}
                 value={endDate}
                 onChangeText={setEndDate}
-                style={{ color: '#2f4360', fontSize: 13, minWidth: 80, padding: 0 }}
+                style={{ color: theme.text, fontSize: 13, minWidth: 80, padding: 0 }}
               />
             )}
           </View>
@@ -472,7 +472,7 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
           </View>
         ) : filteredLogs.length === 0 ? (
           <View style={styles.center}>
-            <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>
+            <Text style={{ textAlign: 'center', color: theme.textMuted, marginTop: 20 }}>
               {isRtl ? 'لا توجد سجلات' : 'No logs found'}
             </Text>
           </View>

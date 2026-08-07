@@ -230,7 +230,7 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
           {Platform.OS === 'web' ? (
             <View style={{ flex: 1, position: 'relative', minHeight: 40, justifyContent: 'center' }}>
               <View style={{ paddingLeft: 12 }} pointerEvents="none">
-                <Text style={{ color: selectedDate ? '#333' : '#a0a0a0', fontSize: 15 }}>
+                <Text style={{ color: selectedDate ? theme.text : theme.textMuted, fontSize: 15 }}>
                   {selectedDate ? formatDateDDMMYYYY(selectedDate) : 'dd/mm/yyyy'}
                 </Text>
               </View>

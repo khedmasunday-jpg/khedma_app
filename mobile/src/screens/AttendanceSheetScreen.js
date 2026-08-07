@@ -165,7 +165,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
             {Platform.OS === 'web' ? (
               <>
                 <View style={{ flex: 1, minHeight: 40, justifyContent: 'center', paddingLeft: 6 }} pointerEvents="none">
-                  <Text style={{ color: selectedDate ? '#333333' : '#a0a0a0', fontSize: 14, fontWeight: '600' }}>
+                  <Text style={{ color: selectedDate ? theme.text : theme.textMuted, fontSize: 14, fontWeight: '600' }}>
                     {selectedDate ? formatDate(selectedDate) : 'dd/mm/yyyy'}
                   </Text>
                 </View>

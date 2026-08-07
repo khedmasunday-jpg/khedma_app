@@ -111,9 +111,9 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
         return { name: 'gift-outline', color: '#e91e63' };
       case 'weekly_followup':
       case 'weekly':
-        return { name: 'chatbubble-ellipses-outline', color: '#2f4360' };
+        return { name: 'chatbubble-ellipses-outline', color: theme.text };
       default:
-        return { name: 'notifications-outline', color: '#666' };
+        return { name: 'notifications-outline', color: theme.textMuted };
     }
   };
 

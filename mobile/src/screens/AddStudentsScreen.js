@@ -472,7 +472,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               onChangeText={(v) => handleChange('fullName', v)}
               style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]}
               placeholder={t('studentName')}
-              placeholderTextColor="#a0a0a0"
+              placeholderTextColor={theme.textMuted}
             />
           </View>
         </View>
@@ -599,7 +599,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               keyboardType="phone-pad"
               style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]}
               placeholder={t('phonePlaceholder')}
-              placeholderTextColor="#a0a0a0"
+              placeholderTextColor={theme.textMuted}
             />
           </View>
           <Text style={styles.contactHint}>
@@ -624,7 +624,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               keyboardType="phone-pad"
               style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]}
               placeholder={t('phonePlaceholder')}
-              placeholderTextColor="#a0a0a0"
+              placeholderTextColor={theme.textMuted}
             />
           </View>
           <Text style={styles.contactHint}>
@@ -708,7 +708,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
                 renderItem={({ item }) => (
                   <View style={styles.contactRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ fontWeight: 'bold', color: '#2f4360' }}>{item.name || 'No name'}</Text>
+                      <Text style={{ fontWeight: 'bold', color: theme.text }}>{item.name || 'No name'}</Text>
                       {item.phones.map((p, i2) => (
                         <TouchableOpacity
                           key={i2}
@@ -724,7 +724,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
                           }}
                           style={{ paddingVertical: 8 }}
                         >
-                          <Text style={{ color: '#555' }}>
+                          <Text style={{ color: theme.text }}>
                             {p.label ? `${p.label}: ` : ''}
                             {p.number}
                           </Text>
@@ -754,7 +754,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               </View>
             </View>
             <View style={{ marginBottom: 16 }}>
-              <Text style={{ fontSize: 15, color: '#333333', lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
+              <Text style={{ fontSize: 15, color: theme.text, lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
             </View>
             <View style={styles.modalFooter}>
               <TouchableOpacity 

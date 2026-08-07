@@ -495,7 +495,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               onChangeText={val => handleChange('fullName', val)} 
               style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
               placeholder={t('fullNameLabel')}
-              placeholderTextColor="#a0a0a0"
+              placeholderTextColor={theme.textMuted}
             />
           </View>
         </View>
@@ -551,7 +551,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               keyboardType="numeric"
               style={[styles.input, { flex: 1, textAlign: locale === 'ar' ? 'right' : 'left' }]} 
               placeholder={t('telegramChatIdPlaceholder')}
-              placeholderTextColor="#a0a0a0"
+              placeholderTextColor={theme.textMuted}
             />
           </View>
           <Text style={styles.contactHint}>
@@ -567,7 +567,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
             {Platform.OS === 'web' ? (
               <>
                 <View style={{ flex: 1, minHeight: 40, justifyContent: 'center', paddingLeft: 12 }} pointerEvents="none">
-                  <Text style={{ color: staff.birthdate ? '#333333' : '#a0a0a0', fontSize: 15 }}>
+                  <Text style={{ color: staff.birthdate ? theme.text : theme.textMuted, fontSize: 15 }}>
                     {staff.birthdate ? formatDateDDMMYYYY(staff.birthdate) : 'dd/mm/yyyy'}
                   </Text>
                 </View>
@@ -767,7 +767,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               onChangeText={val => handleChange('username', val)} 
               style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
               placeholder={t('usernameLabel')}
-              placeholderTextColor="#a0a0a0"
+              placeholderTextColor={theme.textMuted}
             />
             <TouchableOpacity 
               onPress={generateUsernameOnDemand} 
@@ -789,7 +789,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               secureTextEntry 
               style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
               placeholder={t('passwordLabel')}
-              placeholderTextColor="#a0a0a0"
+              placeholderTextColor={theme.textMuted}
             />
             <TouchableOpacity 
               onPress={generatePasswordOnDemand} 
@@ -899,7 +899,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{customAlertTitle}</Text>
             </View>
             <View style={styles.modalBody}>
-              <Text style={{ fontSize: 15, color: '#333333', lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
+              <Text style={{ fontSize: 15, color: theme.text, lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
             </View>
             <View style={styles.modalFooter}>
               <TouchableOpacity 
@@ -928,7 +928,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
             </View>
             {loadingContacts ? (
               <View style={{ padding: 32, alignItems: 'center' }}>
-                <Text style={{ color: '#2f4360' }}>{locale === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}</Text>
+                <Text style={{ color: theme.text }}>{locale === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}</Text>
               </View>
             ) : (
               <View style={{ flex: 1 }}>

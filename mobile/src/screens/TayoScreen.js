@@ -32,7 +32,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', color: theme.text, marginTop: 10, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif' }) },
   buttonsContainer: { width: '100%', maxWidth: 400 },
   button: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#fffcf7',
+    flexDirection: 'row', alignItems: 'center', backgroundColor: theme.cardBackground,
     padding: 20, borderRadius: 15, marginBottom: 20, borderWidth: 1, borderColor: theme.borderColor,
     ...Platform.select({
       ios: { shadowColor: '#2f4360', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8 },

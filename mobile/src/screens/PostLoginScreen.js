@@ -27,22 +27,22 @@ const BUTTONS = [
 ];
 
 const BUTTON_ICONS = {
-  'notifications': { icon: 'notifications-outline', color: '#2f4360' },
-  'takeAttendance': { icon: 'checkmark-done-circle-outline', color: '#2f4360' },
-  'birthdays': { icon: 'gift-outline', color: '#2f4360' },
-  'classDisplay': { icon: 'easel-outline', color: '#2f4360' },
-  'editVisitation': { icon: 'git-network-outline', color: '#2f4360' },
-  'addStudents': { icon: 'person-add-outline', color: '#2f4360' },
-  'addStaff': { icon: 'people-outline', color: '#2f4360' },
-  'activateDeactivate': { icon: 'toggle-outline', color: '#2f4360' },
-  'editStaff': { icon: 'create-outline', color: '#2f4360' },
-  'editStudents': { icon: 'pencil-outline', color: '#2f4360' },
+  'notifications': { icon: 'notifications-outline', color: theme.text },
+  'takeAttendance': { icon: 'checkmark-done-circle-outline', color: theme.text },
+  'birthdays': { icon: 'gift-outline', color: theme.text },
+  'classDisplay': { icon: 'easel-outline', color: theme.text },
+  'editVisitation': { icon: 'git-network-outline', color: theme.text },
+  'addStudents': { icon: 'person-add-outline', color: theme.text },
+  'addStaff': { icon: 'people-outline', color: theme.text },
+  'activateDeactivate': { icon: 'toggle-outline', color: theme.text },
+  'editStaff': { icon: 'create-outline', color: theme.text },
+  'editStudents': { icon: 'pencil-outline', color: theme.text },
   'tayo': { icon: 'star-outline', color: '#f39c12' },
-  'logs': { icon: 'document-text-outline', color: '#2f4360' },
-  'reset': { icon: 'refresh-circle-outline', color: '#2f4360' },
+  'logs': { icon: 'document-text-outline', color: theme.text },
+  'reset': { icon: 'refresh-circle-outline', color: theme.text },
   'whatsappTest': { icon: 'paper-plane', color: '#25D366' },
   'backupData': { icon: 'cloud-upload-outline', color: '#27ae60' },
-  'importData': { icon: 'cloud-download-outline', color: '#2f4360' },
+  'importData': { icon: 'cloud-download-outline', color: theme.text },
 };
 
 const roleToRank = {
@@ -301,7 +301,7 @@ export default function PostLoginScreen({ route, navigation }) {
         
         <View style={[styles.gridContainer, { flexDirection: locale === 'ar' ? 'row-reverse' : 'row' }]}>
           {availableButtons.map((btn, idx) => {
-            const iconInfo = BUTTON_ICONS[btn.labelKey] || { icon: 'apps-outline', color: '#2f4360' };
+            const iconInfo = BUTTON_ICONS[btn.labelKey] || { icon: 'apps-outline', color: theme.text };
             const isNotification = btn.labelKey === 'notifications';
             
             return (
@@ -360,7 +360,7 @@ export default function PostLoginScreen({ route, navigation }) {
                 keyboardType="numeric"
                 autoCapitalize="none"
               />
-              <Text style={{ fontSize: 11, color: '#666', marginTop: -6, marginBottom: 10, textAlign: locale === 'ar' ? 'right' : 'left' }}>
+              <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: -6, marginBottom: 10, textAlign: locale === 'ar' ? 'right' : 'left' }}>
                 💡 {t('telegramChatIdHint')}
               </Text>
 
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
   },
   topBtnText: {
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 13,
     fontWeight: 'bold',
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   welcome: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
     textAlign: 'center',
   },
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   buttonLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2f4360',
+    color: theme.text,
     textAlign: 'center',
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#fffcf7',
+    backgroundColor: theme.cardBackground,
     borderRadius: 20,
     width: '90%',
     maxWidth: 400,
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
     textAlign: 'center',
     marginBottom: 20,
@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#2f4360',
+    color: theme.text,
     marginBottom: 6,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 16,
-    color: '#2f4360',
+    color: theme.text,
     fontSize: 15,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
   },
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   cancelBtnText: {
-    color: '#666',
+    color: theme.textMuted,
     fontWeight: 'bold',
     fontSize: 15,
   },

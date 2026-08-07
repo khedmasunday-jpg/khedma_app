@@ -512,7 +512,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                             zIndex: 1
                           }}
                         >
-                          <Text style={{ color: '#2f4360', fontSize: 15 }}>
+                          <Text style={{ color: theme.text, fontSize: 15 }}>
                             {student.birthdate ? formatDateDDMMYYYY(student.birthdate) : 'dd/mm/yyyy'}
                           </Text>
                         </View>
@@ -580,7 +580,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                     />
                   </View>
                   {key.includes('phonenumber') && (
-                    <Text style={{ fontSize: 11, color: '#888', marginTop: 3 }}>
+                    <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 3 }}>
                       {isRtl ? '📞 اضغط على أيقونة الهاتف لاستيراد من جهات الاتصال' : '📞 Tap the phone icon to pick from contacts'}
                     </Text>
                   )}
@@ -636,7 +636,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
               renderItem={({ item }) => (
                 <View style={styles.contactRow}>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontWeight: 'bold', color: '#2f4360' }}>{item.name || 'No name'}</Text>
+                    <Text style={{ fontWeight: 'bold', color: theme.text }}>{item.name || 'No name'}</Text>
                     {item.phones.map((p, i2) => (
                       <TouchableOpacity
                         key={i2}
@@ -652,7 +652,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                         }}
                         style={{ paddingVertical: 8 }}
                       >
-                        <Text style={{ color: '#555' }}>
+                        <Text style={{ color: theme.text }}>
                           {p.label ? `${p.label}: ` : ''}
                           {p.number}
                         </Text>
@@ -719,12 +719,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   level: { 
     fontSize: 15, 
     fontWeight: '700',
-    color: '#2e7d32', 
+    color: isDarkMode ? '#4ade80' : '#2e7d32', 
     marginBottom: 4,
   },
   classnameText: { 
     fontSize: 14, 
-    color: 'rgba(47, 67, 96, 0.7)',
+    color: theme.textMuted,
     fontWeight: '600',
   },
   formContainer: {

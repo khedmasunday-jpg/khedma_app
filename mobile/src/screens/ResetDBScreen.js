@@ -399,7 +399,7 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
         <Text style={styles.inputLabel}>{isAr ? 'اختر التاريخ:' : 'Select Date:'}</Text>
         {Platform.OS === 'web' ? (
           <View style={styles.webDateWrap}>
-            <Text style={{ color: '#333', fontSize: 14 }}>
+            <Text style={{ color: theme.text, fontSize: 14 }}>
               {selectedDate ? formatDateDDMMYYYY(selectedDate) : 'dd/mm/yyyy'}
             </Text>
             <input
@@ -415,7 +415,7 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
         ) : (
           <>
             <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={styles.nativeDateBtn}>
-              <Text style={{ fontSize: 14, color: '#333' }}>{formatDateDDMMYYYY(selectedDate)}</Text>
+              <Text style={{ fontSize: 14, color: theme.text }}>{formatDateDDMMYYYY(selectedDate)}</Text>
             </TouchableOpacity>
             {DateTimePickerModal && (
               <DateTimePickerModal

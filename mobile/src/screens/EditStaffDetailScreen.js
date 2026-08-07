@@ -308,7 +308,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                             zIndex: 1
                           }}
                         >
-                          <Text style={{ color: '#2f4360', fontSize: 15 }}>
+                          <Text style={{ color: theme.text, fontSize: 15 }}>
                             {getSafeField('birthdate') ? formatDateDDMMYYYY(getSafeField('birthdate')) : 'dd/mm/yyyy'}
                           </Text>
                           <Ionicons 
@@ -381,7 +381,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                         keyboardType="phone-pad"
                       />
                     </View>
-                    <Text style={{ fontSize: 11, color: '#888', marginTop: 3 }}>
+                    <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 3 }}>
                       {isRtl ? '📞 اضغط على أيقونة الهاتف لاستيراد رقم' : '📞 Tap the phone icon to pick from contacts'}
                     </Text>
                   </View>
@@ -394,7 +394,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       keyboardType="numeric"
                       style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
                     />
-                    <Text style={{ fontSize: 11, color: '#888', marginTop: 3 }}>
+                    <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 3 }}>
                       💡 {t('telegramChatIdHint')}
                     </Text>
                   </View>
@@ -651,7 +651,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
           <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '75%' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(47,67,96,0.1)' }}>
               <Ionicons name="people-outline" size={22} color={theme.iconColor} />
-              <Text style={{ flex: 1, marginLeft: 10, fontWeight: 'bold', fontSize: 16, color: '#2f4360' }}>
+              <Text style={{ flex: 1, marginLeft: 10, fontWeight: 'bold', fontSize: 16, color: theme.text }}>
                 {isRtl ? 'اختر جهة اتصال' : 'Pick a Contact'}
               </Text>
               <TouchableOpacity onPress={() => setContactPickerVisible(false)}>
@@ -663,7 +663,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
               keyExtractor={(_, i) => String(i)}
               renderItem={({ item: contact }) => (
                 <View style={{ paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(47,67,96,0.07)' }}>
-                  <Text style={{ fontWeight: 'bold', color: '#2f4360', marginBottom: 4 }}>{contact.name}</Text>
+                  <Text style={{ fontWeight: 'bold', color: theme.text, marginBottom: 4 }}>{contact.name}</Text>
                   {contact.phones.map((p, pi) => (
                     <TouchableOpacity
                       key={pi}
@@ -674,8 +674,8 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       }}
                     >
                       <Ionicons name="call-outline" size={14} color={theme.iconColor} style={{ marginRight: 6 }} />
-                      <Text style={{ fontSize: 13, color: '#2f4360', fontWeight: '600' }}>{p.number}</Text>
-                      <Text style={{ fontSize: 12, color: '#888' }}> ({p.label})</Text>
+                      <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>{p.number}</Text>
+                      <Text style={{ fontSize: 12, color: theme.textMuted }}> ({p.label})</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
