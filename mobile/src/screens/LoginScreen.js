@@ -17,6 +17,7 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const { t, locale, toggleLanguage } = useLanguage();
   const { theme, isDarkMode, toggleTheme } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
 
   const handleLogin = async () => {
     const deviceId = Device.osInternalBuildId || Device.deviceName || 'unknown';
@@ -113,7 +114,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

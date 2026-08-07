@@ -27,22 +27,22 @@ const BUTTONS = [
 ];
 
 const BUTTON_ICONS = {
-  'notifications': { icon: 'notifications-outline', color: theme.text },
-  'takeAttendance': { icon: 'checkmark-done-circle-outline', color: theme.text },
-  'birthdays': { icon: 'gift-outline', color: theme.text },
-  'classDisplay': { icon: 'easel-outline', color: theme.text },
-  'editVisitation': { icon: 'git-network-outline', color: theme.text },
-  'addStudents': { icon: 'person-add-outline', color: theme.text },
-  'addStaff': { icon: 'people-outline', color: theme.text },
-  'activateDeactivate': { icon: 'toggle-outline', color: theme.text },
-  'editStaff': { icon: 'create-outline', color: theme.text },
-  'editStudents': { icon: 'pencil-outline', color: theme.text },
+  'notifications': { icon: 'notifications-outline', color: 'theme-text' },
+  'takeAttendance': { icon: 'checkmark-done-circle-outline', color: 'theme-text' },
+  'birthdays': { icon: 'gift-outline', color: 'theme-text' },
+  'classDisplay': { icon: 'easel-outline', color: 'theme-text' },
+  'editVisitation': { icon: 'git-network-outline', color: 'theme-text' },
+  'addStudents': { icon: 'person-add-outline', color: 'theme-text' },
+  'addStaff': { icon: 'people-outline', color: 'theme-text' },
+  'activateDeactivate': { icon: 'toggle-outline', color: 'theme-text' },
+  'editStaff': { icon: 'create-outline', color: 'theme-text' },
+  'editStudents': { icon: 'pencil-outline', color: 'theme-text' },
   'tayo': { icon: 'star-outline', color: '#f39c12' },
-  'logs': { icon: 'document-text-outline', color: theme.text },
-  'reset': { icon: 'refresh-circle-outline', color: theme.text },
+  'logs': { icon: 'document-text-outline', color: 'theme-text' },
+  'reset': { icon: 'refresh-circle-outline', color: 'theme-text' },
   'whatsappTest': { icon: 'paper-plane', color: '#25D366' },
   'backupData': { icon: 'cloud-upload-outline', color: '#27ae60' },
-  'importData': { icon: 'cloud-download-outline', color: theme.text },
+  'importData': { icon: 'cloud-download-outline', color: 'theme-text' },
 };
 
 const roleToRank = {
@@ -60,6 +60,7 @@ export default function PostLoginScreen({ route, navigation }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const { t, locale, toggleLanguage } = useLanguage();
   const { theme, isDarkMode, toggleTheme } = useTheme();
+  const styles = getStyles(theme, isDarkMode);
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
@@ -311,7 +312,7 @@ export default function PostLoginScreen({ route, navigation }) {
                 onPress={() => handleButtonPress(btn.labelKey)}
               >
                 <View style={styles.iconContainer}>
-                  <Ionicons name={iconInfo.icon} size={36} color={iconInfo.color === '#2f4360' ? theme.iconColor : iconInfo.color} />
+                  <Ionicons name={iconInfo.icon} size={36} color={iconInfo.color === '#2f4360' ? theme.iconColor : (iconInfo.color === 'theme-text' ? theme.text : iconInfo.color)} />
                   {isNotification && unreadCount > 0 && (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>{unreadCount}</Text>
@@ -427,7 +428,7 @@ export default function PostLoginScreen({ route, navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
