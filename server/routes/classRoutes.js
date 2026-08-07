@@ -296,11 +296,11 @@ router.post('/co-principal/assign', verifyToken, authorizeRoles('co-principal'),
       return res.status(400).json({ msg: 'Teacher has no assigned classes' });
     }
 
-    let studentsToAssign = await Student.find({ _id: { $in: studentIds } }).select('fullName _id');
+    let studentsToAssign = await Student.find({ _id: { $in: studentIds } }).select('fullName fullName_enc _id');
 
     if (studentsToAssign.length === 0) {
-      const fallback = await Student.find({ studentId: { $in: studentIds } }).select('fullName _id studentId');
-      if (fallback.length) {        
+      const fallback = await Student.find({ studentId: { $in: studentIds } }).select('fullName fullName_enc _id studentId');
+      if (fallback.length) {        
         studentIds = fallback.map(f => f._id);
         studentsToAssign = fallback;
       }
@@ -322,7 +322,7 @@ router.post('/co-principal/assign', verifyToken, authorizeRoles('co-principal'),
       }
     );
 
-    const studentNames = studentsToAssign.map(s => s.fullName).join(', ');
+    const studentNames = studentsToAssign.map(s => (typeof s.getFullName === 'function' ? s.getFullName() : s.fullName)).join(', ');
     const notificationMessage = `You have been assigned ${studentsToAssign.length} new student${studentsToAssign.length > 1 ? 's' : ''}: ${studentNames}`;
     
     await Notification.create({

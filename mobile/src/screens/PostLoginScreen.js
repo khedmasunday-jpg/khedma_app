@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity, Text, Alert, Platform, Modal, TextInput } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
@@ -75,16 +76,18 @@ export default function PostLoginScreen({ route, navigation }) {
     });
   };
 
-  useEffect(() => {
-    if (token) {
-      Axios.get(`${API_URL}/notifications`, {
-        headers: { Authorization: token }
-      }).then(res => {
-        const unread = res.data.filter(n => !n.read).length;
-        setUnreadCount(unread);
-      }).catch(() => setUnreadCount(0));
-    }
-  }, [token]);
+  useFocusEffect(
+    useCallback(() => {
+      if (token) {
+        Axios.get(`${API_URL}/notifications`, {
+          headers: { Authorization: token }
+        }).then(res => {
+          const unread = res.data.filter(n => !n.read).length;
+          setUnreadCount(unread);
+        }).catch(() => setUnreadCount(0));
+      }
+    }, [token])
+  );
 
   logger.log("🔍 PostLoginScreen params:", { token: !!token, role, fullName: initialFullName });
   logger.log("🔍 Route params:", route.params);

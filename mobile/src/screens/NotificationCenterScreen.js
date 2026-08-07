@@ -333,12 +333,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   notifMsg: { 
     fontSize: 14, 
-    color: theme.textMuted,
+    color: theme.text,
     lineHeight: 20,
   },
   notifDate: { 
     fontSize: 11, 
-    color: 'rgba(47, 67, 96, 0.45)',
+    color: theme.text,
     marginTop: 4,
     fontWeight: '600',
   },
