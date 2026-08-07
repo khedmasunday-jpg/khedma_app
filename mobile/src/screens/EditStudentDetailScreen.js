@@ -332,7 +332,6 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
     "fullName",
     "yearLevel",
     "classname",
-    "gender",
     "mother_phonenumber",
     "father_phonenumber",
     "birthdate",
@@ -400,40 +399,6 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                         <Picker.Item label={t('level1')} value="1" />
                         <Picker.Item label={t('level2')} value="2" />
                         <Picker.Item label={t('level3')} value="3" />
-                      </Picker>
-                    )}
-                  </View>
-                </View>
-              ) : key === "gender" ? (
-                <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                  <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
-                  <View style={{ flex: 1 }}>
-                    {Platform.OS === 'web' ? (
-                      <View style={styles.webSelectWrapper}>
-                        <select
-                          value={student.gender || "male"}
-                          onChange={(e) => handleChange("gender", e.target.value)}
-                          style={StyleSheet.flatten([styles.webSelect, { direction: isRtl ? 'rtl' : 'ltr', paddingLeft: isRtl ? 35 : 14, paddingRight: isRtl ? 14 : 35 }])}
-                        >
-                          <option value="male">{isRtl ? 'ولد' : 'Boy'}</option>
-                          <option value="female">{isRtl ? 'بنت' : 'Girl'}</option>
-                        </select>
-                        <Ionicons 
-                          name="chevron-down-outline" 
-                          size={18} 
-                          color={theme.iconColor} 
-                          style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
-                        />
-                      </View>
-                    ) : (
-                      <Picker
-                        selectedValue={student.gender || "male"}
-                        onValueChange={(val) => handleChange("gender", val)}
-                        style={styles.nativePicker}
-                        dropdownIconColor="#2f4360"
-                      >
-                        <Picker.Item label={isRtl ? 'ولد' : 'Boy'} value="male" />
-                        <Picker.Item label={isRtl ? 'بنت' : 'Girl'} value="female" />
                       </Picker>
                     )}
                   </View>

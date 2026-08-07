@@ -478,32 +478,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
         </View>
 
         {}
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gender')}</Text>
-          <View style={styles.pickerWrapper}>
-            <Ionicons name="male-female-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
-            {Platform.OS === 'web' ? (
-              <select
-                value={student.gender}
-                onChange={(e) => handleChange('gender', e.target.value)}
-                style={StyleSheet.flatten([styles.webSelect, { direction: locale === 'ar' ? 'rtl' : 'ltr' }])}
-              >
-                <option value="male">{locale === 'ar' ? 'ولد' : 'Boy'}</option>
-                <option value="female">{locale === 'ar' ? 'بنت' : 'Girl'}</option>
-              </select>
-            ) : (
-              <Picker
-                selectedValue={student.gender}
-                onValueChange={(v) => handleChange('gender', v)}
-                style={styles.nativePicker}
-                dropdownIconColor="#2f4360"
-              >
-                <Picker.Item label={locale === 'ar' ? 'ولد' : 'Boy'} value="male" />
-                <Picker.Item label={locale === 'ar' ? 'بنت' : 'Girl'} value="female" />
-              </Picker>
-            )}
-          </View>
-        </View>
+        {/* Gender field removed */}
 
         {}
         <View style={styles.inputGroup}>
