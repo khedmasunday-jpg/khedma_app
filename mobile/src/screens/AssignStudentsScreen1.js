@@ -66,13 +66,12 @@ export default function AssignStudentsScreen1({ navigation, route }) {
   }, [token]);
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>Select a Teacher</Text>
+    <View style={{ flex: 1, padding: 16, backgroundColor: theme.background }}>
       {loading ? (
-        <ActivityIndicator size="large" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" style={{ marginTop: 20 }} color={theme.text} />
       ) : teachers.length === 0 ? (
         <View style={{ alignItems: 'center', marginTop: 20 }}>
-          <Text style={{ color: '#666', marginBottom: 10 }}>No teachers found in your assigned level</Text>
+          <Text style={{ color: theme.text, marginBottom: 10 }}>No teachers found in your assigned level</Text>
           <Button title="Retry" onPress={() => {
             setLoading(true);
             const client = createApiClient(token);
@@ -94,12 +93,12 @@ export default function AssignStudentsScreen1({ navigation, route }) {
           {teachers.map(teacher => (
             <TouchableOpacity
               key={teacher._id}
-              style={{ padding: 16, backgroundColor: '#eee', borderRadius: 8, marginBottom: 12 }}
+              style={{ padding: 16, backgroundColor: theme.cardBackground, borderRadius: 8, marginBottom: 12 }}
               onPress={() => navigation.navigate('AssignStudentsScreen2', { token, teacher })}
             >
-              <Text style={{ fontSize: 16 }}>{teacher.fullName}</Text>
+              <Text style={{ fontSize: 16, color: theme.text }}>{teacher.fullName}</Text>
               {teacher.assignedClass && (
-                <Text style={{ color: '#666', marginTop: 4, fontSize: 14 }}>
+                <Text style={{ color: theme.text, opacity: 0.7, marginTop: 4, fontSize: 14 }}>
                   Class: {teacher.assignedClass}
                 </Text>
               )}
