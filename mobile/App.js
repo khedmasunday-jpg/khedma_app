@@ -18,6 +18,9 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
       color-scheme: light !important;
       height: 100dvh !important;
     }
+    select option {
+      color: #000000 !important;
+    }
   `;
   document.head.appendChild(style);
 }
