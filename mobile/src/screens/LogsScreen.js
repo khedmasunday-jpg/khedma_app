@@ -33,6 +33,8 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLive, setIsLive] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
 
   const timeFilters = [
     { id: 'all', labelKey: 'timeAll' },
@@ -154,25 +156,25 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
         return {
           icon: 'log-in-outline',
           bg: 'rgba(0, 123, 255, 0.1)',
-          color: '#007bff'
+          color: isDarkMode ? '#66b2ff' : '#007bff'
         };
       case 'attendance':
         return {
           icon: 'calendar-outline',
           bg: 'rgba(40, 167, 69, 0.1)',
-          color: '#28a745'
+          color: isDarkMode ? '#4cd964' : '#28a745'
         };
       case 'user':
         return {
           icon: 'person-add-outline',
           bg: 'rgba(111, 66, 193, 0.1)',
-          color: '#6f42c1'
+          color: isDarkMode ? '#b388ff' : '#6f42c1'
         };
       default:
         return {
           icon: 'settings-outline',
           bg: 'rgba(253, 126, 20, 0.1)',
-          color: '#fd7e14'
+          color: isDarkMode ? '#ffb74d' : '#fd7e14'
         };
     }
   };
@@ -325,7 +327,27 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
       {}
       {}
       <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <View style={[styles.searchContainer, { flex: 1, marginRight: isRtl ? 0 : 12, marginLeft: isRtl ? 12 : 0, marginBottom: 0, flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
+            <Ionicons name="search-outline" size={20} color={theme.iconColor} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setShowFilter(!showFilter)}>
+            <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color={theme.iconColor} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.liveBtn, isLive ? styles.liveBtnActive : styles.liveBtnInactive, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
+            onPress={() => setIsLive(!isLive)}
+          >
+            <View style={[styles.liveDot, isLive ? styles.liveDotActive : styles.liveDotInactive, isRtl ? { marginLeft: 6 } : { marginRight: 6 }]} />
+            <Text style={[styles.liveBtnText, isLive ? styles.liveBtnTextActive : styles.liveBtnTextInactive]}>
+              {isRtl ? 'تحديث مباشر' : 'Live Update'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {showSearch && (
+        <View style={[styles.searchContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <Ionicons name="search-outline" size={20} color={theme.iconColor} style={styles.searchIcon} />
           <TextInput
             style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
@@ -340,125 +362,112 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
             </TouchableOpacity>
           )}
         </View>
+      )}
 
-        <TouchableOpacity 
-          style={[styles.liveBtn, isLive ? styles.liveBtnActive : styles.liveBtnInactive, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
-          onPress={() => setIsLive(!isLive)}
-        >
-          <View style={[styles.liveDot, isLive ? styles.liveDotActive : styles.liveDotInactive, isRtl ? { marginLeft: 6 } : { marginRight: 6 }]} />
-          <Text style={[styles.liveBtnText, isLive ? styles.liveBtnTextActive : styles.liveBtnTextInactive]}>
-            {isRtl ? 'تحديث مباشر' : 'Live Update'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {}
-      <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        {filterPills.map((pill) => {
-          const isActive = selectedFilter === pill.id;
-          const count = counts[pill.id] || 0;
-          return (
-            <TouchableOpacity
-              key={pill.id}
-              onPress={() => setSelectedFilter(pill.id)}
-              style={[
-                styles.filterPill,
-                isActive ? styles.filterPillActive : styles.filterPillInactive,
-                { flexDirection: isRtl ? 'row-reverse' : 'row' }
-              ]}
-            >
-              <Ionicons 
-                name={pill.icon} 
-                size={16} 
-                color={isActive ? '#fff' : '#2f4360'} 
-                style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
-              />
-              <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
-                {t(pill.labelKey)} ({count})
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {}
-      <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        {timeFilters.map((tFilter) => {
-          const isActive = selectedTimeFilter === tFilter.id;
-          return (
-            <TouchableOpacity
-              key={tFilter.id}
-              onPress={() => setSelectedTimeFilter(tFilter.id)}
-              style={[
-                styles.filterPill,
-                isActive ? styles.filterPillActive : styles.filterPillInactive,
-                { flexDirection: isRtl ? 'row-reverse' : 'row' }
-              ]}
-            >
-              <Ionicons 
-                name={tFilter.id === 'custom' ? 'calendar-outline' : 'time-outline'} 
-                size={16} 
-                color={isActive ? '#fff' : '#2f4360'} 
-                style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
-              />
-              <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
-                {t(tFilter.labelKey)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* amount filters removed */}
-
-      {}
-      {selectedTimeFilter === 'custom' && (
-        <View style={[styles.customDateContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          <View style={[styles.customDateWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <Text style={styles.customDateLabel}>{isRtl ? 'من:' : 'From:'}</Text>
-            {Platform.OS === 'web' ? (
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                style={styles.customDateInput}
-              />
-            ) : (
-              <TextInput
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={theme.textMuted}
-                value={startDate}
-                onChangeText={setStartDate}
-                style={{ color: theme.text, fontSize: 13, minWidth: 80, padding: 0 }}
-              />
-            )}
+      {showFilter && (
+        <View>
+          <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            {filterPills.map((pill) => {
+              const isActive = selectedFilter === pill.id;
+              const count = counts[pill.id] || 0;
+              return (
+                <TouchableOpacity
+                  key={pill.id}
+                  onPress={() => setSelectedFilter(pill.id)}
+                  style={[
+                    styles.filterPill,
+                    isActive ? styles.filterPillActive : styles.filterPillInactive,
+                    { flexDirection: isRtl ? 'row-reverse' : 'row' }
+                  ]}
+                >
+                  <Ionicons 
+                    name={pill.icon} 
+                    size={16} 
+                    color={isActive ? '#fff' : '#2f4360'} 
+                    style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
+                  />
+                  <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
+                    {t(pill.labelKey)} ({count})
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-          <View style={[styles.customDateWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <Text style={styles.customDateLabel}>{isRtl ? 'إلى:' : 'To:'}</Text>
-            {Platform.OS === 'web' ? (
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                style={styles.customDateInput}
-              />
-            ) : (
-              <TextInput
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={theme.textMuted}
-                value={endDate}
-                onChangeText={setEndDate}
-                style={{ color: theme.text, fontSize: 13, minWidth: 80, padding: 0 }}
-              />
-            )}
+          <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            {timeFilters.map((tFilter) => {
+              const isActive = selectedTimeFilter === tFilter.id;
+              return (
+                <TouchableOpacity
+                  key={tFilter.id}
+                  onPress={() => setSelectedTimeFilter(tFilter.id)}
+                  style={[
+                    styles.filterPill,
+                    isActive ? styles.filterPillActive : styles.filterPillInactive,
+                    { flexDirection: isRtl ? 'row-reverse' : 'row' }
+                  ]}
+                >
+                  <Ionicons 
+                    name={tFilter.id === 'custom' ? 'calendar-outline' : 'time-outline'} 
+                    size={16} 
+                    color={isActive ? '#fff' : '#2f4360'} 
+                    style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
+                  />
+                  <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
+                    {t(tFilter.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-          {(startDate || endDate) && (
-            <TouchableOpacity 
-              style={styles.clearCustomBtn} 
-              onPress={() => { setStartDate(''); setEndDate(''); }}
-            >
-              <Ionicons name="trash-outline" size={16} color={theme.iconColor} />
-            </TouchableOpacity>
+          {selectedTimeFilter === 'custom' && (
+            <View style={[styles.customDateContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+              <View style={[styles.customDateWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <Text style={styles.customDateLabel}>{isRtl ? 'من:' : 'From:'}</Text>
+                {Platform.OS === 'web' ? (
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    style={styles.customDateInput}
+                  />
+                ) : (
+                  <TextInput
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor={theme.textMuted}
+                    value={startDate}
+                    onChangeText={setStartDate}
+                    style={{ color: theme.text, fontSize: 13, minWidth: 80, padding: 0 }}
+                  />
+                )}
+              </View>
+              <View style={[styles.customDateWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <Text style={styles.customDateLabel}>{isRtl ? 'إلى:' : 'To:'}</Text>
+                {Platform.OS === 'web' ? (
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    style={styles.customDateInput}
+                  />
+                ) : (
+                  <TextInput
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor={theme.textMuted}
+                    value={endDate}
+                    onChangeText={setEndDate}
+                    style={{ color: theme.text, fontSize: 13, minWidth: 80, padding: 0 }}
+                  />
+                )}
+              </View>
+              {(startDate || endDate) && (
+                <TouchableOpacity 
+                  style={styles.clearCustomBtn} 
+                  onPress={() => { setStartDate(''); setEndDate(''); }}
+                >
+                  <Ionicons name="trash-outline" size={16} color={theme.iconColor} />
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </View>
       )}
@@ -531,12 +540,12 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                     {}
                     <View style={[styles.cardFooter, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                       <View style={[styles.footerItem, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                        <Ionicons name="time-outline" size={13} color={isDarkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
+                        <Ionicons name="time-outline" size={13} color={isDarkMode ? "#ffffff" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
                         <Text style={styles.footerText}>{formatLogTimestamp(log.timestamp)}</Text>
                       </View>
                       {ip ? (
                         <View style={[styles.footerItem, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                          <Ionicons name="globe-outline" size={13} color={isDarkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
+                          <Ionicons name="globe-outline" size={13} color={isDarkMode ? "#ffffff" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
                           <Text style={styles.footerText}>{ip}</Text>
                         </View>
                       ) : null}
@@ -738,7 +747,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   performer: {
     fontSize: 13,
-    color: isDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(47, 67, 96, 0.8)',
+    color: isDarkMode ? '#ffffff' : 'rgba(47, 67, 96, 0.8)',
     marginBottom: 2,
   },
   target: {
@@ -761,7 +770,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   detailsText: {
     fontSize: 12.5,
-    color: theme.textMuted,
+    color: isDarkMode ? '#ffffff' : theme.textMuted,
     lineHeight: 16,
   },
   cardFooter: {
@@ -777,7 +786,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   footerText: {
     fontSize: 11.5,
-    color: isDarkMode ? 'rgba(255, 255, 255, 0.55)' : 'rgba(47, 67, 96, 0.55)',
+    color: isDarkMode ? '#ffffff' : 'rgba(47, 67, 96, 0.55)',
   },
   customDateContainer: {
     flexDirection: 'row',
@@ -823,9 +832,18 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     justifyContent: 'center',
   },
   headerContainer: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  iconButton: {
+    backgroundColor: 'rgba(47, 67, 96, 0.06)',
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: theme.borderColor,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   liveBtn: {
     paddingHorizontal: 12,
