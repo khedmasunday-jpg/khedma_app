@@ -360,7 +360,7 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
             <ActivityIndicator color="#fff" size="small" />
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="flame-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
+              <Ionicons name="flame-outline" size={20} color="#ffffff" style={{ marginRight: 6 }} />
               <Text style={styles.btnText}>
                 {isAr ? 'مسح وإعادة ضبط جميع البيانات' : 'Wipe & Reset All Data'}
               </Text>

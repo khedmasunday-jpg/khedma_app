@@ -608,7 +608,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
               onPress={handleSave} 
               disabled={saving}
             >
-              <Ionicons name="checkmark-circle-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
+              <Ionicons name="checkmark-circle-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
               <Text style={styles.btnText}>
                 {saving ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ' : 'Save')}
               </Text>
@@ -634,7 +634,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                 }}
                 disabled={deleting}
               >
-                <Ionicons name="trash-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
+                <Ionicons name="trash-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
                 <Text style={styles.btnText}>
                   {deleting ? (isRtl ? 'جاري الحذف...' : 'Deleting...') : (isRtl ? 'حذف الخادم' : 'Delete Staff')}
                 </Text>

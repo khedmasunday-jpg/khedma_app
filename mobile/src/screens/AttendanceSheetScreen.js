@@ -277,7 +277,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
             style={styles.refreshBtn} 
             onPress={() => fetchAttendanceForDate(selectedDate)}
           >
-            <Ionicons name="refresh" size={18} color={theme.iconColor} />
+            <Ionicons name="refresh" size={18} color="#ffffff" />
           </TouchableOpacity>
         </View>
       </View>

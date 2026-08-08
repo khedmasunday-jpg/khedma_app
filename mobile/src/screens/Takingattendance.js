@@ -287,11 +287,11 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
         {}
         <View style={[styles.bulkActionsRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
           <TouchableOpacity style={[styles.bulkBtn, styles.btnPresent]} onPress={() => setAll('present')}>
-            <Ionicons name="checkmark-done" size={18} color={theme.iconColor} style={{ marginHorizontal: 4 }} />
+            <Ionicons name="checkmark-done" size={18} color="#ffffff" style={{ marginHorizontal: 4 }} />
             <Text style={styles.bulkBtnText}>{t('allPresent')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.bulkBtn, styles.btnAbsent]} onPress={() => setAll('absent')}>
-            <Ionicons name="close" size={18} color={theme.iconColor} style={{ marginHorizontal: 4 }} />
+            <Ionicons name="close" size={18} color="#ffffff" style={{ marginHorizontal: 4 }} />
             <Text style={styles.bulkBtnText}>{t('allAbsent')}</Text>
           </TouchableOpacity>
         </View>
@@ -301,7 +301,7 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
             <ActivityIndicator size="small" color="#ffffff" />
           ) : (
             <>
-              <Ionicons name="cloud-upload-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
+              <Ionicons name="cloud-upload-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
               <Text style={styles.submitBtnText}>{t('registerAttendance')}</Text>
             </>
           )}

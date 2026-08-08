@@ -293,7 +293,7 @@ export default function BackupScreen({ route, navigation }) {const { theme, isDa
             </View>
           ) : (
             <View style={styles.btnRow}>
-              <Ionicons name="play-circle-outline" size={22} color={theme.iconColor} style={{ marginRight: 6 }} />
+              <Ionicons name="play-circle-outline" size={22} color="#ffffff" style={{ marginRight: 6 }} />
               <Text style={styles.primaryButtonText}>
                 {isAr ? 'بدء النسخ الاحتياطي الآن' : 'Start Backup Now'}
               </Text>

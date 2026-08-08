@@ -808,7 +808,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
-            <Ionicons name="cloud-upload-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
+            <Ionicons name="cloud-upload-outline" size={20} color="#ffffff" style={{ marginRight: 6 }} />
             <Text style={styles.primaryButtonText}>{t('submitAll')}</Text>
           </TouchableOpacity>
         </View>

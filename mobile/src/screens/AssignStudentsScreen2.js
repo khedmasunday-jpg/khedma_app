@@ -386,18 +386,18 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
               <View style={styles.adminButtonsGrid}>
                 {assignedStudents.length > 0 && (
                   <TouchableOpacity style={[styles.adminBtn, styles.btnRedOutline]} onPress={removeStudents}>
-                    <Ionicons name="person-remove-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                    <Ionicons name="person-remove-outline" size={16} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                     <Text style={styles.btnTextRed}>{localT('unassignAll')}</Text>
                   </TouchableOpacity>
                 )}
 
                 <TouchableOpacity style={[styles.adminBtn, styles.btnOrangeOutline]} onPress={confirmAndResetClass}>
-                  <Ionicons name="refresh-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="refresh-outline" size={16} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={styles.btnTextOrange}>{localT('resetClass')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.adminBtn, styles.btnDarkRedOutline]} onPress={confirmAndResetAll}>
-                  <Ionicons name="alert-circle-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="alert-circle-outline" size={16} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={styles.btnTextDarkRed}>{localT('masterReset')}</Text>
                 </TouchableOpacity>
               </View>
@@ -405,7 +405,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
               {}
               {assignedSelectedCount > 0 && (
                 <TouchableOpacity style={[styles.adminBtn, styles.btnRemoveSelected, { marginTop: 12 }]} onPress={removeSelected}>
-                  <Ionicons name="trash-outline" size={18} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="trash-outline" size={18} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
                   <Text style={styles.btnTextWhite}>
                     {isRtl 
                       ? `إزالة ${assignedSelectedCount} من المخدومين الموزعين` 

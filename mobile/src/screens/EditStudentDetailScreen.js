@@ -561,7 +561,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
               onPress={handleSave}
               disabled={saving || deleting}
             >
-              <Ionicons name="checkmark-done" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+              <Ionicons name="checkmark-done" size={20} color="#ffffff" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
               <Text style={styles.btnText}>{saving ? t('loading') : t('save')}</Text>
             </TouchableOpacity>
 
@@ -571,7 +571,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                 onPress={handleDelete}
                 disabled={saving || deleting}
               >
-                <Ionicons name="trash-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+                <Ionicons name="trash-outline" size={20} color="#ffffff" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
                 <Text style={styles.btnText}>{deleting ? t('loading') : t('deleteLabel')}</Text>
               </TouchableOpacity>
             )}
