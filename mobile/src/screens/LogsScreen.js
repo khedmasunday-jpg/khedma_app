@@ -323,8 +323,24 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
       scrollEventThrottle={16}
     >
       {}
+      {}
       <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <Text style={[styles.title, { color: theme.text }, { color: theme.text }]}>{t('logs')}</Text>
+        <View style={[styles.searchContainer, { flex: 1, marginRight: isRtl ? 0 : 12, marginLeft: isRtl ? 12 : 0, marginBottom: 0, flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+          <Ionicons name="search-outline" size={20} color={theme.iconColor} style={styles.searchIcon} />
+          <TextInput
+            style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+            placeholder={t('search')}
+            placeholderTextColor={theme.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearchButton}>
+              <Ionicons name="close-circle" size={18} color={theme.iconColor} />
+            </TouchableOpacity>
+          )}
+        </View>
+
         <TouchableOpacity 
           style={[styles.liveBtn, isLive ? styles.liveBtnActive : styles.liveBtnInactive, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
           onPress={() => setIsLive(!isLive)}
@@ -334,23 +350,6 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
             {isRtl ? 'تحديث مباشر' : 'Live Update'}
           </Text>
         </TouchableOpacity>
-      </View>
-
-      {}
-      <View style={[styles.searchContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <Ionicons name="search-outline" size={20} color={theme.iconColor} style={styles.searchIcon} />
-        <TextInput
-          style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
-          placeholder={t('search')}
-          placeholderTextColor={theme.textMuted}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearchButton}>
-            <Ionicons name="close-circle" size={18} color="rgba(47, 67, 96, 0.4)" />
-          </TouchableOpacity>
-        )}
       </View>
 
       {}
@@ -532,12 +531,12 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                     {}
                     <View style={[styles.cardFooter, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                       <View style={[styles.footerItem, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                        <Ionicons name="time-outline" size={13} color="rgba(47, 67, 96, 0.5)" style={{ marginHorizontal: 2 }} />
+                        <Ionicons name="time-outline" size={13} color={isDarkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
                         <Text style={styles.footerText}>{formatLogTimestamp(log.timestamp)}</Text>
                       </View>
                       {ip ? (
                         <View style={[styles.footerItem, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                          <Ionicons name="globe-outline" size={13} color="rgba(47, 67, 96, 0.5)" style={{ marginHorizontal: 2 }} />
+                          <Ionicons name="globe-outline" size={13} color={isDarkMode ? "rgba(255, 255, 255, 0.5)" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
                           <Text style={styles.footerText}>{ip}</Text>
                         </View>
                       ) : null}
@@ -739,12 +738,12 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   performer: {
     fontSize: 13,
-    color: 'rgba(47, 67, 96, 0.8)',
+    color: isDarkMode ? 'rgba(255, 255, 255, 0.8)' : 'rgba(47, 67, 96, 0.8)',
     marginBottom: 2,
   },
   target: {
     fontSize: 13,
-    color: '#2e7d32',
+    color: isDarkMode ? '#81c784' : '#2e7d32',
     marginBottom: 2,
   },
   label: {
@@ -778,7 +777,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   },
   footerText: {
     fontSize: 11.5,
-    color: 'rgba(47, 67, 96, 0.55)',
+    color: isDarkMode ? 'rgba(255, 255, 255, 0.55)' : 'rgba(47, 67, 96, 0.55)',
   },
   customDateContainer: {
     flexDirection: 'row',
