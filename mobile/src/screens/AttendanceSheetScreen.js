@@ -22,7 +22,11 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
   const { token: routeToken, role, classId, className } = route.params || {};
   const token = routeToken || getAuthToken();
   const { t, locale } = useLanguage();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - d.getDay()); // Default to the most recent Sunday
+    return d;
+  });
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const [students, setStudents] = useState([]);
   const [attendanceMap, setAttendanceMap] = useState({});
@@ -118,8 +122,12 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
   };
 
   const onChangeDate = (date) => {
-    setSelectedDate(date);
     setDatePickerVisible(false);
+    if (date && date.getDay() !== 0) {
+      notify(isRtl ? 'تنبيه' : 'Notice', isRtl ? 'يجب اختيار يوم أحد فقط. سيتم اختيار يوم الأحد السابق.' : 'Please select a Sunday only. Selecting the previous Sunday.');
+      date.setDate(date.getDate() - date.getDay());
+    }
+    setSelectedDate(date || new Date());
   };
 
   const formatDate = (d) => {
@@ -171,6 +179,8 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
                 </View>
                 <input
                   type="date"
+                  min="2023-01-01"
+                  step="7"
                   value={(() => {
                     try {
                       if (!selectedDate) return '';
@@ -179,7 +189,11 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
                   })()}
                   onChange={(e) => {
                     const v = e.target.value;
-                    if (!v) return setSelectedDate(new Date());
+                    if (!v) {
+                      const d = new Date();
+                      d.setDate(d.getDate() - d.getDay());
+                      return setSelectedDate(d);
+                    }
                     const d = new Date(v);
                     if (!isNaN(d.getTime())) setSelectedDate(d);
                   }}
