@@ -141,6 +141,49 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
     } catch (e) { return '' }
   };
 
+  const presentStudents = [];
+  const absentStudents = [];
+
+  students.forEach(s => {
+    if (attendanceMap[s._id] === 'present') {
+      presentStudents.push(s);
+    } else {
+      absentStudents.push(s);
+    }
+  });
+
+  const sortFn = (a, b) => (a.fullName || '').localeCompare(b.fullName || '');
+  presentStudents.sort(sortFn);
+  absentStudents.sort(sortFn);
+
+  const renderStudentCard = (s, isPresent) => (
+    <View key={s._id} style={styles.studentCard}>
+      <View style={[styles.studentHeaderRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <Text style={[styles.studentName, { textAlign: isRtl ? 'right' : 'left' }]}>
+          {s.fullName}
+        </Text>
+        <View style={[styles.statusBadge, isPresent ? styles.badgePresent : styles.badgeAbsent]}>
+          <Ionicons 
+            name={isPresent ? "checkmark-circle-outline" : "close-circle-outline"} 
+            size={16} 
+            color={isPresent ? "#2e7d32" : "#c62828"} 
+            style={{ marginHorizontal: 4 }}
+          />
+          <Text style={[styles.statusText, { color: isPresent ? "#2e7d32" : "#c62828" }]}>
+            {isPresent ? (isRtl ? 'حاضر' : 'Present') : (isRtl ? 'غائب' : 'Absent')}
+          </Text>
+        </View>
+      </View>
+      
+      <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <Text style={styles.detailLabel}>{t('lastAttendance')}:</Text>
+        <Text style={styles.detailValue}>
+          {s.lastAttendanceDate ? formatDate(s.lastAttendanceDate) : t('never')}
+        </Text>
+      </View>
+    </View>
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
@@ -246,36 +289,25 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
         ) : students.length === 0 ? (
           <Text style={styles.noStudentsText}>{t('noStudents')}</Text>
         ) : (
-          students.map(s => {
-            const isPresent = attendanceMap[s._id] === 'present';
-            return (
-              <View key={s._id} style={styles.studentCard}>
-                <View style={[styles.studentHeaderRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                  <Text style={[styles.studentName, { textAlign: isRtl ? 'right' : 'left' }]}>
-                    {s.fullName}
-                  </Text>
-                  <View style={[styles.statusBadge, isPresent ? styles.badgePresent : styles.badgeAbsent]}>
-                    <Ionicons 
-                      name={isPresent ? "checkmark-circle-outline" : "close-circle-outline"} 
-                      size={16} 
-                      color={isPresent ? "#2e7d32" : "#c62828"} 
-                      style={{ marginHorizontal: 4 }}
-                    />
-                    <Text style={[styles.statusText, { color: isPresent ? "#2e7d32" : "#c62828" }]}>
-                      {isPresent ? (isRtl ? 'حاضر' : 'Present') : (isRtl ? 'غائب' : 'Absent')}
-                    </Text>
-                  </View>
+          <View>
+            {presentStudents.length > 0 && (
+              <View style={styles.sectionContainer}>
+                <View style={[styles.sectionHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                  <Text style={styles.sectionTitle}>{isRtl ? 'الحاضرون' : 'Present'} ({presentStudents.length})</Text>
                 </View>
-                
-                <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                  <Text style={styles.detailLabel}>{t('lastAttendance')}:</Text>
-                  <Text style={styles.detailValue}>
-                    {s.lastAttendanceDate ? formatDate(s.lastAttendanceDate) : t('never')}
-                  </Text>
-                </View>
+                {presentStudents.map(s => renderStudentCard(s, true))}
               </View>
-            );
-          })
+            )}
+
+            {absentStudents.length > 0 && (
+              <View style={styles.sectionContainer}>
+                <View style={[styles.sectionHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                  <Text style={styles.sectionTitle}>{isRtl ? 'الغائبون' : 'Absent'} ({absentStudents.length})</Text>
+                </View>
+                {absentStudents.map(s => renderStudentCard(s, false))}
+              </View>
+            )}
+          </View>
         )}
       </ScrollView>
     </View>
@@ -469,5 +501,21 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     color: theme.text,
     fontSize: 13,
     fontWeight: '600',
-  }
+  },
+  sectionContainer: {
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(47, 67, 96, 0.05)',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.text,
+    fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
+  },
 });
