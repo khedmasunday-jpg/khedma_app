@@ -48,6 +48,7 @@ import TayoScreen from './src/screens/TayoScreen';
 import TayoGiveScreen from './src/screens/TayoGiveScreen';
 import TayoDisplayScreen from './src/screens/TayoDisplayScreen';
 import BackupScreen from './src/screens/BackupScreen';
+import RssLinksScreen from './src/screens/RssLinksScreen';
 
 try {
   const arabicAlert = require('./src/utils/arabicAlert');
@@ -193,6 +194,11 @@ function AppNavigator() {
         name="AttendanceSheet"
         component={AttendanceSheetScreen}
         options={{ title: t('attendanceSheet') }}
+      />
+      <Stack.Screen
+        name="RssLinksScreen"
+        component={RssLinksScreen}
+        options={{ title: 'RSS Links' }}
       />
       <Stack.Screen 
         name="TakingAttendance" 

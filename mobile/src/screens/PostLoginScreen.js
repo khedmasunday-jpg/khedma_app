@@ -24,6 +24,7 @@ const BUTTONS = [
   { labelKey: 'reset', label: 'Reset', exactRank: 1 },
   { labelKey: 'whatsappTest', label: 'Telegram Test', exactRank: 1 },
   { labelKey: 'backupData', label: 'النسخ الاحتياطي', exactRank: 1 },
+  { labelKey: 'rssLinks', label: 'RSS Links', minRank: 1 },
 ];
 
 const BUTTON_ICONS = {
@@ -43,6 +44,7 @@ const BUTTON_ICONS = {
   'whatsappTest': { icon: 'paper-plane', color: '#25D366' },
   'backupData': { icon: 'cloud-upload-outline', color: '#27ae60' },
   'importData': { icon: 'cloud-download-outline', color: 'theme-text' },
+  'rssLinks': { icon: 'logo-rss', color: '#e67e22' },
 };
 
 const roleToRank = {
@@ -198,6 +200,9 @@ export default function PostLoginScreen({ route, navigation }) {
         break;
       case 'editStaff':
         navigation.navigate('EditStaffListScreen', { role });
+        break;
+      case 'rssLinks':
+        navigation.navigate('RssLinksScreen', { role });
         break;
       case 'addStudents':
         navigation.navigate('AddStudentsScreen');
