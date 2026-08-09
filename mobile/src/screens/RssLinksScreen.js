@@ -17,6 +17,7 @@ export default function RssLinksScreen({ route, navigation }) {
   const [allowedLevels, setAllowedLevels] = useState([]);
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [staff, setStaff] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const { t, locale } = useLanguage();
   const { theme, isDarkMode } = useTheme();
@@ -185,8 +186,15 @@ export default function RssLinksScreen({ route, navigation }) {
             </View>
 
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Allowed Specific Users:</Text>
+            <TextInput
+              style={[styles.input, { color: theme.text, borderColor: theme.border, marginBottom: 5 }]}
+              placeholder="Search teachers..."
+              placeholderTextColor={theme.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
             <ScrollView style={styles.userList}>
-              {staff.map(user => (
+              {staff.filter(u => (u.fullName || u.username).toLowerCase().includes(searchQuery.toLowerCase())).map(user => (
                 <TouchableOpacity
                   key={user._id}
                   style={[styles.userRow, { backgroundColor: allowedUsers.includes(user._id) ? theme.primary : theme.cardBackground }]}
