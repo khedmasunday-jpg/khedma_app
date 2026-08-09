@@ -4,7 +4,7 @@ const RssLinkSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     url: { type: String, required: true },
-    allowedRoles: [{ type: String }],
+    allowedLevels: [{ type: Number }],
     allowedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
   },
   { timestamps: true }

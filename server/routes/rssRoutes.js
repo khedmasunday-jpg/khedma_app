@@ -7,8 +7,8 @@ const User = require('../models/User');
 // Create an RSS Link (Admin only)
 router.post('/', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
-    const { title, url, allowedRoles, allowedUsers } = req.body;
-    const newLink = new RssLink({ title, url, allowedRoles, allowedUsers });
+    const { title, url, allowedLevels, allowedUsers } = req.body;
+    const newLink = new RssLink({ title, url, allowedLevels, allowedUsers });
     await newLink.save();
     res.status(201).json(newLink);
   } catch (error) {
@@ -20,7 +20,7 @@ router.post('/', verifyToken, authorizeRoles('admin'), async (req, res) => {
 // Get RSS Links based on user role and id
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const { role, id } = req.user;
+    const { role, id, assignedlevel } = req.user;
     let query = {};
     
     if (role === 'admin' || role === 'principal') {
@@ -31,10 +31,10 @@ router.get('/', verifyToken, async (req, res) => {
       // Or if a link allows everyone (empty roles and empty users) - assuming an empty link is public to all staff
       query = {
         $or: [
-          { allowedRoles: role },
+          { allowedLevels: assignedlevel },
           { allowedUsers: id },
           { $and: [
-              { allowedRoles: { $size: 0 } }, 
+              { allowedLevels: { $size: 0 } }, 
               { allowedUsers: { $size: 0 } }
           ]}
         ]
@@ -52,10 +52,10 @@ router.get('/', verifyToken, async (req, res) => {
 // Update an RSS Link (Admin only)
 router.put('/:id', verifyToken, authorizeRoles('admin'), async (req, res) => {
   try {
-    const { title, url, allowedRoles, allowedUsers } = req.body;
+    const { title, url, allowedLevels, allowedUsers } = req.body;
     const link = await RssLink.findByIdAndUpdate(
       req.params.id, 
-      { title, url, allowedRoles, allowedUsers },
+      { title, url, allowedLevels, allowedUsers },
       { new: true }
     );
     if (!link) {

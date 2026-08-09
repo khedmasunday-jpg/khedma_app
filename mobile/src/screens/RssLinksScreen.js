@@ -14,7 +14,7 @@ export default function RssLinksScreen({ route, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
-  const [allowedRoles, setAllowedRoles] = useState([]);
+  const [allowedLevels, setAllowedLevels] = useState([]);
   const [allowedUsers, setAllowedUsers] = useState([]);
   const [staff, setStaff] = useState([]);
   
@@ -65,14 +65,14 @@ export default function RssLinksScreen({ route, navigation }) {
     try {
       const token = getAuthToken();
       await Axios.post(`${API_URL}/rss`, {
-        title, url, allowedRoles, allowedUsers
+        title, url, allowedLevels, allowedUsers
       }, {
         headers: { Authorization: token }
       });
       setModalVisible(false);
       setTitle('');
       setUrl('');
-      setAllowedRoles([]);
+      setAllowedLevels([]);
       setAllowedUsers([]);
       fetchLinks();
     } catch (err) {
@@ -94,11 +94,11 @@ export default function RssLinksScreen({ route, navigation }) {
     }
   };
 
-  const toggleRole = (r) => {
-    if (allowedRoles.includes(r)) {
-      setAllowedRoles(allowedRoles.filter(role => role !== r));
+  const toggleLevel = (l) => {
+    if (allowedLevels.includes(l)) {
+      setAllowedLevels(allowedLevels.filter(level => level !== l));
     } else {
-      setAllowedRoles([...allowedRoles, r]);
+      setAllowedLevels([...allowedLevels, l]);
     }
   };
 
@@ -125,7 +125,7 @@ export default function RssLinksScreen({ route, navigation }) {
       </TouchableOpacity>
       {isAdmin && (
         <Text style={[styles.meta, { color: theme.textSecondary }]}>
-          Roles: {item.allowedRoles.join(', ') || 'All'} | Users: {item.allowedUsers.length}
+          Levels: {item.allowedLevels.join(', ') || 'All'} | Users: {item.allowedUsers.length}
         </Text>
       )}
     </View>
@@ -171,15 +171,15 @@ export default function RssLinksScreen({ route, navigation }) {
               onChangeText={setUrl}
             />
 
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Allowed Roles:</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Allowed Levels (Years):</Text>
             <View style={styles.roleContainer}>
-              {['co-principal', 'teacher'].map(r => (
+              {[1, 2, 3].map(l => (
                 <TouchableOpacity
-                  key={r}
-                  style={[styles.roleChip, { backgroundColor: allowedRoles.includes(r) ? theme.primary : theme.cardBackground }]}
-                  onPress={() => toggleRole(r)}
+                  key={l}
+                  style={[styles.roleChip, { backgroundColor: allowedLevels.includes(l) ? theme.primary : theme.cardBackground }]}
+                  onPress={() => toggleLevel(l)}
                 >
-                  <Text style={{ color: allowedRoles.includes(r) ? '#fff' : theme.text }}>{r}</Text>
+                  <Text style={{ color: allowedLevels.includes(l) ? '#fff' : theme.text }}>Year {l}</Text>
                 </TouchableOpacity>
               ))}
             </View>
