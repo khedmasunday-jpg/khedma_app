@@ -12,6 +12,7 @@ export default function RssLinksScreen({ route, navigation }) {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [allowedLevels, setAllowedLevels] = useState([]);
@@ -58,6 +59,24 @@ export default function RssLinksScreen({ route, navigation }) {
     }
   };
 
+  const closeModal = () => {
+    setModalVisible(false);
+    setTitle('');
+    setUrl('');
+    setAllowedLevels([]);
+    setAllowedUsers([]);
+    setEditingId(null);
+  };
+
+  const handleEditClick = (item) => {
+    setTitle(item.title);
+    setUrl(item.url);
+    setAllowedLevels(item.allowedLevels || []);
+    setAllowedUsers(item.allowedUsers || []);
+    setEditingId(item._id);
+    setModalVisible(true);
+  };
+
   const handleCreate = async () => {
     if (!title || !url) {
       Alert.alert('Error', 'Title and URL are required');
@@ -65,20 +84,24 @@ export default function RssLinksScreen({ route, navigation }) {
     }
     try {
       const token = getAuthToken();
-      await Axios.post(`${API_URL}/rss`, {
-        title, url, allowedLevels, allowedUsers
-      }, {
-        headers: { Authorization: token }
-      });
-      setModalVisible(false);
-      setTitle('');
-      setUrl('');
-      setAllowedLevels([]);
-      setAllowedUsers([]);
+      if (editingId) {
+        await Axios.put(`${API_URL}/rss/${editingId}`, {
+          title, url, allowedLevels, allowedUsers
+        }, {
+          headers: { Authorization: token }
+        });
+      } else {
+        await Axios.post(`${API_URL}/rss`, {
+          title, url, allowedLevels, allowedUsers
+        }, {
+          headers: { Authorization: token }
+        });
+      }
+      closeModal();
       fetchLinks();
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'Failed to create RSS link');
+      Alert.alert('Error', 'Failed to save RSS link');
     }
   };
 
@@ -116,16 +139,21 @@ export default function RssLinksScreen({ route, navigation }) {
       <View style={styles.cardHeader}>
         <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
         {role === 'admin' && (
-          <TouchableOpacity onPress={() => handleDelete(item._id)}>
-            <Ionicons name="trash-outline" size={24} color="#e74c3c" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => handleEditClick(item)} style={{ marginRight: 15 }}>
+              <Ionicons name="pencil-outline" size={24} color={theme.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleDelete(item._id)}>
+              <Ionicons name="trash-outline" size={24} color="#e74c3c" />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
       <TouchableOpacity onPress={() => Linking.openURL(item.url)}>
         <Text style={[styles.url, { color: theme.primary }]}>{item.url}</Text>
       </TouchableOpacity>
       {isAdmin && (
-        <Text style={[styles.meta, { color: theme.textSecondary }]}>
+        <Text style={[styles.meta, { color: isDarkMode ? '#fff' : theme.textSecondary }]}>
           Levels: {item.allowedLevels.join(', ') || 'All'} | Users: {item.allowedUsers.length}
         </Text>
       )}
@@ -147,7 +175,14 @@ export default function RssLinksScreen({ route, navigation }) {
       )}
 
       {role === 'admin' && (
-        <TouchableOpacity style={[styles.fab, { backgroundColor: theme.primary }]} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={[styles.fab, { backgroundColor: theme.primary }]} onPress={() => {
+          setEditingId(null);
+          setTitle('');
+          setUrl('');
+          setAllowedLevels([]);
+          setAllowedUsers([]);
+          setModalVisible(true);
+        }}>
           <Ionicons name="add" size={30} color="#fff" />
         </TouchableOpacity>
       )}
@@ -155,7 +190,7 @@ export default function RssLinksScreen({ route, navigation }) {
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Add RSS Link</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>{editingId ? 'Edit RSS Link' : 'Add RSS Link'}</Text>
             
             <TextInput
               style={[styles.input, { color: theme.text, borderColor: theme.border }]}
@@ -206,7 +241,7 @@ export default function RssLinksScreen({ route, navigation }) {
             </ScrollView>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={[styles.btn, { backgroundColor: '#e74c3c' }]} onPress={() => setModalVisible(false)}>
+              <TouchableOpacity style={[styles.btn, { backgroundColor: '#e74c3c' }]} onPress={closeModal}>
                 <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.btn, { backgroundColor: theme.primary }]} onPress={handleCreate}>
