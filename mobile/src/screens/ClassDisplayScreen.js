@@ -122,7 +122,15 @@ export default function ClassDisplayScreen({ route, navigation }) {const { theme
       <View style={styles.actionContainer}>
         <TouchableOpacity
           style={styles.attendanceActionBtn}
-          onPress={() => navigation.navigate('AttendanceSheet', { token, role })}
+          onPress={() => {
+            const currentCls = classes?.find(c => c._id === selectedClass);
+            navigation.navigate('AttendanceSheet', { 
+              token, 
+              role,
+              classId: selectedClass,
+              className: currentCls ? currentCls.name : null
+            });
+          }}
         >
           <Text style={styles.attendanceActionBtnText}>{t('viewAttendanceSheet')}</Text>
         </TouchableOpacity>
