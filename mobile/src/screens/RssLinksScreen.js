@@ -189,7 +189,7 @@ export default function RssLinksScreen({ route, navigation }) {
 
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
+          <View style={[styles.modalContent, { backgroundColor: isDarkMode ? theme.background : '#ffffff' }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>{editingId ? 'Edit RSS Link' : 'Add RSS Link'}</Text>
             
             <TextInput
@@ -229,7 +229,16 @@ export default function RssLinksScreen({ route, navigation }) {
               onChangeText={setSearchQuery}
             />
             <ScrollView style={styles.userList}>
-              {staff.filter(u => (u.fullName || u.username).toLowerCase().includes(searchQuery.toLowerCase())).map(user => (
+              {staff
+                .filter(u => (u.fullName || u.username).toLowerCase().includes(searchQuery.toLowerCase()))
+                .sort((a, b) => {
+                  const aSelected = allowedUsers.includes(a._id);
+                  const bSelected = allowedUsers.includes(b._id);
+                  if (aSelected && !bSelected) return -1;
+                  if (!aSelected && bSelected) return 1;
+                  return 0;
+                })
+                .map(user => (
                 <TouchableOpacity
                   key={user._id}
                   style={[styles.userRow, { backgroundColor: allowedUsers.includes(user._id) ? theme.primary : theme.cardBackground }]}
