@@ -282,10 +282,14 @@ export default function PostLoginScreen({ route, navigation }) {
           
           {role === 'admin' && (
             <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => {
-              Alert.alert(
-                locale === 'ar' ? '⚠️ تحذير خطير جداً!' : '⚠️ CRITICAL SYSTEM FAILURE!',
-                locale === 'ar' ? 'لقد قمت بمسح جميع بيانات الخدام والمخدومين... \n\n\n\n\nبم بم بم بم... بهزر معاك يا ريس 😂' : 'All user databases have been permanently deleted... \n\n\n\n\nJust kidding boss 😂'
-              );
+              const title = locale === 'ar' ? '⚠️ تحذير خطير جداً!' : '⚠️ CRITICAL SYSTEM FAILURE!';
+              const message = locale === 'ar' ? 'لقد قمت بمسح جميع بيانات الخدام والمخدومين... \n\n\n\n\nبم بم بم بم... بهزر معاك يا ريس 😂' : 'All user databases have been permanently deleted... \n\n\n\n\nJust kidding boss 😂';
+              
+              if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.alert(`${title}\n\n${message}`);
+              } else {
+                Alert.alert(title, message);
+              }
             }}>
               <Ionicons name="skull-outline" size={22} color={theme.iconColor} />
             </TouchableOpacity>
@@ -296,10 +300,14 @@ export default function PostLoginScreen({ route, navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => {
-            Alert.alert(
-              locale === 'ar' ? 'تغيير الإضاءة' : 'Lighting Change',
-              locale === 'ar' ? (isDarkMode ? 'قمت بتشغيل النور... عينيك هتوجعك 🌞😎' : 'قمت بإطفاء النور... اوعى تنام 😴🌙') : (isDarkMode ? 'Lights ON... put your sunglasses on 🌞😎' : 'Lights OFF... don\'t fall asleep 😴🌙')
-            );
+            const title = locale === 'ar' ? 'تغيير الإضاءة' : 'Lighting Change';
+            const message = locale === 'ar' ? (isDarkMode ? 'قمت بتشغيل النور... عينيك هتوجعك 🌞😎' : 'قمت بإطفاء النور... اوعى تنام 😴🌙') : (isDarkMode ? 'Lights ON... put your sunglasses on 🌞😎' : 'Lights OFF... don\'t fall asleep 😴🌙');
+            
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+              window.alert(`${title}\n\n${message}`);
+            } else {
+              Alert.alert(title, message);
+            }
             toggleTheme();
           }}>
             <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={22} color={theme.iconColor} />

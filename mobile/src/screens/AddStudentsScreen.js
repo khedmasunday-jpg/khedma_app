@@ -40,12 +40,9 @@ const initialStudent = {
   fullName: '',
   classLevel: '', 
   classname: '',
-  googlecode: '',
-  address: '',
   mother_phonenumber: '',
   father_phonenumber: '',
   birthdate: '',
-  gender: 'male',
 };
 
 export default function AddStudentsScreen({ route, navigation }) {const { theme, isDarkMode } = useTheme();
@@ -183,12 +180,9 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
         const fullName = getVal(['اسم الطالب', 'الاسم بالكامل', 'الاسم', 'fullname', 'name', 'full name']);
         const classLevel = getVal(['السنة الدراسية', 'الصف', 'classlevel', 'grade', 'year', 'level']);
         const classname = getVal(['اسم الفصل', 'الفصل', 'classname', 'class name', 'class']);
-        const googlecode = getVal(['كود جوجل', 'الكود', 'googlecode', 'code']);
-        const address = getVal(['العنوان', 'address']);
         const mother_phonenumber = String(getVal(['تليفون الأم', 'رقم الأم', 'mother phone', 'mother_phonenumber', 'motherphone'])).replace(/\D/g, '');
         const father_phonenumber = String(getVal(['تليفون الأب', 'رقم الأب', 'father phone', 'father_phonenumber', 'fatherphone'])).replace(/\D/g, '');
         const birthdateRaw = getVal(['تاريخ الميلاد', 'birthdate', 'birth date', 'dob']);
-        const genderRaw = String(getVal(['النوع', 'الجنس', 'gender', 'sex'])).trim().toLowerCase();
 
         let birthdate = '';
         if (birthdateRaw) {
@@ -207,21 +201,13 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
           }
         }
 
-        let gender = 'male';
-        if (genderRaw.includes('girl') || genderRaw.includes('بنت') || genderRaw.includes('female') || genderRaw.includes('أنثى')) {
-          gender = 'female';
-        }
-
         return {
           fullName: String(fullName).trim(),
           classLevel: classLevel ? Number(classLevel) : '',
           classname: String(classname).trim(),
-          googlecode: String(googlecode).trim(),
-          address: String(address).trim(),
           mother_phonenumber,
           father_phonenumber,
           birthdate,
-          gender
         };
       });
 
@@ -275,7 +261,10 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
   const downloadTemplate = async () => {
     try {
-      const ws = XLSX.utils.aoa_to_sheet([['اسم الطالب', 'السنة الدراسية', 'اسم الفصل', 'تليفون الأم', 'تليفون الأب', 'تاريخ الميلاد', 'النوع', 'العنوان', 'كود جوجل']]);
+      const ws = XLSX.utils.aoa_to_sheet([
+        ['اسم الطالب', 'السنة الدراسية', 'اسم الفصل', 'تليفون الأم', 'تليفون الأب', 'تاريخ الميلاد'],
+        ['(مثال) مينا مدحت', '1', 'الشاروبيم', '01234567890', '01000000000', '2015-05-20']
+      ]);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Students");
       
@@ -360,12 +349,9 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
       fullName: student.fullName.trim(),
       classLevel: Number(student.classLevel),
       classname: student.classname,
-      googlecode: student.googlecode || '',
-      address: student.address || '',
       mother_phonenumber: (student.mother_phonenumber || '').trim(),
       father_phonenumber: (student.father_phonenumber || '').trim(),
       birthdate: student.birthdate || new Date().toISOString(),
-      gender: student.gender || 'male',
     };
 
     setStudents([...students, toAdd]);
@@ -444,12 +430,9 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
           fullName: student.fullName.trim(),
           classLevel: Number(student.classLevel),
           classname: student.classname,
-          googlecode: student.googlecode || '',
-          address: student.address || '',
           mother_phonenumber: (student.mother_phonenumber || '').trim(),
           father_phonenumber: (student.father_phonenumber || '').trim(),
           birthdate: student.birthdate || new Date().toISOString(),
-          gender: student.gender || 'male',
         };
         
         toSubmit.push(toAdd);
