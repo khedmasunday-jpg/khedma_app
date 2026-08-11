@@ -172,7 +172,7 @@ async function handleBirthdayJob(job) {
     for (const principal of principals) {
       if (!principal.telegramChatId) continue;
       
-      let msg = `استاذه ${principal.fullName}\nاليوم يوافق عيد ميلاد هؤلاء الخدام المباركين:\n\n`;
+      let msg = `ميس ${principal.fullName}\nاليوم يوافق عيد ميلاد هؤلاء الخدام المباركين:\n\n`;
       staffWithBirthdays.forEach(t => {
         msg += `🎁 ${t.fullName} (${t.assignedclass || t.role}) - 📞 ${t.phonenumber || 'لا يوجد'}\n`;
       });
@@ -205,7 +205,7 @@ async function handleBirthdayJob(job) {
       const myLevelStudents = studentsWithBirthdays.filter(s => s.getClassLevel() === Number(cp.assignedlevel));
       if (myLevelStudents.length === 0) continue;
 
-      let msg = `استاذه ${cp.fullName}\nاليوم يوافق عيد ميلاد هؤلاء المخدومين في مرحلتك (سنة ${cp.assignedlevel}):\n\n`;
+      let msg = `ميس ${cp.fullName}\nاليوم يوافق عيد ميلاد هؤلاء المخدومين في مرحلتك (سنة ${cp.assignedlevel}):\n\n`;
       myLevelStudents.forEach(s => {
         msg += `🎈 ${s.getFullName()} - فصل ${s.getClassname() || 'غير محدد'}\n`;
       });
