@@ -21,26 +21,8 @@ router.post('/', verifyToken, authorizeRoles('admin'), async (req, res) => {
 router.get('/', verifyToken, async (req, res) => {
   try {
     const { role, id, assignedlevel } = req.user;
-    let query = {};
-    
-    if (role === 'admin' || role === 'principal') {
-      // Admins and Principals see all links
-      query = {};
-    } else {
-      // Others see links that allow their role, or specifically allow their user ID
-      // Or if a link allows everyone (empty roles and empty users) - assuming an empty link is public to all staff
-      query = {
-        $or: [
-          { allowedLevels: assignedlevel },
-          { allowedUsers: id },
-          { $and: [
-              { allowedLevels: { $size: 0 } }, 
-              { allowedUsers: { $size: 0 } }
-          ]}
-        ]
-      };
-    }
-    
+    // Return all links. The frontend will decide which ones belong to 'My Resources' vs 'Other Resources'
+    const query = {};
     const links = await RssLink.find(query).sort({ createdAt: -1 });
     res.json(links);
   } catch (error) {

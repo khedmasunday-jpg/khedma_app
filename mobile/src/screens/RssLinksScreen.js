@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, TextInput, A
 import Axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { API_URL } from '../config/api';
-import { getAuthToken } from '../config/authSession';
+import { getAuthToken, getAuthUser } from '../config/authSession';
 import { useLanguage } from '../utils/LanguageContext';
 import { useTheme } from '../utils/ThemeContext';
 
@@ -11,6 +11,7 @@ export default function RssLinksScreen({ route, navigation }) {
   const { role } = route.params || {};
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showOtherLinks, setShowOtherLinks] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState('');
@@ -160,18 +161,48 @@ export default function RssLinksScreen({ route, navigation }) {
     </View>
   );
 
+  const currentUser = getAuthUser() || {};
+  
+  const myLinks = links.filter(l => 
+    isAdmin || 
+    (l.allowedLevels && l.allowedLevels.includes(currentUser.assignedlevel)) || 
+    (l.allowedUsers && l.allowedUsers.includes(currentUser._id)) ||
+    (!l.allowedLevels?.length && !l.allowedUsers?.length)
+  );
+
+  const otherLinks = links.filter(l => !myLinks.includes(l));
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {loading ? (
         <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 50 }} />
       ) : (
-        <FlatList
-          data={links}
-          keyExtractor={(item) => item._id}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          ListEmptyComponent={<Text style={{ color: theme.text, textAlign: 'center', marginTop: 50 }}>No RSS links found</Text>}
-        />
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+          {myLinks.length === 0 && otherLinks.length === 0 ? (
+            <Text style={{ color: theme.text, textAlign: 'center', marginTop: 50 }}>No RSS links found</Text>
+          ) : (
+            myLinks.map(item => <React.Fragment key={item._id}>{renderItem({ item })}</React.Fragment>)
+          )}
+
+          {!isAdmin && otherLinks.length > 0 && (
+            <View style={{ marginTop: 20 }}>
+              <TouchableOpacity 
+                style={{ backgroundColor: theme.cardBackground, padding: 15, borderRadius: 10, alignItems: 'center', borderWidth: 1, borderColor: theme.primary }} 
+                onPress={() => setShowOtherLinks(!showOtherLinks)}
+              >
+                <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize: 16 }}>
+                  {locale === 'ar' ? 'مناهج اخري' : 'Other Resources'}
+                </Text>
+              </TouchableOpacity>
+              
+              {showOtherLinks && (
+                <View style={{ marginTop: 15 }}>
+                  {otherLinks.map(item => <React.Fragment key={item._id}>{renderItem({ item })}</React.Fragment>)}
+                </View>
+              )}
+            </View>
+          )}
+        </ScrollView>
       )}
 
       {role === 'admin' && (

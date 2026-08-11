@@ -112,10 +112,10 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
   };
 
   const confirmAndResetTayo = () => {
-    const title = isAr ? 'تأكيد تصفير طايو' : 'Confirm Taio Reset';
+    const title = isAr ? 'تأكيد تصفير طايو' : 'Confirm Tayo Reset';
     const message = isAr
       ? 'سيعمل هذا على تصفير كافة أرصدة طايو ومسح سجلات طايو لجميع المخدومين. هل تريد الاستمرار؟'
-      : 'This will permanently reset all Taio balances to 0 and delete all Taio logs. Continue?';
+      : 'This will permanently reset all Tayo balances to 0 and delete all Tayo logs. Continue?';
 
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       if (window.confirm(`${title}\n\n${message}`)) doResetTayo();
@@ -131,10 +131,10 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
     try {
       setLoading(true);
       const res = await client.post('/tayo/reset');
-      notify(isAr ? 'تم بنجاح 🚀' : 'Success 🚀', res?.data?.msg || 'Taio reset completed.');
+      notify(isAr ? 'تم بنجاح 🚀' : 'Success 🚀', res?.data?.msg || 'Tayo reset completed.');
     } catch (err) {
-      logger.error('Taio reset error', err);
-      notify(isAr ? 'خطأ' : 'Error', err?.response?.data?.msg || err?.message || 'Failed to reset Taio');
+      logger.error('Tayo reset error', err);
+      notify(isAr ? 'خطأ' : 'Error', err?.response?.data?.msg || err?.message || 'Failed to reset Tayo');
     } finally {
       setLoading(false);
     }
@@ -315,13 +315,13 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
         <View style={styles.cardHeader}>
           <Ionicons name="star-outline" size={22} color={theme.iconColor} style={{ marginRight: 8 }} />
           <Text style={styles.cardTitle}>
-            {isAr ? 'تصفير طايو' : 'Reset Taio'}
+            {isAr ? 'تصفير طايو' : 'Reset Tayo'}
           </Text>
         </View>
         <Text style={styles.cardDesc}>
           {isAr
             ? 'يقوم بتصفير جميع أرصدة طايو ومسح سجلات طايو لجميع المخدومين.'
-            : 'Resets all Taio balances to 0 and clears Taio history logs for all students.'}
+            : 'Resets all Tayo balances to 0 and clears Tayo history logs for all students.'}
         </Text>
         <TouchableOpacity
           style={[styles.warningBtn, loading && styles.disabledBtn]}
@@ -332,7 +332,7 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
             <ActivityIndicator color="#fff" size="small" />
           ) : (
             <Text style={styles.btnText}>
-              {isAr ? 'تصفير أرصدة طايو' : 'Reset Taio Balances'}
+              {isAr ? 'تصفير أرصدة طايو' : 'Reset Tayo Balances'}
             </Text>
           )}
         </TouchableOpacity>
