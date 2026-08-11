@@ -119,7 +119,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
     return output;
   };
 
-  const handlePickExcel = async () => {
+  const doPickExcel = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: [
@@ -269,6 +269,53 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
       showAlert(
         locale === 'ar' ? 'خطأ' : 'Error',
         locale === 'ar' ? `حدث خطأ أثناء قراءة الملف: ${e.message}` : `Failed to read file: ${e.message}`
+      );
+    }
+  };
+
+  const downloadTemplate = async () => {
+    try {
+      const ws = XLSX.utils.aoa_to_sheet([['اسم الطالب', 'السنة الدراسية', 'اسم الفصل', 'تليفون الأم', 'تليفون الأب', 'تاريخ الميلاد', 'النوع', 'العنوان', 'كود جوجل']]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Students");
+      
+      if (Platform.OS === 'web') {
+        XLSX.writeFile(wb, "students_template.xlsx");
+      } else {
+        const base64 = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+        const uri = FileSystem.documentDirectory + 'students_template.xlsx';
+        await FileSystem.writeAsStringAsync(uri, base64, { encoding: FileSystem.EncodingType.Base64 });
+        
+        const Sharing = require('expo-sharing');
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(uri);
+        } else {
+          showAlert(locale === 'ar' ? 'خطأ' : 'Error', locale === 'ar' ? 'المشاركة غير مدعومة على هذا الجهاز' : 'Sharing is not available on this device');
+        }
+      }
+    } catch (err) {
+      logger.error('Template download error', err);
+      showAlert(locale === 'ar' ? 'خطأ' : 'Error', locale === 'ar' ? 'فشل تحميل القالب' : 'Failed to download template');
+    }
+  };
+
+  const handlePickExcel = () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (window.confirm(locale === 'ar' ? 'هل تمتلك ملف الإكسل (Template) جاهز للاستيراد؟\n\nاضغط OK إذا كان لديك الملف وتود استيراده.\nاضغط Cancel إذا كنت تريد تنزيل قالب فارغ لتعبئته.' : 'Do you have the Excel template ready?\n\nPress OK if you have the file to import.\nPress Cancel to download a blank template.')) {
+        doPickExcel();
+      } else {
+        downloadTemplate();
+      }
+    } else {
+      Alert.alert(
+        locale === 'ar' ? 'استيراد مخدومين' : 'Import Students',
+        locale === 'ar' ? 'هل تمتلك ملف الإكسل (Template) جاهز للاستيراد؟' : 'Do you have the Excel template ready to import?',
+        [
+          { text: locale === 'ar' ? 'إلغاء' : 'Cancel', style: 'cancel' },
+          { text: locale === 'ar' ? 'لا، قم بتنزيل القالب' : 'No, download template', onPress: () => downloadTemplate() },
+          { text: locale === 'ar' ? 'نعم، اختر الملف' : 'Yes, select file', onPress: () => doPickExcel() }
+        ],
+        { cancelable: true }
       );
     }
   };
