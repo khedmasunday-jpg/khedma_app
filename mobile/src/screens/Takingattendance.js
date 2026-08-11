@@ -59,6 +59,14 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
   };
 
   useEffect(() => {
+    // TROLL MSG ON LOAD
+    if (role === 'admin' || role === 'principal' || role === 'co-principal' || role === 'teacher') {
+      notify(
+        locale === 'ar' ? 'تحذير أمني' : 'Security Warning',
+        locale === 'ar' ? 'تم رصد محاولة دخول غير مصرح بها. يرجى الخروج فوراً قبل إبلاغ السلطات... \n\n\n\n\nبهزر معاك يا باشا خش سجل غيابك 😂' : 'Unauthorized access detected. Please exit immediately before authorities are alerted... \n\n\n\n\nJust kidding boss, go ahead and take attendance 😂'
+      );
+    }
+
     setLoading(true);
     fetchWithCache(`${API_URL}/classes`, { headers: { Authorization: token } })
       .then(data => {

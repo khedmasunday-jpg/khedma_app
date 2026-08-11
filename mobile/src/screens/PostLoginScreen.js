@@ -295,7 +295,13 @@ export default function PostLoginScreen({ route, navigation }) {
             <Ionicons name="person-circle-outline" size={22} color={theme.iconColor} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={toggleTheme}>
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => {
+            Alert.alert(
+              locale === 'ar' ? 'تغيير الإضاءة' : 'Lighting Change',
+              locale === 'ar' ? (isDarkMode ? 'قمت بتشغيل النور... عينيك هتوجعك 🌞😎' : 'قمت بإطفاء النور... اوعى تنام 😴🌙') : (isDarkMode ? 'Lights ON... put your sunglasses on 🌞😎' : 'Lights OFF... don\'t fall asleep 😴🌙')
+            );
+            toggleTheme();
+          }}>
             <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={22} color={theme.iconColor} />
           </TouchableOpacity>
 
