@@ -216,6 +216,31 @@ export default function TelegramTestScreen({ route, navigation }) {const { theme
     }
   };
 
+  const [checkingAbsentees, setCheckingAbsentees] = useState(false);
+
+  const handleCheckAbsentees = async () => {
+    setCheckingAbsentees(true);
+    try {
+      const response = await axios.post(`${API_URL}/telegram/check-absentees`, {}, { headers: getHeaders() });
+      if (response.data && response.data.success) {
+        Alert.alert(
+          isRtl ? 'تم بنجاح' : 'Success',
+          response.data.msg
+        );
+      } else {
+        throw new Error(response.data.msg || 'Unknown error');
+      }
+    } catch (err) {
+      const errMsg = err.response?.data?.msg || err.message || 'Server error';
+      Alert.alert(
+        isRtl ? 'تنبيه' : 'Notice',
+        errMsg
+      );
+    } finally {
+      setCheckingAbsentees(false);
+    }
+  };
+
   const getStatusBadge = () => {
     switch (status) {
       case 'connected':
@@ -408,6 +433,23 @@ export default function TelegramTestScreen({ route, navigation }) {const { theme
                 <Ionicons name="megaphone-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
                 <Text style={styles.sendButtonText}>
                   {isRtl ? `إرسال تعميم لجميع الخدام (${staffList.length} خادم)` : `Broadcast to All Staff (${staffList.length} Members)`}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.sendButton, { backgroundColor: '#8e44ad', marginTop: 10 }]}
+            onPress={handleCheckAbsentees}
+            disabled={loading || broadcastLoading || checkingAbsentees}
+          >
+            {checkingAbsentees ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <View style={styles.btnRow}>
+                <Ionicons name="people-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
+                <Text style={styles.sendButtonText}>
+                  {isRtl ? 'التحقق من غياب فصلي (إرسال تنبيه لي)' : 'Check My Class Absentees (Send Me Alert)'}
                 </Text>
               </View>
             )}

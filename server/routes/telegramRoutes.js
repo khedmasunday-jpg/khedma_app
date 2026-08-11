@@ -359,4 +359,65 @@ router.post('/broadcast', async (req, res) => {
   }
 });
 
+router.post('/check-absentees', async (req, res) => {
+  try {
+    const User = require('../models/User');
+    const Student = require('../models/Student');
+    const moment = require('moment');
+
+    const currentUser = await User.findById(req.user.id);
+    if (!currentUser) return res.status(404).json({ msg: 'User not found' });
+    
+    if (!currentUser.telegramChatId) {
+      return res.status(400).json({ success: false, msg: 'يرجى إعداد حساب التليجرام الخاص بك (Chat ID) في الملف الشخصي أولاً.' });
+    }
+
+    const { assignedlevel, assignedclass } = currentUser;
+    if (!assignedlevel || !assignedclass) {
+      return res.status(400).json({ success: false, msg: 'ليس لديك فصل دراسي معين لمتابعة غيابه.' });
+    }
+
+    const allStudents = await Student.find({});
+    
+    const myStudents = allStudents.filter(s => 
+      s.getClassLevel() === Number(assignedlevel) && 
+      s.getClassname() === assignedclass
+    );
+
+    const fourteenDaysAgo = moment().subtract(14, 'days');
+    
+    const absentees = myStudents.filter(s => {
+      if (!s.lastAttendanceDate) return true;
+      const lastAttended = moment(s.lastAttendanceDate);
+      return lastAttended.isBefore(fourteenDaysAgo);
+    });
+
+    if (absentees.length === 0) {
+      return res.json({ success: true, msg: 'لا يوجد مخدومين متغيبين لأكثر من أسبوعين في فصلك.' });
+    }
+
+    let messageText = `🕊️ سلام ونعمة أستاذ(ة) ${currentUser.fullName}\n\n`;
+    messageText += `هذه قائمة بالمخدومين المتغيبين لأكثر من أسبوعين في فصلك (${assignedclass} - سنة ${assignedlevel}):\n\n`;
+    absentees.forEach(s => {
+      messageText += `👤 ${s.getFullName() || 'بدون اسم'}\n`;
+      if (s.father_phonenumber || s.mother_phonenumber) {
+        messageText += `📞 أب: ${s.father_phonenumber || '-'}\n📞 أم: ${s.mother_phonenumber || '-'}\n`;
+      }
+      messageText += `\n`;
+    });
+    messageText += `برجاء الافتقاد والمتابعة 📋`;
+
+    const result = await telegramClient.sendTelegramMessage(currentUser.telegramChatId, messageText);
+
+    if (result.success) {
+      res.json({ success: true, msg: `تم إرسال رسالة التنبيه بنجاح لعدد ${absentees.length} مخدومين عبر تليجرام.` });
+    } else {
+      res.status(400).json({ success: false, msg: `فشل الإرسال عبر تليجرام: ${result.error}` });
+    }
+  } catch (err) {
+    console.error('Check absentees error:', err);
+    res.status(500).json({ msg: 'حدث خطأ في الخادم' });
+  }
+});
+
 module.exports = router;
