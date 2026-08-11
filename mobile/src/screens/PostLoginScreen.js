@@ -65,6 +65,16 @@ export default function PostLoginScreen({ route, navigation }) {
   const styles = getStyles(theme, isDarkMode);
 
   const [profileModalVisible, setProfileModalVisible] = useState(false);
+  const [customAlertVisible, setCustomAlertVisible] = useState(false);
+  const [customAlertTitle, setCustomAlertTitle] = useState('');
+  const [customAlertMessage, setCustomAlertMessage] = useState('');
+  
+  const showCustomAlert = (title, message) => {
+    setCustomAlertTitle(title);
+    setCustomAlertMessage(message);
+    setCustomAlertVisible(true);
+  };
+
   const [currentUsername, setCurrentUsername] = useState('');
   const [newUsername, setNewUsername] = useState('');
   const [telegramChatId, setTelegramChatId] = useState('');
@@ -285,11 +295,7 @@ export default function PostLoginScreen({ route, navigation }) {
               const title = locale === 'ar' ? '⚠️ تحذير خطير جداً!' : '⚠️ CRITICAL SYSTEM FAILURE!';
               const message = locale === 'ar' ? 'لقد قمت بمسح جميع بيانات الخدام والمخدومين... \n\n\n\n\nبم بم بم بم... بهزر معاك يا ريس 😂' : 'All user databases have been permanently deleted... \n\n\n\n\nJust kidding boss 😂';
               
-              if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                window.alert(`${title}\n\n${message}`);
-              } else {
-                Alert.alert(title, message);
-              }
+              showCustomAlert(title, message);
             }}>
               <Ionicons name="skull-outline" size={22} color={theme.iconColor} />
             </TouchableOpacity>
@@ -303,11 +309,7 @@ export default function PostLoginScreen({ route, navigation }) {
             const title = locale === 'ar' ? 'تغيير الإضاءة' : 'Lighting Change';
             const message = locale === 'ar' ? (isDarkMode ? 'قمت بتشغيل النور... عينيك هتوجعك 🌞😎' : 'قمت بإطفاء النور... اوعى تنام 😴🌙') : (isDarkMode ? 'Lights ON... put your sunglasses on 🌞😎' : 'Lights OFF... don\'t fall asleep 😴🌙');
             
-            if (Platform.OS === 'web' && typeof window !== 'undefined') {
-              window.alert(`${title}\n\n${message}`);
-            } else {
-              Alert.alert(title, message);
-            }
+            showCustomAlert(title, message);
             toggleTheme();
           }}>
             <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={22} color={theme.iconColor} />
@@ -453,6 +455,34 @@ export default function PostLoginScreen({ route, navigation }) {
                   </Text>
                 </TouchableOpacity>
               </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={customAlertVisible}
+          onRequestClose={() => setCustomAlertVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }]}>
+              <Text style={[styles.modalTitle, { color: customAlertTitle.includes('⚠️') ? '#d9534f' : theme.text, marginBottom: 15 }]}>
+                {customAlertTitle}
+              </Text>
+              
+              <Text style={{ fontSize: 16, color: theme.text, textAlign: 'center', marginBottom: 25, lineHeight: 24, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }) }}>
+                {customAlertMessage}
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.modalBtn, { backgroundColor: '#2f4360' }]}
+                onPress={() => setCustomAlertVisible(false)}
+              >
+                <Text style={styles.saveBtnText}>
+                  {locale === 'ar' ? 'حسناً' : 'OK'}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
