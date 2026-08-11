@@ -156,171 +156,152 @@ async function runJobHandler(jobId) {
 async function handleBirthdayJob(job) {
   const todayKey = moment().tz(job.timezone || 'Africa/Cairo').format('MM-DD');
 
-  const templateContent = job.templateId ? job.templateId.content : '🎉 كل سنة وأنت طيب! 🎈';
+  const allUsers = await User.find({ isActive: true });
+  const allStudents = await Student.find({});
 
-  const staff = await User.find({ isActive: true });
-  for (const u of staff) {
-    if (u.birthdate) {
-      // Birthdates are saved as ISO strings, parsing them in local TZ might shift them. We enforce Africa/Cairo.
-      const uBirthday = moment.utc(u.birthdate).tz(job.timezone || 'Africa/Cairo').format('MM-DD');
-      if (uBirthday === todayKey) {
-        const phone = u.phonenumber; 
-        if (!phone) {
-          console.warn(`[BirthdayHandler] Staff member (ID: ${u._id}) has birthday today but no phone number.`);
-          continue;
-        }
+  // 1. Principal: Get sent the birthdays of the teachers today
+  const teachersWithBirthdays = allUsers.filter(u => {
+    if (u.role === 'teacher' && u.birthdate) {
+      return moment.utc(u.birthdate).tz(job.timezone || 'Africa/Cairo').format('MM-DD') === todayKey;
+    }
+    return false;
+  });
 
-        const alreadySent = await hasBeenNotifiedToday(u._id, phone);
-        if (alreadySent) {
-          continue;
-        }
+  if (teachersWithBirthdays.length > 0) {
+    const principals = allUsers.filter(u => u.role === 'principal' || u.role === 'admin');
+    for (const principal of principals) {
+      if (!principal.telegramChatId) continue;
+      
+      let msg = `🎊 أستاذ(ة) ${principal.fullName}\nاليوم يوافق عيد ميلاد هؤلاء الخدام المباركين:\n\n`;
+      teachersWithBirthdays.forEach(t => {
+        msg += `🎁 ${t.fullName} (${t.assignedclass || 'بدون فصل'}) - 📞 ${t.phonenumber || 'لا يوجد'}\n`;
+      });
+      msg += `\nلا تنسَ تهنئتهم وكل عام وأنتم بخير! 🎂`;
 
-        const messageText = templateContent.replace(/{name}/g, u.fullName || '');
-
-        await queueNotification({
-          recipient: phone,
-          message: messageText,
-          notificationType: 'birthday',
-          recipientId: u._id,
-          recipientType: 'User',
-          jobId: job._id
-        });
-      }
+      await queueNotification({
+        recipient: principal.telegramChatId,
+        message: msg,
+        notificationType: 'birthday',
+        recipientId: principal._id,
+        recipientType: 'User',
+        jobId: job._id
+      });
     }
   }
 
-  const students = await Student.find({});
-  for (const s of students) {
+  // 2. Co-Principal: Student birthdays of the same level they are assigned to
+  const studentsWithBirthdays = allStudents.filter(s => {
     if (s.birthdate) {
-      // Birthdates are saved as ISO strings, parsing them in local TZ might shift them. We enforce Africa/Cairo.
-      const sBirthday = moment.utc(s.birthdate).tz(job.timezone || 'Africa/Cairo').format('MM-DD');
-      if (sBirthday === todayKey) {
-        const fatherPhone = s.father_phonenumber; 
-        const motherPhone = s.mother_phonenumber; 
-        const sName = s.getFullName() || '';
-        
-        if (!fatherPhone && !motherPhone) {
-          console.warn(`[BirthdayHandler] Student (ID: ${s._id}) has birthday today but no parent phone number.`);
-          continue;
-        }
+      return moment.utc(s.birthdate).tz(job.timezone || 'Africa/Cairo').format('MM-DD') === todayKey;
+    }
+    return false;
+  });
 
-        const messageText = templateContent.replace(/{name}/g, sName);
+  if (studentsWithBirthdays.length > 0) {
+    const coPrincipals = allUsers.filter(u => u.role === 'co-principal' && u.assignedlevel);
+    for (const cp of coPrincipals) {
+      if (!cp.telegramChatId) continue;
 
-        if (fatherPhone) {
-          const alreadySentFather = await hasBeenNotifiedToday(s._id, fatherPhone);
-          if (!alreadySentFather) {
-            await queueNotification({
-              recipient: fatherPhone,
-              message: messageText,
-              notificationType: 'birthday',
-              recipientId: s._id,
-              recipientType: 'Student',
-              jobId: job._id
-            });
-          } else {
-          }
-        }
+      const myLevelStudents = studentsWithBirthdays.filter(s => s.getClassLevel() === Number(cp.assignedlevel));
+      if (myLevelStudents.length === 0) continue;
 
-        if (motherPhone) {
-          const alreadySentMother = await hasBeenNotifiedToday(s._id, motherPhone);
-          if (!alreadySentMother) {
-            await queueNotification({
-              recipient: motherPhone,
-              message: messageText,
-              notificationType: 'birthday',
-              recipientId: s._id,
-              recipientType: 'Student',
-              jobId: job._id
-            });
-          } else {
-          }
-        }
-      }
+      let msg = `🎉 أستاذ(ة) ${cp.fullName}\nاليوم يوافق عيد ميلاد هؤلاء المخدومين في مرحلتك (سنة ${cp.assignedlevel}):\n\n`;
+      myLevelStudents.forEach(s => {
+        msg += `🎈 ${s.getFullName()} - فصل ${s.getClassname() || 'غير محدد'}\n`;
+      });
+      msg += `\nبرجاء تهنئتهم وكل عام وأنتم بخير! 🎂`;
+
+      await queueNotification({
+        recipient: cp.telegramChatId,
+        message: msg,
+        notificationType: 'birthday',
+        recipientId: cp._id,
+        recipientType: 'User',
+        jobId: job._id
+      });
+    }
+  }
+
+  // Also send the default greeting to the students and teachers directly if templates are active.
+  const templateContent = job.templateId ? job.templateId.content : '🎉 كل سنة وأنت طيب! 🎈';
+  // (We keep the original direct messages as well just in case)
+  for (const u of teachersWithBirthdays) {
+    const phone = u.phonenumber;
+    if (phone && !(await hasBeenNotifiedToday(u._id, phone))) {
+      await queueNotification({
+        recipient: phone,
+        message: templateContent.replace(/{name}/g, u.fullName || ''),
+        notificationType: 'birthday',
+        recipientId: u._id,
+        recipientType: 'User',
+        jobId: job._id
+      });
+    }
+  }
+
+  for (const s of studentsWithBirthdays) {
+    const sName = s.getFullName() || '';
+    const msg = templateContent.replace(/{name}/g, sName);
+    if (s.father_phonenumber && !(await hasBeenNotifiedToday(s._id, s.father_phonenumber))) {
+      await queueNotification({ recipient: s.father_phonenumber, message: msg, notificationType: 'birthday', recipientId: s._id, recipientType: 'Student', jobId: job._id });
+    }
+    if (s.mother_phonenumber && !(await hasBeenNotifiedToday(s._id, s.mother_phonenumber))) {
+      await queueNotification({ recipient: s.mother_phonenumber, message: msg, notificationType: 'birthday', recipientId: s._id, recipientType: 'Student', jobId: job._id });
     }
   }
 }
 
 async function handleWeeklyFollowupJob(job) {
+  // Weekly Follow-up logic for teachers
+  // Check students assigned to each teacher, if they missed last Sunday and it's been >= 2 weeks, send the teacher a summary.
+  const allUsers = await User.find({ isActive: true, role: 'teacher' });
+  const allStudents = await Student.find({});
+  const fourteenDaysAgo = moment().subtract(14, 'days');
 
-  const templateContent = job.templateId ? job.templateId.content : '🕊️ سلام ونعمة. نفتقدكم في الخدمة. 📋';
-  const group = job.recipientGroupId;
-  
-  if (!group) {
-    console.warn(`[WeeklyFollowupHandler] Job "${job.name}" has no recipient group associated. Skipping.`);
-    return;
-  }
+  for (const teacher of allUsers) {
+    if (!teacher.telegramChatId) continue;
 
-  let recipients = [];
+    let myStudents = allStudents.filter(s => 
+      s.teacher && s.teacher.toString() === teacher._id.toString()
+    );
 
-  if (group.recipients && group.recipients.length > 0) {
-    recipients = group.recipients.map(r => ({
-      id: r.recipientId,
-      type: r.recipientType,
-      name: r.name,
-      phone: r.phoneNumber
-    }));
-  } 
-  
-  else if (group.criteria) {
-    const { role, classLevel, assignedclass } = group.criteria;
-    
-    if (role) {
-      
-      const query = { isActive: true, role };
-      if (assignedclass) query.assignedclass = assignedclass;
-      if (classLevel) query.assignedlevel = classLevel;
-
-      const matchedUsers = await User.find(query);
-      recipients = matchedUsers.map(u => ({
-        id: u._id,
-        type: 'User',
-        name: u.fullName,
-        phone: u.phonenumber
-      }));
-    } else {
-
-      const allStudents = await Student.find({});
-      const matchedStudents = allStudents.filter(s => {
-        if (classLevel && s.getClassLevel() !== Number(classLevel)) return false;
-        if (assignedclass && s.getClassname() !== assignedclass) return false;
-        return true;
-      });
-
-      for (const s of matchedStudents) {
-        const sName = s.getFullName() || '';
-        if (s.father_phonenumber) {
-          recipients.push({
-            id: s._id,
-            type: 'Student',
-            name: sName,
-            phone: s.father_phonenumber
-          });
-        }
-        if (s.mother_phonenumber) {
-          recipients.push({
-            id: s._id,
-            type: 'Student',
-            name: sName,
-            phone: s.mother_phonenumber
-          });
-        }
-      }
+    if (myStudents.length === 0) {
+      if (!teacher.assignedlevel || !teacher.assignedclass) continue;
+      myStudents = allStudents.filter(s => 
+        s.getClassLevel() === Number(teacher.assignedlevel) && 
+        s.getClassname() === teacher.assignedclass
+      );
     }
-  }
 
-  for (const recipient of recipients) {
-    if (!recipient.phone) continue;
+    if (myStudents.length === 0) continue;
 
-    const messageText = templateContent.replace(/{name}/g, recipient.name || '');
-
-    await queueNotification({
-      recipient: recipient.phone,
-      message: messageText,
-      notificationType: 'weekly_followup',
-      recipientId: recipient.id,
-      recipientType: recipient.type,
-      jobId: job._id
+    const absentees = myStudents.filter(s => {
+      if (!s.lastAttendanceDate) return true; // never attended
+      const lastAttended = moment(s.lastAttendanceDate);
+      return lastAttended.isBefore(fourteenDaysAgo);
     });
+
+    if (absentees.length > 0) {
+      let messageText = `🕊️ سلام ونعمة أستاذ(ة) ${teacher.fullName}\n\n`;
+      messageText += `نذكرك بافتقاد مخدوميك الذين تغيبوا لأكثر من أسبوعين:\n\n`;
+      absentees.forEach(s => {
+        messageText += `👤 ${s.getFullName() || 'بدون اسم'}\n`;
+        if (s.father_phonenumber || s.mother_phonenumber) {
+          messageText += `📞 أب: ${s.father_phonenumber || '-'}\n📞 أم: ${s.mother_phonenumber || '-'}\n`;
+        }
+        messageText += `\n`;
+      });
+      messageText += `ربنا يعوض تعب محبتك 📋`;
+
+      await queueNotification({
+        recipient: teacher.telegramChatId,
+        message: messageText,
+        notificationType: 'weekly_followup',
+        recipientId: teacher._id,
+        recipientType: 'User',
+        jobId: job._id
+      });
+    }
   }
 }
 
