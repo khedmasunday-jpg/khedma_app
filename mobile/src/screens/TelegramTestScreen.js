@@ -219,9 +219,14 @@ export default function TelegramTestScreen({ route, navigation }) {const { theme
   const [checkingAbsentees, setCheckingAbsentees] = useState(false);
 
   const handleCheckAbsentees = async () => {
+    if (!selectedStaffId) {
+      Alert.alert(isRtl ? 'تنبيه' : 'Warning', isRtl ? 'يرجى اختيار الخادم (المعلم) أولاً للتحقق من المخدومين المعينين له.' : 'Please select a teacher first to check their assigned students.');
+      return;
+    }
+    
     setCheckingAbsentees(true);
     try {
-      const response = await axios.post(`${API_URL}/telegram/check-absentees`, {}, { headers: getHeaders() });
+      const response = await axios.post(`${API_URL}/telegram/check-absentees`, { userId: selectedStaffId }, { headers: getHeaders() });
       if (response.data && response.data.success) {
         Alert.alert(
           isRtl ? 'تم بنجاح' : 'Success',
@@ -449,7 +454,7 @@ export default function TelegramTestScreen({ route, navigation }) {const { theme
               <View style={styles.btnRow}>
                 <Ionicons name="people-outline" size={20} color="#fff" style={{ marginRight: 6 }} />
                 <Text style={styles.sendButtonText}>
-                  {isRtl ? 'التحقق من غياب فصلي (إرسال تنبيه لي)' : 'Check My Class Absentees (Send Me Alert)'}
+                  {isRtl ? 'تحقق من غياب مخدومي الخادم المحدد (إرسال تنبيه له)' : 'Check Selected Teacher\'s Absentees (Alert Them)'}
                 </Text>
               </View>
             )}

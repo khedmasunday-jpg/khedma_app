@@ -365,22 +365,25 @@ router.post('/check-absentees', async (req, res) => {
     const Student = require('../models/Student');
     const moment = require('moment');
 
-    const currentUser = await User.findById(req.user.id);
-    if (!currentUser) return res.status(404).json({ msg: 'User not found' });
+    const targetUserId = req.body.userId || req.user.id;
+    const targetUser = await User.findById(targetUserId);
     
-    if (!currentUser.telegramChatId) {
-      return res.status(400).json({ success: false, msg: 'يرجى إعداد حساب التليجرام الخاص بك (Chat ID) في الملف الشخصي أولاً.' });
+    if (!targetUser) return res.status(404).json({ msg: 'User not found' });
+    
+    if (!targetUser.telegramChatId) {
+      return res.status(400).json({ success: false, msg: `المستخدم ${targetUser.fullName} لم يقم بإعداد حساب التليجرام الخاص به (Chat ID).` });
     }
 
+    const { assignedlevel, assignedclass } = targetUser;
     const allStudents = await Student.find({});
     
     let myStudents = allStudents.filter(s => 
-      s.teacher && s.teacher.toString() === req.user.id.toString()
+      s.teacher && s.teacher.toString() === targetUser._id.toString()
     );
 
     if (myStudents.length === 0) {
       if (!assignedlevel || !assignedclass) {
-        return res.status(400).json({ success: false, msg: 'ليس لديك مخدومين معينين للافتقاد، وليس لديك فصل دراسي معين.' });
+        return res.status(400).json({ success: false, msg: `الخادم ${targetUser.fullName} ليس لديه مخدومين معينين للافتقاد.` });
       }
       myStudents = allStudents.filter(s => 
         s.getClassLevel() === Number(assignedlevel) && 
@@ -397,10 +400,10 @@ router.post('/check-absentees', async (req, res) => {
     });
 
     if (absentees.length === 0) {
-      return res.json({ success: true, msg: 'لا يوجد مخدومين متغيبين لأكثر من أسبوعين في فصلك.' });
+      return res.json({ success: true, msg: `لا يوجد مخدومين متغيبين لأكثر من أسبوعين للخادم ${targetUser.fullName}.` });
     }
 
-    let messageText = `🕊️ سلام ونعمة أستاذ(ة) ${currentUser.fullName}\n\n`;
+    let messageText = `🕊️ سلام ونعمة أستاذ(ة) ${targetUser.fullName}\n\n`;
     messageText += `هذه قائمة بالمخدومين المعينين لك والمتغيبين لأكثر من أسبوعين:\n\n`;
     absentees.forEach(s => {
       messageText += `👤 ${s.getFullName() || 'بدون اسم'}\n`;
@@ -411,12 +414,12 @@ router.post('/check-absentees', async (req, res) => {
     });
     messageText += `برجاء الافتقاد والمتابعة 📋`;
 
-    const result = await telegramClient.sendTelegramMessage(currentUser.telegramChatId, messageText);
+    const result = await telegramClient.sendTelegramMessage(targetUser.telegramChatId, messageText);
 
     if (result.success) {
-      res.json({ success: true, msg: `تم إرسال رسالة التنبيه بنجاح لعدد ${absentees.length} مخدومين عبر تليجرام.` });
+      res.json({ success: true, msg: `تم إرسال التنبيه بنجاح للخادم ${targetUser.fullName} لعدد ${absentees.length} مخدومين.` });
     } else {
-      res.status(400).json({ success: false, msg: `فشل الإرسال عبر تليجرام: ${result.error}` });
+      res.status(400).json({ success: false, msg: `فشل الإرسال لتليجرام الخادم: ${result.error}` });
     }
   } catch (err) {
     console.error('Check absentees error:', err);
