@@ -403,7 +403,7 @@ router.post('/check-absentees', async (req, res) => {
       return res.json({ success: true, msg: `لا يوجد مخدومين متغيبين لأكثر من أسبوعين للخادم ${targetUser.fullName}.` });
     }
 
-    let messageText = `🕊️ سلام ونعمة أستاذ(ة) ${targetUser.fullName}\n\n`;
+    let messageText = `🕊️ سلام ونعمة ميس/مستر ${targetUser.fullName}\n\n`;
     messageText += `هذه قائمة بالمخدومين المعينين لك والمتغيبين لأكثر من أسبوعين:\n\n`;
     absentees.forEach(s => {
       messageText += `👤 ${s.getFullName() || 'بدون اسم'}\n`;

@@ -282,7 +282,7 @@ async function handleWeeklyFollowupJob(job) {
     });
 
     if (absentees.length > 0) {
-      let messageText = `🕊️ سلام ونعمة أستاذ(ة) ${teacher.fullName}\n\n`;
+      let messageText = `🕊️ سلام ونعمة ميس/مستر ${teacher.fullName}\n\n`;
       messageText += `نذكرك بافتقاد مخدوميك الذين تغيبوا لأكثر من أسبوعين:\n\n`;
       absentees.forEach(s => {
         messageText += `👤 ${s.getFullName() || 'بدون اسم'}\n`;
