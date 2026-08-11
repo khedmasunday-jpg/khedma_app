@@ -159,22 +159,22 @@ async function handleBirthdayJob(job) {
   const allUsers = await User.find({ isActive: true });
   const allStudents = await Student.find({});
 
-  // 1. Principal: Get sent the birthdays of the teachers today
-  const teachersWithBirthdays = allUsers.filter(u => {
-    if (u.role === 'teacher' && u.birthdate) {
+  // 1. Principal: Get sent the birthdays of the teachers and co-principals today
+  const staffWithBirthdays = allUsers.filter(u => {
+    if ((u.role === 'teacher' || u.role === 'co-principal') && u.birthdate) {
       return moment.utc(u.birthdate).tz(job.timezone || 'Africa/Cairo').format('MM-DD') === todayKey;
     }
     return false;
   });
 
-  if (teachersWithBirthdays.length > 0) {
+  if (staffWithBirthdays.length > 0) {
     const principals = allUsers.filter(u => u.role === 'principal' || u.role === 'admin');
     for (const principal of principals) {
       if (!principal.telegramChatId) continue;
       
-      let msg = `🎊 أستاذ(ة) ${principal.fullName}\nاليوم يوافق عيد ميلاد هؤلاء الخدام المباركين:\n\n`;
-      teachersWithBirthdays.forEach(t => {
-        msg += `🎁 ${t.fullName} (${t.assignedclass || 'بدون فصل'}) - 📞 ${t.phonenumber || 'لا يوجد'}\n`;
+      let msg = `استاذه ${principal.fullName}\nاليوم يوافق عيد ميلاد هؤلاء الخدام المباركين:\n\n`;
+      staffWithBirthdays.forEach(t => {
+        msg += `🎁 ${t.fullName} (${t.assignedclass || t.role}) - 📞 ${t.phonenumber || 'لا يوجد'}\n`;
       });
       msg += `\nلا تنسَ تهنئتهم وكل عام وأنتم بخير! 🎂`;
 
@@ -205,7 +205,7 @@ async function handleBirthdayJob(job) {
       const myLevelStudents = studentsWithBirthdays.filter(s => s.getClassLevel() === Number(cp.assignedlevel));
       if (myLevelStudents.length === 0) continue;
 
-      let msg = `🎉 أستاذ(ة) ${cp.fullName}\nاليوم يوافق عيد ميلاد هؤلاء المخدومين في مرحلتك (سنة ${cp.assignedlevel}):\n\n`;
+      let msg = `استاذه ${cp.fullName}\nاليوم يوافق عيد ميلاد هؤلاء المخدومين في مرحلتك (سنة ${cp.assignedlevel}):\n\n`;
       myLevelStudents.forEach(s => {
         msg += `🎈 ${s.getFullName()} - فصل ${s.getClassname() || 'غير محدد'}\n`;
       });
@@ -225,7 +225,7 @@ async function handleBirthdayJob(job) {
   // Also send the default greeting to the students and teachers directly if templates are active.
   const templateContent = job.templateId ? job.templateId.content : '🎉 كل سنة وأنت طيب! 🎈';
   // (We keep the original direct messages as well just in case)
-  for (const u of teachersWithBirthdays) {
+  for (const u of staffWithBirthdays) {
     const phone = u.phonenumber;
     if (phone && !(await hasBeenNotifiedToday(u._id, phone))) {
       await queueNotification({
