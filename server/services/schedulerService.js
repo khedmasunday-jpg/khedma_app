@@ -161,7 +161,8 @@ async function handleBirthdayJob(job) {
   const staff = await User.find({ isActive: true });
   for (const u of staff) {
     if (u.birthdate) {
-      const uBirthday = moment(u.birthdate).format('MM-DD');
+      // Birthdates are saved as ISO strings, parsing them in local TZ might shift them. We enforce Africa/Cairo.
+      const uBirthday = moment.utc(u.birthdate).tz(job.timezone || 'Africa/Cairo').format('MM-DD');
       if (uBirthday === todayKey) {
         const phone = u.phonenumber; 
         if (!phone) {
@@ -191,7 +192,8 @@ async function handleBirthdayJob(job) {
   const students = await Student.find({});
   for (const s of students) {
     if (s.birthdate) {
-      const sBirthday = moment(s.birthdate).format('MM-DD');
+      // Birthdates are saved as ISO strings, parsing them in local TZ might shift them. We enforce Africa/Cairo.
+      const sBirthday = moment.utc(s.birthdate).tz(job.timezone || 'Africa/Cairo').format('MM-DD');
       if (sBirthday === todayKey) {
         const fatherPhone = s.father_phonenumber; 
         const motherPhone = s.mother_phonenumber; 

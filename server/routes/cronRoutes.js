@@ -11,6 +11,9 @@ router.get('/run-all', async (req, res) => {
       await runJobManually(job._id);
     }
     
+    const { processPendingNotifications } = require('../services/notificationService');
+    await processPendingNotifications();
+    
     res.json({ msg: 'Cron jobs executed successfully', jobsRun: activeJobs.length });
   } catch (err) {
     console.error('Error running cron jobs:', err);
