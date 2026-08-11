@@ -372,17 +372,21 @@ router.post('/check-absentees', async (req, res) => {
       return res.status(400).json({ success: false, msg: 'يرجى إعداد حساب التليجرام الخاص بك (Chat ID) في الملف الشخصي أولاً.' });
     }
 
-    const { assignedlevel, assignedclass } = currentUser;
-    if (!assignedlevel || !assignedclass) {
-      return res.status(400).json({ success: false, msg: 'ليس لديك فصل دراسي معين لمتابعة غيابه.' });
-    }
-
     const allStudents = await Student.find({});
     
-    const myStudents = allStudents.filter(s => 
-      s.getClassLevel() === Number(assignedlevel) && 
-      s.getClassname() === assignedclass
+    let myStudents = allStudents.filter(s => 
+      s.teacher && s.teacher.toString() === req.user.id.toString()
     );
+
+    if (myStudents.length === 0) {
+      if (!assignedlevel || !assignedclass) {
+        return res.status(400).json({ success: false, msg: 'ليس لديك مخدومين معينين للافتقاد، وليس لديك فصل دراسي معين.' });
+      }
+      myStudents = allStudents.filter(s => 
+        s.getClassLevel() === Number(assignedlevel) && 
+        s.getClassname() === assignedclass
+      );
+    }
 
     const fourteenDaysAgo = moment().subtract(14, 'days');
     
@@ -397,7 +401,7 @@ router.post('/check-absentees', async (req, res) => {
     }
 
     let messageText = `🕊️ سلام ونعمة أستاذ(ة) ${currentUser.fullName}\n\n`;
-    messageText += `هذه قائمة بالمخدومين المتغيبين لأكثر من أسبوعين في فصلك (${assignedclass} - سنة ${assignedlevel}):\n\n`;
+    messageText += `هذه قائمة بالمخدومين المعينين لك والمتغيبين لأكثر من أسبوعين:\n\n`;
     absentees.forEach(s => {
       messageText += `👤 ${s.getFullName() || 'بدون اسم'}\n`;
       if (s.father_phonenumber || s.mother_phonenumber) {
