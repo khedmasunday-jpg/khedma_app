@@ -1,6 +1,5 @@
 require('dotenv').config();
 require('./jobs/backupJob');
-require('./jobs/promotionJob');
 require('./jobs/weeklyreminder');
 const { runBirthdayJob } = require('./jobs/birthdayJob');
 
@@ -104,6 +103,7 @@ app.use('/api/tayo', require('./routes/tayo'));
 app.use('/api/backup', require('./routes/backupRoutes')); 
 app.use('/api/cron', require('./routes/cronRoutes'));
 app.use('/api/rss', require('./routes/rssRoutes'));
+app.use('/api/promotion', require('./routes/promotion'));
 
 app.get('/ping', (req, res) => {
   res.json({ ok: true, time: Date.now() });
