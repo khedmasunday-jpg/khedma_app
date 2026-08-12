@@ -209,7 +209,7 @@ export default function PromotionTeachersScreen() {
               style={[styles.teacherItem, selectedTeacher?._id === t._id && styles.teacherItemSelected]}
               onPress={() => setSelectedTeacher(t)}
             >
-              <Text style={styles.teacherName}>{t.username}</Text>
+              <Text style={styles.teacherName}>{t.fullName || t.username}</Text>
               <Text style={styles.teacherRole}>{t.role === 'co-principal' ? (isAr ? 'أمين خدمة' : 'Co-Principal') : (isAr ? 'خادم' : 'Teacher')}</Text>
             </TouchableOpacity>
           ))}
@@ -225,7 +225,7 @@ export default function PromotionTeachersScreen() {
         ) : (
           <>
             <Text style={[styles.headerText, { marginBottom: 16, textAlign: isAr ? 'right' : 'left' }]}>
-              {isAr ? `تعيين فصل لـ ${selectedTeacher.username}` : `Assign class for ${selectedTeacher.username}`}
+              {isAr ? `تعيين فصل لـ ${selectedTeacher.fullName || selectedTeacher.username}` : `Assign class for ${selectedTeacher.fullName || selectedTeacher.username}`}
             </Text>
             
             <ScrollView>

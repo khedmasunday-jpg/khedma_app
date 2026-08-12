@@ -425,8 +425,11 @@ exports.getStudentData = async (req, res) => {
         .map(x => x.doc);
     } else if (user.role === 'co-principal') {
       const docs = await Student.find({});
-      students = docs.filter(s => (typeof s.getClassLevel === 'function' ? s.getClassLevel() : s.classLevel) === user.assignedlevel)
-                     .sort((a, b) => String((typeof a.getClassname==='function'?a.getClassname():a.classname)||'').localeCompare(String((typeof b.getClassname==='function'?b.getClassname():b.classname)||'')));
+      students = docs.filter(s => {
+        const lvl = typeof s.getClassLevel === 'function' ? s.getClassLevel() : s.classLevel;
+        const yearLevel = lvl ? Math.ceil(lvl / 2) : 0;
+        return yearLevel === user.assignedlevel;
+      }).sort((a, b) => String((typeof a.getClassname==='function'?a.getClassname():a.classname)||'').localeCompare(String((typeof b.getClassname==='function'?b.getClassname():b.classname)||'')));
     } else if (user.role === 'teacher') {
       const docs = await Student.find({});
       const cleanUserClass = (user.assignedclass || '').replace(/^فصل\s+/, '').trim();
