@@ -8,7 +8,7 @@ import { getAuthToken } from '../config/authSession';
 import { API_URL } from '../config/api';
 
 export default function SwitchStudentsScreen({ navigation }) {
-  const { theme, isDarkMode } = useTheme();
+  const { theme } = useTheme();
   const { locale } = useLanguage();
   const isAr = locale === 'ar';
   
@@ -20,9 +20,10 @@ export default function SwitchStudentsScreen({ navigation }) {
   const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
   const [yearPairs, setYearPairs] = useState([]);
-  const [activeYearIndex, setActiveYearIndex] = useState(0);
+  
+  // null means show the 3 buttons, index means show that pair
+  const [activeYearIndex, setActiveYearIndex] = useState(null);
 
-  // Unsaved changes: map of studentId -> newClassId
   const [pendingChanges, setPendingChanges] = useState({});
 
   useEffect(() => {
@@ -32,20 +33,17 @@ export default function SwitchStudentsScreen({ navigation }) {
   const fetchData = async () => {
     try {
       setLoading(true);
+      // FIXED: /api/students -> /api/students/data
       const [resClasses, resStudents] = await Promise.all([
         Axios.get(`${API_URL}/classes`, { headers: { Authorization: token } }),
-        Axios.get(`${API_URL}/students`, { headers: { Authorization: token } })
+        Axios.get(`${API_URL}/students/data`, { headers: { Authorization: token } })
       ]);
       
       const allC = resClasses.data;
-      const allS = resStudents.data;
+      const allS = resStudents.data.data || resStudents.data; // Sometimes it returns { data: [...] }
       setClasses(allC);
       setStudents(allS);
 
-      // Group into year pairs (1&2, 3&4, 5&6 level)
-      // Level 1: الشاروبيم, Level 2: السيرافيم
-      // Level 3: الملاك رفائيل, Level 4: الملاك ميخائيل
-      // Level 5: الملاك سوريال, Level 6: الملاك غبريال
       const classLevel1 = allC.find(c => c.level === 1);
       const classLevel2 = allC.find(c => c.level === 2);
       const classLevel3 = allC.find(c => c.level === 3);
@@ -54,9 +52,9 @@ export default function SwitchStudentsScreen({ navigation }) {
       const classLevel6 = allC.find(c => c.level === 6);
 
       setYearPairs([
-        { title: isAr ? 'السنة الأولى' : 'Year 1', pair: [classLevel1, classLevel2] },
-        { title: isAr ? 'السنة الثانية' : 'Year 2', pair: [classLevel3, classLevel4] },
-        { title: isAr ? 'السنة الثالثة' : 'Year 3', pair: [classLevel5, classLevel6] }
+        { title: isAr ? 'السنة الأولى (الشاروبيم و السيرافيم)' : 'Year 1', pair: [classLevel1, classLevel2] },
+        { title: isAr ? 'السنة الثانية (الملاك رفائيل و الملاك ميخائيل)' : 'Year 2', pair: [classLevel3, classLevel4] },
+        { title: isAr ? 'السنة الثالثة (الملاك سوريال و الملاك غبريال)' : 'Year 3', pair: [classLevel5, classLevel6] }
       ].filter(y => y.pair[0] && y.pair[1]));
 
     } catch (err) {
@@ -67,14 +65,12 @@ export default function SwitchStudentsScreen({ navigation }) {
     }
   };
 
-  const activePair = yearPairs[activeYearIndex]?.pair;
-
   const getStudentClassId = (student) => {
     if (pendingChanges[student._id]) return pendingChanges[student._id];
     return student.class;
   };
 
-  const handleStudentPress = (student, currentClassId, targetClassId) => {
+  const handleStudentPress = (student, targetClassId) => {
     setPendingChanges(prev => ({
       ...prev,
       [student._id]: targetClassId
@@ -87,7 +83,6 @@ export default function SwitchStudentsScreen({ navigation }) {
 
     setSaving(true);
     try {
-      // Create an array of updates
       const updates = changes.map(([studentId, newClassId]) => {
         const targetClass = classes.find(c => c._id === newClassId);
         return {
@@ -98,14 +93,13 @@ export default function SwitchStudentsScreen({ navigation }) {
         };
       });
 
-      // Update one by one or create a bulk endpoint. Since we don't have a bulk endpoint, we use the single update
       for (const update of updates) {
         await Axios.put(`${API_URL}/students/edit`, update, { headers: { Authorization: token } });
       }
 
       Alert.alert(isAr ? 'تم بنجاح' : 'Success', isAr ? 'تم حفظ التعديلات بنجاح' : 'Changes saved successfully');
       setPendingChanges({});
-      fetchData(); // reload
+      fetchData(); 
     } catch (err) {
       console.error(err);
       Alert.alert(isAr ? 'خطأ' : 'Error', isAr ? 'فشل حفظ التعديلات' : 'Failed to save changes');
@@ -116,41 +110,82 @@ export default function SwitchStudentsScreen({ navigation }) {
 
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background },
-    tabs: { flexDirection: 'row', backgroundColor: theme.cardBackground, elevation: 2 },
-    tab: { flex: 1, padding: 15, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-    activeTab: { borderBottomColor: theme.primary },
-    tabText: { color: theme.textMuted, fontWeight: 'bold' },
-    activeTabText: { color: theme.primary },
-    pairContainer: { flexDirection: 'row', flex: 1, padding: 10, gap: 10 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    homeContainer: { flex: 1, padding: 16, justifyContent: 'center', alignItems: 'center' },
+    homeTitle: { fontSize: 24, fontWeight: 'bold', color: theme.text, marginBottom: 24, textAlign: 'center' },
+    bigButton: {
+      width: '100%',
+      maxWidth: 500,
+      backgroundColor: theme.cardBackground,
+      padding: 24,
+      borderRadius: 16,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      alignItems: 'center',
+      ...Platform.select({
+        web: { cursor: 'pointer' },
+        ios: { shadowColor: theme.shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
+        android: { elevation: 2 },
+      })
+    },
+    bigButtonText: { fontSize: 18, fontWeight: 'bold', color: theme.primary, marginTop: 12 },
+    
+    splitContainer: { flex: 1, flexDirection: 'column' },
+    header: { padding: 16, flexDirection: isAr ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.headerBackground, borderBottomWidth: 1, borderBottomColor: theme.borderColor },
+    headerTitle: { fontSize: 18, fontWeight: 'bold', color: theme.text },
+    backBtn: { padding: 8 },
+    
+    instructions: { padding: 12, textAlign: 'center', color: theme.textMuted, fontSize: 14 },
+    
+    pairContainer: { flexDirection: isAr ? 'row-reverse' : 'row', flex: 1, padding: 10, gap: 10 },
     classColumn: { flex: 1, backgroundColor: theme.cardBackground, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: theme.borderColor },
     classTitle: { fontSize: 16, fontWeight: 'bold', color: theme.text, textAlign: 'center', marginBottom: 10 },
-    studentRow: { padding: 12, backgroundColor: theme.inputBackground, borderRadius: 8, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    
+    studentRow: { padding: 12, backgroundColor: theme.inputBackground, borderRadius: 8, marginBottom: 8, flexDirection: isAr ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center' },
     studentName: { color: theme.text, fontSize: 14, flex: 1, textAlign: isAr ? 'right' : 'left' },
+    
     saveBtn: { margin: 16, backgroundColor: theme.primary, padding: 16, borderRadius: 12, alignItems: 'center' },
     saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   });
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.tabs}>
+  if (activeYearIndex === null) {
+    return (
+      <ScrollView contentContainerStyle={styles.homeContainer}>
+        <Text style={styles.homeTitle}>{isAr ? 'اختر السنة الدراسية لنقل المخدومين' : 'Select Year to Switch Students'}</Text>
         {yearPairs.map((yp, idx) => (
-          <TouchableOpacity 
-            key={idx} 
-            style={[styles.tab, activeYearIndex === idx && styles.activeTab]}
-            onPress={() => setActiveYearIndex(idx)}
-          >
-            <Text style={[styles.tabText, activeYearIndex === idx && styles.activeTabText]}>{yp.title}</Text>
+          <TouchableOpacity key={idx} style={styles.bigButton} onPress={() => setActiveYearIndex(idx)}>
+            <Ionicons name="people-outline" size={48} color={theme.primary} />
+            <Text style={styles.bigButtonText}>{yp.title}</Text>
           </TouchableOpacity>
         ))}
+      </ScrollView>
+    );
+  }
+
+  const activePair = yearPairs[activeYearIndex]?.pair;
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => setActiveYearIndex(null)}>
+          <Ionicons name={isAr ? "arrow-forward" : "arrow-back"} size={24} color={theme.text} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{yearPairs[activeYearIndex].title}</Text>
+        <View style={{ width: 24 }} />
       </View>
+      
+      <Text style={styles.instructions}>
+        {isAr ? 'انقر على اسم المخدوم لنقله للفصل الآخر' : 'Click on a student to move them to the other class'}
+      </Text>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {activePair && (
@@ -166,11 +201,11 @@ export default function SwitchStudentsScreen({ navigation }) {
                     <TouchableOpacity 
                       key={s._id} 
                       style={styles.studentRow}
-                      onPress={() => handleStudentPress(s, cls._id, otherCls._id)}
+                      onPress={() => handleStudentPress(s, otherCls._id)}
                     >
-                      {idx === 1 && <Ionicons name={isAr ? "chevron-forward" : "chevron-back"} size={16} color={theme.primary} />}
+                      {(!isAr ? idx === 1 : idx === 0) && <Ionicons name="arrow-back-outline" size={16} color={theme.primary} />}
                       <Text style={styles.studentName} numberOfLines={1}>{s.firstname || s.name}</Text>
-                      {idx === 0 && <Ionicons name={isAr ? "chevron-back" : "chevron-forward"} size={16} color={theme.primary} />}
+                      {(!isAr ? idx === 0 : idx === 1) && <Ionicons name="arrow-forward-outline" size={16} color={theme.primary} />}
                     </TouchableOpacity>
                   ))}
                 </View>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../utils/ThemeContext';
 import { useLanguage } from '../utils/LanguageContext';
 import Axios from 'axios';
 import { getAuthToken } from '../config/authSession';
 import { API_URL } from '../config/api';
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function PromotionTeachersScreen() {
   const { theme } = useTheme();
@@ -16,12 +15,10 @@ export default function PromotionTeachersScreen() {
 
   const [loading, setLoading] = useState(true);
   const [teachers, setTeachers] = useState([]);
+  const [classes, setClasses] = useState([]);
   
-  const levelMapping = {
-    1: { year: isAr ? 'السنة الأولى' : 'Year 1', classes: 'الشاروبيم & السيرافيم' },
-    2: { year: isAr ? 'السنة الثانية' : 'Year 2', classes: 'الملاك رفائيل & الملاك ميخائيل' },
-    3: { year: isAr ? 'السنة الثالثة' : 'Year 3', classes: 'الملاك سوريال & الملاك غبريال' },
-  };
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -30,49 +27,144 @@ export default function PromotionTeachersScreen() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await Axios.get(`${API_URL}/users`, { headers: { Authorization: token } });
-      const staff = res.data.filter(u => u.role === 'teacher' || u.role === 'co-principal');
+      const [usersRes, classesRes] = await Promise.all([
+        Axios.get(`${API_URL}/users`, { headers: { Authorization: token } }),
+        Axios.get(`${API_URL}/classes`, { headers: { Authorization: token } })
+      ]);
+      
+      const staff = usersRes.data.filter(u => u.role === 'teacher' || u.role === 'co-principal');
       setTeachers(staff);
+      setClasses(classesRes.data);
     } catch (err) {
       console.error(err);
+      Alert.alert('Error', 'Failed to fetch data');
     } finally {
       setLoading(false);
     }
   };
 
+  const assignTeacherToClass = async (teacher, targetClass) => {
+    try {
+      setUpdating(true);
+      // Backend usually updates user via PATCH /api/users/:id or similar
+      const payload = {
+        assignedclass: targetClass.name,
+        assignedlevel: targetClass.level
+      };
+      
+      await Axios.patch(`${API_URL}/users/${teacher._id}`, payload, { headers: { Authorization: token } });
+      
+      // Update local state
+      setTeachers(prev => prev.map(t => {
+        if (t._id === teacher._id) {
+          return { ...t, assignedclass: targetClass.name, assignedlevel: targetClass.level };
+        }
+        return t;
+      }));
+      
+      setSelectedTeacher({ ...teacher, assignedclass: targetClass.name, assignedlevel: targetClass.level });
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to assign class');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const styles = StyleSheet.create({
-    container: { flexGrow: 1, padding: 16, backgroundColor: theme.background },
-    card: {
+    container: { flex: 1, flexDirection: isAr ? 'row-reverse' : 'row', backgroundColor: theme.background },
+    leftPane: {
+      flex: 1,
+      borderRightWidth: isAr ? 0 : 1,
+      borderLeftWidth: isAr ? 1 : 0,
+      borderColor: theme.borderColor,
       backgroundColor: theme.cardBackground,
-      borderRadius: 12,
+    },
+    rightPane: {
+      flex: 1.5,
+      backgroundColor: theme.background,
       padding: 16,
+    },
+    header: {
+      padding: 16,
+      backgroundColor: theme.headerBackground,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.borderColor,
+    },
+    headerText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: theme.text,
+      textAlign: 'center',
+    },
+    teacherItem: {
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.borderColor,
+    },
+    teacherItemSelected: {
+      backgroundColor: theme.primary + '20', // 20% opacity
+      borderLeftWidth: isAr ? 0 : 4,
+      borderRightWidth: isAr ? 4 : 0,
+      borderColor: theme.primary,
+    },
+    teacherName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.text,
+      textAlign: isAr ? 'right' : 'left',
+    },
+    teacherRole: {
+      fontSize: 12,
+      color: theme.textMuted,
+      textAlign: isAr ? 'right' : 'left',
+      marginTop: 4,
+    },
+    emptyRight: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyRightText: {
+      fontSize: 16,
+      color: theme.textMuted,
+    },
+    classCard: {
+      backgroundColor: theme.cardBackground,
+      padding: 16,
+      borderRadius: 12,
       marginBottom: 12,
       borderWidth: 1,
       borderColor: theme.borderColor,
       flexDirection: isAr ? 'row-reverse' : 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
     },
-    iconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      backgroundColor: theme.inputBackground,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: isAr ? 12 : 0,
-      marginRight: isAr ? 0 : 12,
+    classCardSelected: {
+      borderColor: theme.primary,
+      backgroundColor: theme.primary + '10',
+      borderWidth: 2,
     },
-    infoContainer: { flex: 1 },
-    name: { fontSize: 16, fontWeight: 'bold', color: theme.text, textAlign: isAr ? 'right' : 'left' },
-    role: { fontSize: 12, color: theme.textMuted, textAlign: isAr ? 'right' : 'left', marginBottom: 4 },
-    assignmentBox: {
-      marginTop: 8,
-      backgroundColor: theme.inputBackground,
-      padding: 8,
-      borderRadius: 8,
+    className: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: theme.text,
     },
-    yearText: { fontSize: 14, fontWeight: 'bold', color: theme.primary, textAlign: isAr ? 'right' : 'left' },
-    classesText: { fontSize: 13, color: theme.text, textAlign: isAr ? 'right' : 'left', marginTop: 2 },
+    classYear: {
+      fontSize: 14,
+      color: theme.textMuted,
+    },
+    selectedBadge: {
+      backgroundColor: theme.primary,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    selectedBadgeText: {
+      color: '#fff',
+      fontSize: 12,
+      fontWeight: 'bold',
+    }
   });
 
   if (loading) {
@@ -83,27 +175,88 @@ export default function PromotionTeachersScreen() {
     );
   }
 
+  // Sort classes so the assigned one is at the top
+  let displayClasses = [...classes];
+  if (selectedTeacher) {
+    const cleanUserClass = (selectedTeacher.assignedclass || '').replace(/^فصل\s+/, '').trim();
+    displayClasses.sort((a, b) => {
+      const isASelected = a.name === cleanUserClass || a.name === selectedTeacher.assignedclass;
+      const isBSelected = b.name === cleanUserClass || b.name === selectedTeacher.assignedclass;
+      if (isASelected && !isBSelected) return -1;
+      if (!isASelected && isBSelected) return 1;
+      return a.level - b.level;
+    });
+  }
+
+  const getYearName = (level) => {
+    if (level === 1 || level === 2) return isAr ? 'السنة الأولى' : 'Year 1';
+    if (level === 3 || level === 4) return isAr ? 'السنة الثانية' : 'Year 2';
+    if (level === 5 || level === 6) return isAr ? 'السنة الثالثة' : 'Year 3';
+    return '';
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {teachers.map(t => {
-        const mapping = levelMapping[t.assignedlevel] || { year: isAr ? 'غير محدد' : 'Unassigned', classes: '---' };
-        return (
-          <View key={t._id} style={styles.card}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="person-outline" size={24} color={theme.iconColor} />
-            </View>
-            <View style={styles.infoContainer}>
-              <Text style={styles.name}>{t.username}</Text>
-              <Text style={styles.role}>{t.role === 'co-principal' ? (isAr ? 'أمين خدمة' : 'Co-Principal') : (isAr ? 'خادم' : 'Teacher')}</Text>
-              
-              <View style={styles.assignmentBox}>
-                <Text style={styles.yearText}>{mapping.year} (Level {t.assignedlevel})</Text>
-                <Text style={styles.classesText}>{mapping.classes}</Text>
-              </View>
-            </View>
+    <View style={styles.container}>
+      {/* Left Pane: Teachers */}
+      <View style={styles.leftPane}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>{isAr ? 'الخدام' : 'Teachers'}</Text>
+        </View>
+        <ScrollView>
+          {teachers.map(t => (
+            <TouchableOpacity 
+              key={t._id} 
+              style={[styles.teacherItem, selectedTeacher?._id === t._id && styles.teacherItemSelected]}
+              onPress={() => setSelectedTeacher(t)}
+            >
+              <Text style={styles.teacherName}>{t.username}</Text>
+              <Text style={styles.teacherRole}>{t.role === 'co-principal' ? (isAr ? 'أمين خدمة' : 'Co-Principal') : (isAr ? 'خادم' : 'Teacher')}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Right Pane: Classes */}
+      <View style={styles.rightPane}>
+        {!selectedTeacher ? (
+          <View style={styles.emptyRight}>
+            <Text style={styles.emptyRightText}>{isAr ? 'اختر خادماً لعرض وتعديل فصله' : 'Select a teacher to view/edit their class'}</Text>
           </View>
-        );
-      })}
-    </ScrollView>
+        ) : (
+          <>
+            <Text style={[styles.headerText, { marginBottom: 16, textAlign: isAr ? 'right' : 'left' }]}>
+              {isAr ? `تعيين فصل لـ ${selectedTeacher.username}` : `Assign class for ${selectedTeacher.username}`}
+            </Text>
+            
+            <ScrollView>
+              {displayClasses.map(cls => {
+                const cleanUserClass = (selectedTeacher.assignedclass || '').replace(/^فصل\s+/, '').trim();
+                const isSelected = cls.name === cleanUserClass || cls.name === selectedTeacher.assignedclass;
+                
+                return (
+                  <TouchableOpacity 
+                    key={cls._id} 
+                    style={[styles.classCard, isSelected && styles.classCardSelected]}
+                    onPress={() => assignTeacherToClass(selectedTeacher, cls)}
+                    disabled={isSelected || updating}
+                  >
+                    <View style={{ alignItems: isAr ? 'flex-end' : 'flex-start' }}>
+                      <Text style={styles.className}>{cls.name}</Text>
+                      <Text style={styles.classYear}>{getYearName(cls.level)}</Text>
+                    </View>
+                    
+                    {isSelected && (
+                      <View style={styles.selectedBadge}>
+                        <Text style={styles.selectedBadgeText}>{isAr ? 'الفصل الحالي' : 'Selected'}</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </>
+        )}
+      </View>
+    </View>
   );
 }
