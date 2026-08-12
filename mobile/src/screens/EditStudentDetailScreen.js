@@ -267,19 +267,14 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
       setDeleting(false);
     };
 
-    if (Platform.OS === 'web') {
-      const confirm = window.confirm(locale === 'ar' ? 'هل أنت متأكد من رغبتك في حذف هذا المخدوم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this student record? This action cannot be undone.');
-      if (confirm) performDelete();
-    } else {
-      Alert.alert(
-        locale === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete',
-        locale === 'ar' ? 'هل أنت متأكد من رغبتك في حذف هذا المخدوم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this student record? This action cannot be undone.',
-        [
-          { text: t('cancel'), style: 'cancel' },
-          { text: t('deleteLabel'), style: 'destructive', onPress: performDelete }
-        ]
-      );
-    }
+    Alert.alert(
+      locale === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete',
+      locale === 'ar' ? 'هل أنت متأكد من رغبتك في حذف هذا المخدوم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this student record? This action cannot be undone.',
+      [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('deleteLabel'), style: 'destructive', onPress: performDelete }
+      ]
+    );
   };
 
   const getFieldLabel = (key) => {

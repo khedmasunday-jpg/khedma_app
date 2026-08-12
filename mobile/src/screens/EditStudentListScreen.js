@@ -120,25 +120,16 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
       }
     };
 
-    if (Platform.OS === 'web') {
-      const confirmMsg = isRtl 
+    Alert.alert(
+      isRtl ? 'حذف مخدومين' : 'Delete Students',
+      isRtl 
         ? `هل أنت متأكد من حذف ${selectedStudentIds.size} مخدوم نهائياً؟` 
-        : `Are you sure you want to permanently delete ${selectedStudentIds.size} students?`;
-      if (window.confirm(confirmMsg)) {
-        deleteAction();
-      }
-    } else {
-      Alert.alert(
-        isRtl ? 'حذف مخدومين' : 'Delete Students',
-        isRtl 
-          ? `هل أنت متأكد من حذف ${selectedStudentIds.size} مخدوم نهائياً؟` 
-          : `Are you sure you want to permanently delete ${selectedStudentIds.size} students?`,
-        [
-          { text: isRtl ? 'إلغاء' : 'Cancel', style: 'cancel' },
-          { text: isRtl ? 'حذف' : 'Delete', style: 'destructive', onPress: deleteAction }
-        ]
-      );
-    }
+        : `Are you sure you want to permanently delete ${selectedStudentIds.size} students?`,
+      [
+        { text: isRtl ? 'إلغاء' : 'Cancel', style: 'cancel' },
+        { text: isRtl ? 'حذف' : 'Delete', style: 'destructive', onPress: deleteAction }
+      ]
+    );
   };
 
   return (

@@ -289,24 +289,16 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
   };
 
   const handlePickExcel = () => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      if (window.confirm(locale === 'ar' ? 'هل تمتلك ملف الإكسل (Template) جاهز للاستيراد؟\n\nاضغط OK إذا كان لديك الملف وتود استيراده.\nاضغط Cancel إذا كنت تريد تنزيل قالب فارغ لتعبئته.' : 'Do you have the Excel template ready?\n\nPress OK if you have the file to import.\nPress Cancel to download a blank template.')) {
-        doPickExcel();
-      } else {
-        downloadTemplate();
-      }
-    } else {
-      Alert.alert(
-        locale === 'ar' ? 'استيراد مخدومين' : 'Import Students',
-        locale === 'ar' ? 'هل تمتلك ملف الإكسل (Template) جاهز للاستيراد؟' : 'Do you have the Excel template ready to import?',
-        [
-          { text: locale === 'ar' ? 'إلغاء' : 'Cancel', style: 'cancel' },
-          { text: locale === 'ar' ? 'لا، قم بتنزيل القالب' : 'No, download template', onPress: () => downloadTemplate() },
-          { text: locale === 'ar' ? 'نعم، اختر الملف' : 'Yes, select file', onPress: () => doPickExcel() }
-        ],
-        { cancelable: true }
-      );
-    }
+    Alert.alert(
+      locale === 'ar' ? 'استيراد مخدومين' : 'Import Students',
+      locale === 'ar' ? 'هل تمتلك ملف الإكسل (Template) جاهز للاستيراد؟' : 'Do you have the Excel template ready to import?',
+      [
+        { text: locale === 'ar' ? 'إلغاء' : 'Cancel', style: 'cancel' },
+        { text: locale === 'ar' ? 'لا، قم بتنزيل القالب' : 'No, download template', onPress: () => downloadTemplate() },
+        { text: locale === 'ar' ? 'نعم، اختر الملف' : 'Yes, select file', onPress: () => doPickExcel() }
+      ],
+      { cancelable: true }
+    );
   };
 
   useEffect(() => {

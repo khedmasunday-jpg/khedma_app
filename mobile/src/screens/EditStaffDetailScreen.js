@@ -618,19 +618,14 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
               <TouchableOpacity 
                 style={[styles.btn, styles.btnDelete, deleting && styles.btnDisabled]} 
                 onPress={() => {
-                  if (Platform.OS === 'web') {
-                    const confirmDelete = window.confirm(t('deleteStaffConfirm'));
-                    if (confirmDelete) handleDelete();
-                  } else {
                     Alert.alert(
                       t('confirmDeleteTitle'),
                       t('deleteStaffConfirm'),
                       [
                         { text: t('cancel'), style: 'cancel' },
-                        { text: t('deleteLabel'), style: 'destructive', onPress: handleDelete },
+                        { text: t('deleteLabel'), style: 'destructive', onPress: handleDelete }
                       ]
                     );
-                  }
                 }}
                 disabled={deleting}
               >

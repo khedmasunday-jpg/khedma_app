@@ -24,7 +24,8 @@ export function installArabicAlert() {
   Alert.alert = function (title, message, buttons, options) {
     const t = translate(title);
     const m = translate(message);
-    return old.call(Alert, t, m, buttons, options);
+    const { showGlobalAlert } = require('../components/GlobalAlert');
+    return showGlobalAlert(t, m, buttons);
   };
 }
 

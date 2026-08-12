@@ -56,10 +56,11 @@ try {
   const arabicAlert = require('./src/utils/arabicAlert');
   if (arabicAlert && arabicAlert.installArabicAlert) arabicAlert.installArabicAlert();
   try {
-    if (typeof window !== 'undefined' && window.alert && arabicAlert.translate) {
+    if (typeof window !== 'undefined' && arabicAlert.translate) {
       const oldWinAlert = window.alert;
       window.alert = function (msg) {
-        try { return oldWinAlert(arabicAlert.translate(msg)); } catch (e) { return oldWinAlert(msg); }
+        const { showGlobalAlert } = require('./src/components/GlobalAlert');
+        showGlobalAlert(arabicAlert.translate('Alert') || 'Alert', arabicAlert.translate(msg) || msg);
       };
     }
   } catch (e) {}
@@ -293,12 +294,15 @@ function AppNavigator() {
   );
 }
 
+import { GlobalAlert } from './src/components/GlobalAlert';
+
 export default function App() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
         <ThemeProvider>
           <LanguageProvider>
+          <GlobalAlert />
           <View style={styles.rootView}>
             <ImageBackground 
               source={require('./assets/pattern.webp')} 
