@@ -49,6 +49,7 @@ export default function SwitchStudentsScreen({ navigation }) {
         allS = resStudents.data.data;
       }
       
+      const allC = resClasses.data || [];
       setClasses(allC);
       setStudents(allS);
 
