@@ -1,11 +1,11 @@
-
 const cron = require('node-cron');
 const User = require('../models/User');
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
 const Notification = require('../models/Notification');
+const { queueNotification } = require('../services/notificationService');
 
-cron.schedule('0 10 * * 5', async () => {
+cron.schedule('0 11 * * 3', async () => {
   try {
     
     const coPrincipals = await User.find({ role: 'co-principal', isActive: true });
@@ -37,9 +37,18 @@ cron.schedule('0 10 * * 5', async () => {
           recipient: teacher._id,
           message: msg.trim(),
         });
+
+        if (teacher.phonenumber) {
+          await queueNotification({
+            recipient: teacher.phonenumber,
+            message: msg.trim(),
+            notificationType: 'reminder',
+            recipientId: teacher._id,
+            recipientType: 'User'
+          });
+        }
       }
-    }  } catch (err) {
+    }  } catch (err) {
     console.error('❌ Error sending weekly checkup notifications:', err);
   }
-});
-
+}, { timezone: 'Africa/Cairo' });

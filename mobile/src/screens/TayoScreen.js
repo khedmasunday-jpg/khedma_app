@@ -16,11 +16,12 @@ export default function TayoScreen({ navigation, route }) {const { theme, isDark
           <Ionicons name="gift-outline" size={32} color={theme.iconColor} style={styles.icon} />
           <Text style={styles.buttonText}>{t('giveTayo')}</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TayoDisplayScreen')}>
-          <Ionicons name="list-outline" size={32} color={theme.iconColor} style={styles.icon} />
-          <Text style={styles.buttonText}>{t('displayDeductTayo')}</Text>
-        </TouchableOpacity>
+        {role !== 'teacher' && (
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TayoDisplayScreen')}>
+            <Ionicons name="list-outline" size={32} color={theme.iconColor} style={styles.icon} />
+            <Text style={styles.buttonText}>{t('displayDeductTayo')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );

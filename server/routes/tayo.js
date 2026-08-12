@@ -60,7 +60,7 @@ router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'c
   }
 });
 
-router.get('/logs', verifyToken, authorizeRoles('admin', 'co-principal'), async (req, res) => {
+router.get('/logs', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), async (req, res) => {
   try {
     const logs = await TayoLog.find({})
       .populate('givenBy', 'fullName role')
