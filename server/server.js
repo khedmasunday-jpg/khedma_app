@@ -15,12 +15,13 @@ const userRoutes = require('./routes/users');
 const app = express();
 app.set('trust proxy', 1); 
 
-// Explicitly handle all OPTIONS requests for Vercel CORS
+// Global CORS Handler for Vercel
 app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-CSRF-Token, Accept, Accept-Version, Date, X-Api-Version');
+  
   if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-CSRF-Token, Accept, Accept-Version, Date, X-Api-Version');
     return res.status(200).send();
   }
   next();
@@ -56,8 +57,7 @@ async function connectDB() {
   await dbConnectionPromise;
 }
 
-// CORS: Paused strict origin check for local testing
-app.use(cors());
+// CORS handled globally at the top
 
 app.use(helmet());
 app.use(express.json({ limit: '2mb' })); 
