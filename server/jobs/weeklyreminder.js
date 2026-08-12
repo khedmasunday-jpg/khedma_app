@@ -5,7 +5,7 @@ const Attendance = require('../models/Attendance');
 const Notification = require('../models/Notification');
 const { queueNotification } = require('../services/notificationService');
 
-cron.schedule('0 11 * * 3', async () => {
+cron.schedule('5 11 * * 3', async () => {
   try {
     
     const coPrincipals = await User.find({ role: 'co-principal', isActive: true });
