@@ -74,9 +74,13 @@ export default function SwitchStudentsScreen({ navigation }) {
     }
   };
 
-  const getStudentClassId = (student) => {
-    if (pendingChanges[student._id]) return pendingChanges[student._id];
-    return student.class;
+  const getStudentClassId = (student, cls) => {
+    if (pendingChanges[student._id]) return pendingChanges[student._id] === cls._id;
+    const sClassId = student.class?._id || student.class;
+    if (sClassId && sClassId === cls._id) return true;
+    const cleanSName = (student.classname || '').replace(/^فصل\s+/, '').trim();
+    const cleanCName = (cls.name || '').replace(/^فصل\s+/, '').trim();
+    return cleanSName && cleanSName === cleanCName;
   };
 
   const handleStudentPress = (student, targetClassId) => {
@@ -204,7 +208,7 @@ export default function SwitchStudentsScreen({ navigation }) {
           <View style={styles.pairContainer}>
             {activePair.map((cls, idx) => {
               const otherCls = idx === 0 ? activePair[1] : activePair[0];
-              const colStudents = students.filter(s => getStudentClassId(s) === cls._id);
+              const colStudents = students.filter(s => getStudentClassId(s, cls));
 
               return (
                 <View key={cls._id} style={styles.classColumn}>
@@ -216,7 +220,7 @@ export default function SwitchStudentsScreen({ navigation }) {
                       onPress={() => handleStudentPress(s, otherCls._id)}
                     >
                       {(!isAr ? idx === 1 : idx === 0) && <Ionicons name="arrow-back-outline" size={16} color={theme.primary} />}
-                      <Text style={styles.studentName} numberOfLines={1}>{s.firstname || s.name}</Text>
+                      <Text style={styles.studentName} numberOfLines={1}>{s.fullName || s.firstname || s.name}</Text>
                       {(!isAr ? idx === 0 : idx === 1) && <Ionicons name="arrow-forward-outline" size={16} color={theme.primary} />}
                     </TouchableOpacity>
                   ))}
