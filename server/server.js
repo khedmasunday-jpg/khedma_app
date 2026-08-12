@@ -14,6 +14,18 @@ const userRoutes = require('./routes/users');
 
 const app = express();
 app.set('trust proxy', 1); 
+
+// Explicitly handle all OPTIONS requests for Vercel CORS
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, X-CSRF-Token, Accept, Accept-Version, Date, X-Api-Version');
+    return res.status(200).send();
+  }
+  next();
+});
+
 const PORT = process.env.PORT || 5000;
 
 mongoose.connection.on('connected', () => {});
