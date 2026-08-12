@@ -39,8 +39,16 @@ export default function SwitchStudentsScreen({ navigation }) {
         Axios.get(`${API_URL}/students/data`, { headers: { Authorization: token } })
       ]);
       
-      const allC = resClasses.data;
-      const allS = resStudents.data.data || resStudents.data; // Sometimes it returns { data: [...] }
+      // Robust parsing of students array
+      let allS = [];
+      if (Array.isArray(resStudents.data)) {
+        allS = resStudents.data;
+      } else if (resStudents.data && Array.isArray(resStudents.data.students)) {
+        allS = resStudents.data.students;
+      } else if (resStudents.data && Array.isArray(resStudents.data.data)) {
+        allS = resStudents.data.data;
+      }
+      
       setClasses(allC);
       setStudents(allS);
 
@@ -185,6 +193,9 @@ export default function SwitchStudentsScreen({ navigation }) {
       
       <Text style={styles.instructions}>
         {isAr ? 'انقر على اسم المخدوم لنقله للفصل الآخر' : 'Click on a student to move them to the other class'}
+      </Text>
+      <Text style={[styles.instructions, { color: theme.primary, fontWeight: 'bold' }]}>
+        Total Students Fetched from API: {students.length}
       </Text>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
