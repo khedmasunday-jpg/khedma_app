@@ -49,7 +49,9 @@ import TayoGiveScreen from './src/screens/TayoGiveScreen';
 import TayoDisplayScreen from './src/screens/TayoDisplayScreen';
 import BackupScreen from './src/screens/BackupScreen';
 import RssLinksScreen from './src/screens/RssLinksScreen';
-
+import PromotionScreen from './src/screens/PromotionScreen';
+import SwitchStudentsScreen from './src/screens/SwitchStudentsScreen';
+import PromotionTeachersScreen from './src/screens/PromotionTeachersScreen';
 try {
   const arabicAlert = require('./src/utils/arabicAlert');
   if (arabicAlert && arabicAlert.installArabicAlert) arabicAlert.installArabicAlert();
@@ -284,6 +286,9 @@ function AppNavigator() {
       <Stack.Screen name="TayoGiveScreen" component={TayoGiveScreen} options={{ title: t('giveTayo') || 'إعطاء الطايو' }} />
       <Stack.Screen name="TayoDisplayScreen" component={TayoDisplayScreen} options={{ title: t('displayDeductTayo') || 'عرض و خصم الطايو' }} />
       <Stack.Screen name="BackupScreen" component={BackupScreen} options={{ title: t('backupData') || 'النسخ الاحتياطي' }} />
+      <Stack.Screen name="PromotionScreen" component={PromotionScreen} options={{ title: locale === 'ar' ? 'الترقية' : 'Promotion' }} />
+      <Stack.Screen name="SwitchStudentsScreen" component={SwitchStudentsScreen} options={{ title: locale === 'ar' ? 'نقل المخدومين' : 'Switch Students' }} />
+      <Stack.Screen name="PromotionTeachersScreen" component={PromotionTeachersScreen} options={{ title: locale === 'ar' ? 'الخدام والفصول' : 'Teachers & Classes' }} />
     </Stack.Navigator>
   );
 }

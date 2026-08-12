@@ -184,72 +184,6 @@ export default function PostLoginScreen({ route, navigation }) {
     );
   }
 
-  const handlePromotion = async () => {
-    Alert.alert(
-      locale === 'ar' ? 'تأكيد الترقية' : 'Confirm Promotion',
-      locale === 'ar' ? 'هل أنت متأكد من ترقية جميع الفصول وتصدير الخريجين؟' : 'Are you sure you want to promote all classes and export graduates?',
-      [
-        { text: locale === 'ar' ? 'إلغاء' : 'Cancel', style: 'cancel' },
-        { 
-          text: locale === 'ar' ? 'تأكيد' : 'Confirm', 
-          onPress: async () => {
-            try {
-              if (Platform.OS === 'web') {
-                const response = await Axios.post(`${API_URL}/promotion/promote-all`, {}, {
-                  headers: { Authorization: token },
-                  responseType: 'blob'
-                });
-                
-                // If it's a JSON response (no graduates), axios won't parse it automatically because of blob type
-                if (response.data.type === 'application/json') {
-                   const text = await response.data.text();
-                   const json = JSON.parse(text);
-                   Alert.alert(locale === 'ar' ? 'تمت الترقية' : 'Promoted', json.msg);
-                   return;
-                }
-
-                // If Excel blob
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', 'graduates.xlsx');
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                
-                Alert.alert(locale === 'ar' ? 'نجاح' : 'Success', locale === 'ar' ? 'تمت الترقية وتحميل ملف الخريجين!' : 'Promoted and downloaded graduates!');
-              } else {
-                // Mobile download handling
-                const FileSystem = require('expo-file-system');
-                const Sharing = require('expo-sharing');
-                const fileUri = FileSystem.documentDirectory + 'graduates.xlsx';
-                
-                const response = await FileSystem.downloadAsync(
-                  `${API_URL}/promotion/promote-all`,
-                  fileUri,
-                  { headers: { Authorization: token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json' }, httpMethod: 'POST' }
-                );
-
-                if (response.headers['Content-Type']?.includes('application/json')) {
-                   Alert.alert(locale === 'ar' ? 'تمت الترقية' : 'Promoted', locale === 'ar' ? 'تمت الترقية بنجاح. لا يوجد خريجون هذا العام.' : 'Promotion successful. No graduates this year.');
-                   return;
-                }
-                
-                if (await Sharing.isAvailableAsync()) {
-                  await Sharing.shareAsync(fileUri);
-                  Alert.alert(locale === 'ar' ? 'نجاح' : 'Success', locale === 'ar' ? 'تمت الترقية بنجاح!' : 'Promotion Successful!');
-                }
-              }
-            } catch (err) {
-              logger.error('Promotion error:', err);
-              Alert.alert('Error', 'Failed to run promotion');
-            }
-          }
-        }
-      ]
-    );
-  };
-
   const handleButtonPress = async (buttonKey) => {
     switch (buttonKey) {
       case 'notifications':
@@ -310,7 +244,7 @@ export default function PostLoginScreen({ route, navigation }) {
         navigation.navigate('BackupScreen');
         break;
       case 'promotion':
-        handlePromotion();
+        navigation.navigate('PromotionScreen');
         break;
       case 'importData':
         navigation.navigate('AddStudentsScreen', { autoPickExcel: true });
