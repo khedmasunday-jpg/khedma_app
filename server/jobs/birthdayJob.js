@@ -97,7 +97,7 @@ const runBirthdayJob = async (isManual = false) => {
 };
 
 if (!process.env.VERCEL) {
-  cron.schedule('5 11 * * *', runBirthdayJob, { timezone: 'Africa/Cairo' });
+  cron.schedule('0 14 * * *', runBirthdayJob, { timezone: 'Africa/Cairo' });
 }
 
 module.exports = { runBirthdayJob };

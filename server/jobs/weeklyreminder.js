@@ -1,11 +1,12 @@
 const cron = require('node-cron');
+const cron = require('node-cron');
 const User = require('../models/User');
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
 const Notification = require('../models/Notification');
 const { queueNotification } = require('../services/notificationService');
 
-cron.schedule('5 11 * * 3', async () => {
+const runWeeklyReminderJob = async () => {
   try {
     
     const coPrincipals = await User.find({ role: 'co-principal', isActive: true });
@@ -51,4 +52,8 @@ cron.schedule('5 11 * * 3', async () => {
     }  } catch (err) {
     console.error('❌ Error sending weekly checkup notifications:', err);
   }
-}, { timezone: 'Africa/Cairo' });
+};
+
+cron.schedule('0 14 * * 3', runWeeklyReminderJob, { timezone: 'Africa/Cairo' });
+
+module.exports = { runWeeklyReminderJob };

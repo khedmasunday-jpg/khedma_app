@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const ScheduledJob = require('../models/ScheduledJob');
 const { runJobManually } = require('../services/schedulerService');
+const { runBirthdayJob } = require('../jobs/birthdayJob');
+const { runWeeklyReminderJob } = require('../jobs/weeklyreminder');
+const { runBackupJob } = require('../jobs/backupJob');
 
 router.get('/run-all', async (req, res) => {
   try {
@@ -11,6 +14,13 @@ router.get('/run-all', async (req, res) => {
       await runJobManually(job._id);
     }
     
+    // Run the manual scripts on Vercel
+    if (new Date().getDay() === 3) { // Run weekly reminder on Wednesdays
+       await runWeeklyReminderJob();
+    }
+    await runBirthdayJob(true); // Run birthday job daily
+    await runBackupJob(); // Run backup job
+
     const { processPendingNotifications } = require('../services/notificationService');
     await processPendingNotifications();
     
