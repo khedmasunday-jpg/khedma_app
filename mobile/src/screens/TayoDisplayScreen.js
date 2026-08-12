@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, FlatList, TextInput, Modal, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
 import Axios from 'axios';
 import { API_URL } from '../config/api';
-import { getAuthToken } from '../config/authSession';
+import { getAuthToken, getAuthUser } from '../config/authSession';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 
@@ -27,6 +27,12 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
   
   const [amount, setAmount] = useState('5');
   const [reason, setReason] = useState('');
+
+  const [globalLogsVisible, setGlobalLogsVisible] = useState(false);
+  const [globalLogs, setGlobalLogs] = useState([]);
+  
+  const user = getAuthUser();
+  const role = user?.role;
 
   useEffect(() => {
     fetchStudents();
@@ -95,6 +101,18 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
     }
   };
 
+  const fetchGlobalLogs = async () => {
+    try {
+      const token = getAuthToken();
+      const res = await Axios.get(`${API_URL}/tayo/logs`, { headers: { Authorization: token } });
+      setGlobalLogs(res.data);
+      setGlobalLogsVisible(true);
+    } catch (err) {
+      console.error(err);
+      Alert.alert(t('error'), 'Failed to fetch global logs');
+    }
+  };
+
   const submitDeduct = async () => {
     if (!amount || isNaN(amount) || parseInt(amount) <= 0) return Alert.alert(t('error'), t('invalidNumber'));
 
@@ -121,6 +139,11 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
         <View style={{ flexDirection: t('isRtl') ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+          {(role === 'admin' || role === 'co-principal' || role === 'principal') && (
+            <TouchableOpacity style={styles.iconButton} onPress={fetchGlobalLogs}>
+              <Ionicons name="receipt-outline" size={20} color={theme.iconColor} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
@@ -260,6 +283,44 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
             )}
 
             <TouchableOpacity style={styles.closeModalBtn} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeModalText}>{t('closeModal')}</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={globalLogsVisible} transparent animationType="slide" onRequestClose={() => setGlobalLogsVisible(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContainer}>
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }]}>
+            <View style={styles.modalHeaderInfo}>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>{locale === 'ar' ? 'سجل تايو العام' : 'Global Tayo Logs'}</Text>
+            </View>
+            
+            <FlatList
+              data={globalLogs}
+              keyExtractor={item => item._id}
+              style={{maxHeight: 400, marginTop: 10}}
+              renderItem={({ item }) => (
+                <View style={styles.logCard}>
+                  <View style={styles.logIconWrapper}>
+                    <Ionicons name={item.amount > 0 ? "arrow-up-circle" : "arrow-down-circle"} size={24} color={item.amount > 0 ? '#2ecc71' : '#e74c3c'} />
+                  </View>
+                  <View style={styles.logDetails}>
+                    <Text style={styles.logReason}>
+                      {item.student?.fullName} ({item.student?.classname || '?'})
+                    </Text>
+                    <Text style={[styles.logReason, { fontSize: 13, marginTop: 2, color: theme.textMuted }]}>{item.reason}</Text>
+                    <Text style={styles.logDate}>{new Date(item.date).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} • {item.givenBy?.fullName}</Text>
+                  </View>
+                  <Text style={[styles.logAmount, { color: item.amount > 0 ? '#2ecc71' : '#e74c3c' }]}>
+                    {item.amount > 0 ? '+' : ''}{item.amount}
+                  </Text>
+                </View>
+              )}
+              ListEmptyComponent={<Text style={{textAlign: 'center', marginTop: 20, color: '#7f8c8d'}}>{t('noLogs')}</Text>}
+            />
+
+            <TouchableOpacity style={styles.closeModalBtn} onPress={() => setGlobalLogsVisible(false)}>
               <Text style={styles.closeModalText}>{t('closeModal')}</Text>
             </TouchableOpacity>
           </View>

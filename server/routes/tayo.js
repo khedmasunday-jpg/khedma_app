@@ -60,6 +60,20 @@ router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'c
   }
 });
 
+router.get('/logs', verifyToken, authorizeRoles('admin', 'co-principal'), async (req, res) => {
+  try {
+    const logs = await TayoLog.find({})
+      .populate('givenBy', 'fullName role')
+      .populate('student', 'fullName classname classLevel')
+      .sort({ date: -1 })
+      .limit(100); // limit to recent 100 for performance
+    res.json(logs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server Error' });
+  }
+});
+
 router.get('/logs/:id', verifyToken, async (req, res) => {
   try {
     const logs = await TayoLog.find({ student: req.params.id })
