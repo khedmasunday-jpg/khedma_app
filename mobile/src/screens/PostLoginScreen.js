@@ -290,17 +290,6 @@ export default function PostLoginScreen({ route, navigation }) {
             </TouchableOpacity>
           )}
           
-          {role === 'admin' && (
-            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => {
-              const title = locale === 'ar' ? '⚠️ تحذير خطير جداً!' : '⚠️ CRITICAL SYSTEM FAILURE!';
-              const message = locale === 'ar' ? 'لقد قمت بمسح جميع بيانات الخدام والمخدومين... \n\n\n\n\nبم بم بم بم... بهزر معاك يا ريس 😂' : 'All user databases have been permanently deleted... \n\n\n\n\nJust kidding boss 😂';
-              
-              showCustomAlert(title, message);
-            }}>
-              <Ionicons name="skull-outline" size={22} color={theme.iconColor} />
-            </TouchableOpacity>
-          )}
-
           <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => setProfileModalVisible(true)}>
             <Ionicons name="person-circle-outline" size={22} color={theme.iconColor} />
           </TouchableOpacity>
