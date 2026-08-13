@@ -101,6 +101,7 @@ app.use('/api/rss', require('./routes/rssRoutes'));
 app.use('/api/promotion', require('./routes/promotion'));
 
 app.get('/ping', (req, res) => {
+  // Trigger Vercel redeployment
   res.json({ ok: true, time: Date.now() });
 });
 
