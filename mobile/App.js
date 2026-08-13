@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { navigationRef } from './src/utils/RootNavigation';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ImageBackground, View, Platform, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { LanguageProvider, useLanguage } from './src/utils/LanguageContext';
@@ -311,7 +312,7 @@ export default function App() {
             >
               <View style={{ flex: 1 }}>
                 <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
-                  <NavigationContainer theme={MyTheme}>
+                  <NavigationContainer theme={MyTheme} ref={navigationRef}>
                     <AppNavigator />
                   </NavigationContainer>
                 </SafeAreaView>

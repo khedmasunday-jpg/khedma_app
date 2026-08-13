@@ -3,6 +3,8 @@ import { Platform, Alert } from 'react-native';
 import axios from 'axios';
 import { logger } from '../utils/logger';
 import { getAuthToken, clearAuthToken } from './authSession';
+import * as RootNavigation from '../utils/RootNavigation';
+import { showGlobalAlert } from '../components/GlobalAlert';
 
 export const resolveHostFromConstants = () => {
   const m = Constants.manifest || {};
@@ -121,7 +123,17 @@ axios.interceptors.response.use(
         clearAuthToken();
         
         if (!error.config?.url?.includes('/auth/login')) {
-          Alert.alert('انتهت الجلسة (Session Expired)', 'انتهت دورتك الحالية. يرجى تسجيل الدخول مجدداً.');
+          showGlobalAlert(
+            'انتهت الجلسة (Session Expired)', 
+            'انتهت دورتك الحالية. يرجى تسجيل الدخول مجدداً.',
+            [{ text: 'OK', onPress: () => {
+              if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.location.href = '/';
+              } else {
+                RootNavigation.reset([{ name: 'Login' }]);
+              }
+            }}]
+          );
         }
       } else if (status === 403) {
         Alert.alert('غير مصرح (Access Denied)', serverMsg || 'غير مصرح لك بإجراء هذه العملية.');

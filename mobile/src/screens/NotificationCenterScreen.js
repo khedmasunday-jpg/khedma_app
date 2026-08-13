@@ -108,12 +108,12 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
   const getNotifIconInfo = (type) => {
     switch (type) {
       case 'birthday':
-        return { name: 'gift-outline', color: '#e91e63' };
+        return { name: 'gift-outline', color: '#e91e63', bg: 'rgba(233, 30, 99, 0.12)' };
       case 'weekly_followup':
       case 'weekly':
-        return { name: 'chatbubble-ellipses-outline', color: theme.text };
+        return { name: 'chatbubble-ellipses-outline', color: theme.primary, bg: isDarkMode ? 'rgba(56, 189, 248, 0.15)' : 'rgba(47, 67, 96, 0.1)' };
       default:
-        return { name: 'notifications-outline', color: theme.textMuted };
+        return { name: 'notifications-outline', color: theme.text, bg: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(47, 67, 96, 0.1)' };
     }
   };
 
@@ -189,7 +189,7 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
                 style={[styles.notifCard, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}
               >
                 {}
-                <View style={[styles.iconBadge, { backgroundColor: `${iconInfo.color}15` }]}>
+                <View style={[styles.iconBadge, { backgroundColor: iconInfo.bg }]}>
                   <Ionicons name={iconInfo.name} size={22} color={iconInfo.color} />
                 </View>
 
