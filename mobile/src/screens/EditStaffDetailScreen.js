@@ -177,6 +177,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
         assignedclass: getSafeField('assignedclass'),
         assignedlevel: getSafeField('assignedlevel'),
         isClassLeader: !!getSafeField('isClassLeader'),
+        telegramChatId: getSafeField('telegramChatId'),
       };
 
       await axios.patch(`${API_URL}/${userId}`, updates, { headers: { Authorization: `Bearer ${token}` } });

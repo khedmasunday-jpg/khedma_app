@@ -290,6 +290,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
       lockedDeviceId: staff.lockedDeviceId || '',
       
       assignedlevel: (staff.assignedlevel !== undefined && staff.assignedlevel !== '') ? staff.assignedlevel : undefined,
+      telegramChatId: staff.telegramChatId || '',
     };
 
     setStaffList(prev => [...prev, toAdd]);
@@ -346,6 +347,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
             deviceId: staff.deviceId || '',
             lockedDeviceId: staff.lockedDeviceId || '',
             assignedlevel: (staff.assignedlevel !== undefined && staff.assignedlevel !== '') ? staff.assignedlevel : undefined,
+            telegramChatId: staff.telegramChatId || '',
           };
           toProcess = [toAdd];
           directFormSubmission = true;
