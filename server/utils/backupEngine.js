@@ -2,50 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const mongoose = require('mongoose');
-const { google } = require('googleapis');
 const Log = require('../models/Log');
 const JobLog = require('../models/JobLog');
 
-function getDriveInstance() {
-  
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET
-    );
-    oauth2Client.setCredentials({
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-    });
-    return google.drive({ version: 'v3', auth: oauth2Client });
-  }
 
-  const SCOPES = ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive'];
-  let googleAuthOpts = { scopes: SCOPES };
-
-  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    try {
-      googleAuthOpts.credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-    } catch (err) {
-      console.error('❌ Failed to parse GOOGLE_SERVICE_ACCOUNT_JSON env variable:', err.message);
-    }
-  } else {
-    
-    const candidatePaths = [
-      path.join(__dirname, '../config/drive-service-account.json'),
-      process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH
-    ].filter(Boolean);
-
-    let keyFilePath = candidatePaths.find(p => fs.existsSync(p));
-    if (keyFilePath) {
-      googleAuthOpts.keyFile = keyFilePath;
-    } else {
-      console.warn('⚠️ No Google Drive service account key file found at candidate paths.');
-    }
-  }
-
-  const auth = new google.auth.GoogleAuth(googleAuthOpts);
-  return google.drive({ version: 'v3', auth });
-}
 
 const os = require('os');
 
@@ -87,34 +47,7 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
     fs.writeFileSync(filePath, compressedBuffer);
     const fileSize = compressedBuffer.length;
 
-    let driveFileId = null;
-    let driveErrorMsg = null;
-    try {
-      const drive = getDriveInstance();
-      const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
-      if (!folderId) throw new Error('Missing GOOGLE_DRIVE_FOLDER_ID env var');
 
-      const fileMetadata = {
-        name: fileName,
-        parents: [folderId]
-      };
-      const media = {
-        mimeType: 'application/gzip',
-        body: fs.createReadStream(filePath)
-      };
-
-      const driveRes = await drive.files.create({
-        resource: fileMetadata,
-        media: media,
-        supportsAllDrives: true,
-        fields: 'id'
-      });
-
-      driveFileId = driveRes.data.id;
-    } catch (driveErr) {
-      driveErrorMsg = driveErr.message;
-      console.error('⚠️ Google Drive upload error:', driveErr.message);
-    }
 
     let telegramUploaded = false;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
@@ -197,7 +130,7 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
           actor: userObj.id || userObj._id,
           performedBy: userObj.id || userObj._id,
           timestamp: new Date(),
-          details: `Manual backup completed in ${Date.now() - startTime}ms. Collections: ${Object.keys(exportData.collections).length}, Docs: ${totalDocs}, Size: ${(fileSize / 1024).toFixed(1)} KB. Drive ID: ${driveFileId || 'None (Error: ' + (driveErrorMsg || 'N/A') + ')'}`,
+          details: `Manual backup completed in ${Date.now() - startTime}ms. Collections: ${Object.keys(exportData.collections).length}, Docs: ${totalDocs}, Size: ${(fileSize / 1024).toFixed(1)} KB.`,
           actorName: userObj.fullName || userObj.username,
           actorRole: userObj.role,
           actionDescription: `Admin ${userObj.fullName || userObj.username} triggered a manual database backup.`
@@ -211,8 +144,7 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
       success: true,
       timestamp: new Date().toISOString(),
       fileName,
-      driveFileId,
-      driveError: driveErrorMsg,
+
       telegramUploaded,
       dropboxUploaded,
       sizeBytes: fileSize,
