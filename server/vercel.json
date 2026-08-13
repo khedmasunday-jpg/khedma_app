@@ -15,15 +15,15 @@
   "crons": [
     {
       "path": "/api/cron/birthday",
-      "schedule": "15 7 * * *"
+      "schedule": "20 7 * * *"
     },
     {
       "path": "/api/cron/attendance",
-      "schedule": "15 7 * * 4"
+      "schedule": "20 7 * * 4"
     },
     {
       "path": "/api/cron/backup",
-      "schedule": "15 7 13 * *"
+      "schedule": "20 7 13 * *"
     }
   ]
 }
