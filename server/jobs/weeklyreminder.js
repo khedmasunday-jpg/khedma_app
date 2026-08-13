@@ -64,6 +64,14 @@ const runWeeklyReminderJob = async (isManual = false) => {
         absentees.forEach(s => {
           const sName = typeof s.getFullName === 'function' ? s.getFullName() : s.fullName;
           messageText += `👤 ${sName || 'بدون اسم'}\n`;
+          
+          if (s.lastAttendanceDate) {
+            const lastDate = moment(s.lastAttendanceDate).format('YYYY-MM-DD');
+            messageText += `🗓 آخر حضور: ${lastDate}\n`;
+          } else {
+            messageText += `🗓 آخر حضور: لم يحضر أبدًا\n`;
+          }
+
           if (s.father_phonenumber || s.mother_phonenumber) {
             messageText += `📞 أب: ${s.father_phonenumber || '-'}\n📞 أم: ${s.mother_phonenumber || '-'}\n`;
           }
@@ -78,6 +86,19 @@ const runWeeklyReminderJob = async (isManual = false) => {
           recipientId: teacher._id,
           recipientType: 'User'
         });
+
+        // Create in-app notification
+        try {
+          const Notification = require('../models/Notification');
+          await Notification.create({
+            recipient: teacher._id,
+            type: 'weekly',
+            message: messageText
+          });
+        } catch (notifErr) {
+          console.error('Failed to create in-app notification for weekly reminder:', notifErr.message);
+        }
+
         recordsProcessed++;
       }
     }
