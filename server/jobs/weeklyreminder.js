@@ -5,6 +5,16 @@ const CronJobRun = require('../models/CronJobRun');
 const { queueNotification } = require('../services/notificationService');
 const Logger = require('../utils/logger');
 
+const formatPhoneForTelegram = (num) => {
+  if (!num) return '-';
+  const clean = String(num).trim();
+  // If it's a standard 11-digit Egyptian mobile number starting with 01, add +2
+  if (/^01\d{9}$/.test(clean)) {
+    return `+2${clean}`;
+  }
+  return clean;
+};
+
 const runWeeklyReminderJob = async (isManual = false) => {
   const timezone = 'Africa/Cairo';
   const todayKey = moment().tz(timezone).isoWeek(); 
@@ -73,7 +83,7 @@ const runWeeklyReminderJob = async (isManual = false) => {
           }
 
           if (s.father_phonenumber || s.mother_phonenumber) {
-            messageText += `📞 أب: ${s.father_phonenumber || '-'}\n📞 أم: ${s.mother_phonenumber || '-'}\n`;
+            messageText += `📞 أب: ${formatPhoneForTelegram(s.father_phonenumber)}\n📞 أم: ${formatPhoneForTelegram(s.mother_phonenumber)}\n`;
           }
           messageText += `\n`;
         });

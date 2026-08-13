@@ -6,6 +6,15 @@ const MessageTemplate = require('../models/MessageTemplate');
 const { queueNotification } = require('../services/notificationService');
 const Logger = require('../utils/logger');
 
+const formatPhoneForTelegram = (num) => {
+  if (!num) return '-';
+  const clean = String(num).trim();
+  if (/^01\d{9}$/.test(clean)) {
+    return `+2${clean}`;
+  }
+  return clean;
+};
+
 const runBirthdayJob = async (isManual = false) => {
   const timezone = 'Africa/Cairo';
   const todayKey = moment().tz(timezone).format('YYYY-MM-DD');
@@ -51,7 +60,7 @@ const runBirthdayJob = async (isManual = false) => {
         
         let msg = `ميس ${principal.fullName}\nاليوم يوافق عيد ميلاد هؤلاء الخدام المباركين:\n\n`;
         staffWithBirthdays.forEach(t => {
-          msg += `🎁 ${t.fullName} (${t.assignedclass || t.role}) - 📞 ${t.phonenumber || 'لا يوجد'}\n`;
+          msg += `🎁 ${t.fullName} (${t.assignedclass || t.role}) - 📞 ${t.phonenumber ? formatPhoneForTelegram(t.phonenumber) : 'لا يوجد'}\n`;
         });
         msg += `\nلا تنسَ تهنئتهم وكل عام وأنتم بخير! 🎂`;
 
