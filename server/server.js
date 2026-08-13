@@ -1,8 +1,3 @@
-require('dotenv').config();
-require('./jobs/backupJob');
-require('./jobs/weeklyreminder');
-const { runBirthdayJob } = require('./jobs/birthdayJob');
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); 
@@ -149,15 +144,10 @@ async function startServer() {
   try {
     await connectDB();
     try {
-      const { triggerQueueWorker } = require('./services/notificationService');
-      const { initializeScheduler } = require('./services/schedulerService');
       const { initializeTelegram } = require('./services/telegramClient');
-      
       await initializeTelegram();
-      triggerQueueWorker();
-      await initializeScheduler();
     } catch (err) {
-      console.error('❌ Failed to initialize WhatsApp/Scheduler Services:', err);
+      console.error('❌ Failed to initialize Telegram Service:', err);
     }
 
     if (!process.env.VERCEL) {

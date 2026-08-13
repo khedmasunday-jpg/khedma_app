@@ -47,12 +47,14 @@ function getDriveInstance() {
   return google.drive({ version: 'v3', auth });
 }
 
+const os = require('os');
+
 let lastBackupInfo = null;
 
 async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
   const startTime = Date.now();
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const backupDir = path.join(__dirname, '../backups');
+  const backupDir = process.env.VERCEL ? os.tmpdir() : path.join(__dirname, '../backups');
   fs.mkdirSync(backupDir, { recursive: true });
 
   const fileName = `khedma-backup-${timestamp}.json.gz`;
@@ -151,17 +153,23 @@ async function runDatabaseBackup(triggeredBy = 'cron', userObj = null) {
     }
 
     try {
-      const files = fs.readdirSync(backupDir)
-        .filter(f => f.startsWith('khedma-backup-') && f.endsWith('.json.gz'))
-        .map(f => ({ name: f, path: path.join(backupDir, f), time: fs.statSync(path.join(backupDir, f)).mtime.getTime() }))
-        .sort((a, b) => b.time - a.time);
+      if (process.env.VERCEL) {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } else {
+        const files = fs.readdirSync(backupDir)
+          .filter(f => f.startsWith('khedma-backup-') && f.endsWith('.json.gz'))
+          .map(f => ({ name: f, path: path.join(backupDir, f), time: fs.statSync(path.join(backupDir, f)).mtime.getTime() }))
+          .sort((a, b) => b.time - a.time);
 
-      const MAX_LOCAL_BACKUPS = 10;
-      if (files.length > MAX_LOCAL_BACKUPS) {
-        const toDelete = files.slice(MAX_LOCAL_BACKUPS);
-        for (const file of toDelete) {
-          if (fs.existsSync(file.path)) {
-            fs.unlinkSync(file.path);
+        const MAX_LOCAL_BACKUPS = 10;
+        if (files.length > MAX_LOCAL_BACKUPS) {
+          const toDelete = files.slice(MAX_LOCAL_BACKUPS);
+          for (const file of toDelete) {
+            if (fs.existsSync(file.path)) {
+              fs.unlinkSync(file.path);
+            }
           }
         }
       }

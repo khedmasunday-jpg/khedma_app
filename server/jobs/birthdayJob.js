@@ -1,103 +1,150 @@
-
-
-const cron = require('node-cron');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const User = require('../models/User');
 const Student = require('../models/Student');
-const Notification = require('../models/Notification');
+const CronJobRun = require('../models/CronJobRun');
+const MessageTemplate = require('../models/MessageTemplate');
 const { queueNotification } = require('../services/notificationService');
-
-let notifiedToday = new Set();
+const Logger = require('../utils/logger');
 
 const runBirthdayJob = async (isManual = false) => {
-  try {
-    const todayKey = moment.utc().format('MM-DD');
-    
-    if (moment.utc().format('HH:mm') === '00:00') notifiedToday.clear();
+  const timezone = 'Africa/Cairo';
+  const todayKey = moment().tz(timezone).format('YYYY-MM-DD');
+  const executionKey = `birthday:${todayKey}`;
 
-    const staff = await User.find({
-      birthdate: { $exists: true }, 
-      role: { $in: ['teacher', 'co-principal'] }
+  if (!isManual) {
+    try {
+      await CronJobRun.create({
+        jobName: 'birthday',
+        executionKey,
+        status: 'running'
+      });
+      Logger.info('JOB_STARTED', { jobName: 'birthday', executionKey });
+    } catch (err) {
+      if (err.code === 11000) {
+        Logger.info('JOB_SKIPPED', { jobName: 'birthday', executionKey, reason: 'Already running or completed' });
+        return { msg: 'Job already executed or running today.' };
+      }
+      throw err;
+    }
+  }
+
+  let recordsProcessed = 0;
+  try {
+    const todayMMDD = moment().tz(timezone).format('MM-DD');
+    const allUsers = await User.find({ isActive: true });
+    const allStudents = await Student.find({});
+
+    let birthdayTemplate = await MessageTemplate.findOne({ name: 'Default Birthday Template' });
+    const templateContent = birthdayTemplate ? birthdayTemplate.content : '🎉 كل سنة وأنت طيب بمناسبة عيد ميلادك! 🎈';
+
+    const staffWithBirthdays = allUsers.filter(u => {
+      if ((u.role === 'teacher' || u.role === 'co-principal') && u.birthdate) {
+        return moment.utc(u.birthdate).tz(timezone).format('MM-DD') === todayMMDD;
+      }
+      return false;
     });
 
-    const staffBirthdays = staff.filter(u => moment.utc(u.birthdate).format('MM-DD') === todayKey);
-
-    if (staffBirthdays.length > 0) {
-      const names = staffBirthdays.map(u => u.fullName).filter(Boolean).join('، ');
-      const principals = await User.find({ role: 'principal' });
-      const msg = names
-        ? `🎉 النهاردة عيد ميلاد ${names}`
-        : '🎉 النهاردة عيد ميلاد أحد الخدام';
+    const principals = allUsers.filter(u => u.role === 'principal' || u.role === 'admin');
+    if (staffWithBirthdays.length > 0) {
       for (const principal of principals) {
-        const key = `staff-${principal._id}-${todayKey}`;
-        if (!notifiedToday.has(key)) {
-          await Notification.create({
-            recipient: principal._id,
-            type: 'birthday',
-            message: msg,
-          });
-          
-          if (principal.phonenumber) {
-            await queueNotification({
-              recipient: principal.phonenumber,
-              message: msg,
-              notificationType: 'birthday',
-              recipientId: principal._id,
-              recipientType: 'User'
-            });
-          }          notifiedToday.add(key);
-        }
-      }
-    } else {    }
+        if (!principal.telegramChatId) continue;
+        
+        let msg = `ميس ${principal.fullName}\nاليوم يوافق عيد ميلاد هؤلاء الخدام المباركين:\n\n`;
+        staffWithBirthdays.forEach(t => {
+          msg += `🎁 ${t.fullName} (${t.assignedclass || t.role}) - 📞 ${t.phonenumber || 'لا يوجد'}\n`;
+        });
+        msg += `\nلا تنسَ تهنئتهم وكل عام وأنتم بخير! 🎂`;
 
-    const coPrincipals = await User.find({ role: 'co-principal' });
+        await queueNotification({
+          recipient: principal.telegramChatId,
+          message: msg,
+          notificationType: 'birthday',
+          recipientId: principal._id,
+          recipientType: 'User'
+        });
+        recordsProcessed++;
+      }
+    }
+
+    const studentsWithBirthdays = allStudents.filter(s => {
+      if (s.birthdate) {
+        return moment.utc(s.birthdate).tz(timezone).format('MM-DD') === todayMMDD;
+      }
+      return false;
+    });
+
+    if (studentsWithBirthdays.length > 0) {
+      const coPrincipals = allUsers.filter(u => u.role === 'co-principal' && u.assignedlevel);
+      for (const cp of coPrincipals) {
+        if (!cp.telegramChatId) continue;
+
+        const myLevelStudents = studentsWithBirthdays.filter(s => (typeof s.getClassLevel === 'function' ? s.getClassLevel() : s.classLevel) === Number(cp.assignedlevel));
+        if (myLevelStudents.length === 0) continue;
+
+        let msg = `ميس ${cp.fullName}\nاليوم يوافق عيد ميلاد هؤلاء المخدومين في مرحلتك (سنة ${cp.assignedlevel}):\n\n`;
+        myLevelStudents.forEach(s => {
+          msg += `🎈 ${typeof s.getFullName === 'function' ? s.getFullName() : (s.fullName || '')} - فصل ${typeof s.getClassname === 'function' ? s.getClassname() : (s.classname || 'غير محدد')}\n`;
+        });
+        msg += `\nبرجاء تهنئتهم وكل عام وأنتم بخير! 🎂`;
+
+        await queueNotification({
+          recipient: cp.telegramChatId,
+          message: msg,
+          notificationType: 'birthday',
+          recipientId: cp._id,
+          recipientType: 'User'
+        });
+        recordsProcessed++;
+      }
+    }
+
+    for (const u of staffWithBirthdays) {
+      const phone = u.phonenumber;
+      if (phone) {
+        await queueNotification({
+          recipient: phone,
+          message: templateContent.replace(/{name}/g, u.fullName || ''),
+          notificationType: 'birthday',
+          recipientId: u._id,
+          recipientType: 'User'
+        });
+        recordsProcessed++;
+      }
+    }
+
+    for (const s of studentsWithBirthdays) {
+      const sName = (typeof s.getFullName === 'function' ? s.getFullName() : s.fullName) || '';
+      const msg = templateContent.replace(/{name}/g, sName);
+      if (s.father_phonenumber) {
+        await queueNotification({ recipient: s.father_phonenumber, message: msg, notificationType: 'birthday', recipientId: s._id, recipientType: 'Student' });
+        recordsProcessed++;
+      }
+      if (s.mother_phonenumber) {
+        await queueNotification({ recipient: s.mother_phonenumber, message: msg, notificationType: 'birthday', recipientId: s._id, recipientType: 'Student' });
+        recordsProcessed++;
+      }
+    }
+
+    if (!isManual) {
+      await CronJobRun.findOneAndUpdate(
+        { executionKey },
+        { status: 'completed', completedAt: new Date(), recordsProcessed }
+      );
+      Logger.info('JOB_COMPLETED', { jobName: 'birthday', executionKey, recordsProcessed });
+    }
     
-    const students = await Student.find({});
-
-    for (const cp of coPrincipals) {
-      const assignedLevel = cp.assignedlevel;
-      const levelBirthdays = students.filter(s => {
-        try {
-          const b = (typeof s.birthdate !== 'undefined') ? s.birthdate : (typeof s.getBirthdate === 'function' ? s.getBirthdate() : null);
-          const lvl = (typeof s.getClassLevel === 'function' ? s.getClassLevel() : s.classLevel);
-          if (!b) return false;
-          return moment.utc(b).format('MM-DD') === todayKey && lvl === assignedLevel;
-        } catch (e) {
-          return false;
-        }
-      });
-
-      if (levelBirthdays.length > 0) {
-        const names = levelBirthdays.map(s => (typeof s.getFullName === 'function' ? s.getFullName() : (s.fullName || ''))).filter(Boolean).join(', ');
-        const key = `students-${cp._id}-${todayKey}`;
-        const msg = names
-          ? `🎈 عيد ميلاد ${names} النهاردة!`
-          : '🎈 عيد ميلاد أحد الطلاب النهاردة!';
-        if (!notifiedToday.has(key)) {
-          await Notification.create({
-            recipient: cp._id,
-            type: 'birthday',
-            message: msg,
-          });
-          
-          if (cp.phonenumber) {
-            await queueNotification({
-              recipient: cp.phonenumber,
-              message: msg,
-              notificationType: 'birthday',
-              recipientId: cp._id,
-              recipientType: 'User'
-            });
-          }          notifiedToday.add(key);
-        }
-      }
-    }  } catch (err) {
+    return { success: true, recordsProcessed };
+  } catch (err) {
+    if (!isManual) {
+      await CronJobRun.findOneAndUpdate(
+        { executionKey },
+        { status: 'failed', completedAt: new Date(), error: err.message }
+      );
+      Logger.error('JOB_FAILED', { jobName: 'birthday', executionKey, error: err.message });
+    }
     console.error('[BirthdayJob] Error:', err);
+    throw err;
   }
 };
-
-if (!process.env.VERCEL) {
-  cron.schedule('0 14 * * *', runBirthdayJob, { timezone: 'Africa/Cairo' });
-}
 
 module.exports = { runBirthdayJob };

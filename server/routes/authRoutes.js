@@ -8,6 +8,7 @@ const Log = require('../models/Log');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const BlacklistedToken = require('../models/BlacklistedToken');
+const Logger = require('../utils/logger');
 
 const DUMMY_HASH = '$2a$10$e8N8p2D30.F.g91vU5G1o.5R5wW9oW9oW9oW9oW9oW9oW9oW9oW9o';
 
@@ -53,6 +54,15 @@ async function createEnhancedLog(action, actor, targetUser = null, additionalDet
     }
 
     await Log.create(logData);
+    
+    // Splunk logging
+    if (action === 'Failed login') {
+      Logger.info('LOGIN_FAILED', { userIdentifier: actorName, ip: logData.ip, userAgent: logData.userAgent, reason: logData.details });
+    } else if (action === 'User login') {
+      Logger.info('LOGIN_SUCCESS', { userId: logData.performedBy, username: actorName, ip: logData.ip, userAgent: logData.userAgent });
+    } else {
+      Logger.info('USER_ACTIVITY', { action, performedBy: logData.performedBy, username: actorName, targetUserName: logData.targetUserName, ip: logData.ip });
+    }
   } catch (err) {
     console.error('Error creating enhanced log:', err);
   }
@@ -171,6 +181,8 @@ router.post('/logout', verifyToken, async (req, res) => {
       { token, expiresAt },
       { upsert: true }
     );
+    
+    Logger.info('LOGOUT', { userId: decoded ? decoded.id : 'unknown' });
 
     res.json({ msg: 'Logged out successfully. Token revoked.' });
   } catch (err) {

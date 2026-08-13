@@ -1,12 +1,10 @@
-
 const NotificationLog = require('../models/NotificationLog');
 const telegramClient = require('./telegramClient');
 const moment = require('moment');
+const Logger = require('../utils/logger');
 
 const MAX_RETRIES = parseInt(process.env.MAX_RETRIES, 10) || 3;
 const SEND_DELAY_MS = parseInt(process.env.TELEGRAM_SEND_DELAY_MS, 10) || 200; // reduced for Vercel
-
-let isWorkerRunning = false;
 
 async function queueNotification({
   recipient,
@@ -29,9 +27,7 @@ async function queueNotification({
   });
 
   await log.save();
-
-  triggerQueueWorker();
-  
+  Logger.info('TELEGRAM_MESSAGE_QUEUED', { recipient, notificationType });
   return log;
 }
 
@@ -55,92 +51,17 @@ async function hasBeenNotifiedToday(recipientId, recipientPhone, date = new Date
   });
 }
 
-async function runQueueWorker() {
-  if (isWorkerRunning) return;
-  isWorkerRunning = true;
-
-  while (isWorkerRunning) {
-    if (process.env.PAUSE_SCHEDULER === 'true') {
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      continue;
-    }
-
-    try {
-      
-      const now = new Date();
-      const nextItem = await NotificationLog.findOneAndUpdate(
-        {
-          status: 'pending',
-          scheduledTime: { $lte: now }
-        },
-        {
-          
-          status: 'pending' 
-        }
-      ).sort({ scheduledTime: 1, createdAt: 1 });
-
-      if (!nextItem) {
-        
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        continue;
-      }
-
-      let sendToTarget = nextItem.recipient;
-      if (nextItem.recipientId && (nextItem.recipientType === 'User' || !nextItem.recipientType)) {
-        try {
-          const User = require('../models/User');
-          const u = await User.findById(nextItem.recipientId);
-          if (u && u.telegramChatId) {
-            sendToTarget = u.telegramChatId;
-          }
-        } catch (e) {
-          
-        }
-      }
-      
-      const result = await telegramClient.sendTelegramMessage(sendToTarget, nextItem.message);
-      
-      if (result.success) {
-        nextItem.status = 'sent';
-        nextItem.sentTime = new Date();
-        nextItem.errorDetails = undefined;
-      } else {
-        nextItem.retryCount += 1;
-        nextItem.errorDetails = result.error;
-        
-        if (nextItem.retryCount >= MAX_RETRIES) {
-          nextItem.status = 'failed';
-          console.error(`❌ [NotificationQueue] Permanently failed to send to ${nextItem.recipient} after ${nextItem.retryCount} attempts. Error: ${result.error}`);
-        } else {
-          nextItem.status = 'pending'; 
-          console.warn(`⚠️ [NotificationQueue] Temporary send failure to ${nextItem.recipient}. Retry ${nextItem.retryCount}/${MAX_RETRIES}. Error: ${result.error}`);
-        }
-      }
-
-      await nextItem.save();
-
-      await new Promise(resolve => setTimeout(resolve, SEND_DELAY_MS));
-
-    } catch (err) {
-      console.error('[NotificationQueue] Error in queue worker loop:', err);
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
-  }
-}
-
-function triggerQueueWorker() {
-  if (!isWorkerRunning) {
-    runQueueWorker().catch(err => {
-      console.error('Fatal error starting Notification Queue worker:', err);
-      isWorkerRunning = false;
-    });
-  }
-}
-
+// Bounded synchronous queue processor suitable for Vercel Serverless
 async function processPendingNotifications() {
   console.log('[NotificationQueue] Processing pending notifications synchronously...');
+  
+  // To avoid hitting Vercel serverless timeouts (e.g. 10s or 60s max), limit the batch size.
+  // 50 messages with 200ms delay = ~10s max.
+  const MAX_BATCH_SIZE = 50; 
+  let processedCount = 0;
   let hasMore = true;
-  while (hasMore) {
+
+  while (hasMore && processedCount < MAX_BATCH_SIZE) {
     try {
       const now = new Date();
       const nextItem = await NotificationLog.findOneAndUpdate(
@@ -176,6 +97,7 @@ async function processPendingNotifications() {
         nextItem.status = 'sent';
         nextItem.sentTime = new Date();
         nextItem.errorDetails = undefined;
+        Logger.info('TELEGRAM_MESSAGE_SENT', { recipient: sendToTarget, notificationType: nextItem.notificationType });
       } else {
         nextItem.retryCount += 1;
         nextItem.errorDetails = result.error;
@@ -183,25 +105,26 @@ async function processPendingNotifications() {
         if (nextItem.retryCount >= MAX_RETRIES) {
           nextItem.status = 'failed';
           console.error(`❌ [NotificationQueue] Permanently failed to send to ${nextItem.recipient}. Error: ${result.error}`);
+          Logger.error('TELEGRAM_MESSAGE_FAILED', { recipient: sendToTarget, error: result.error, retryCount: nextItem.retryCount });
         } else {
           nextItem.status = 'pending'; 
         }
       }
 
       await nextItem.save();
+      processedCount++;
       await new Promise(resolve => setTimeout(resolve, SEND_DELAY_MS));
     } catch (err) {
       console.error('[NotificationQueue] Error in sync processor loop:', err);
       hasMore = false;
     }
   }
-  console.log('[NotificationQueue] Finished processing pending notifications.');
+  console.log(`[NotificationQueue] Finished processing ${processedCount} pending notifications.`);
 }
 
 module.exports = {
   queueNotification,
   hasBeenNotifiedToday,
-  triggerQueueWorker,
   processPendingNotifications,
   telegramClient
 };

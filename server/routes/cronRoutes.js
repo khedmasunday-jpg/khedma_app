@@ -1,33 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const ScheduledJob = require('../models/ScheduledJob');
-const { runJobManually } = require('../services/schedulerService');
+const { verifyCronAuth } = require('../middleware/verifyCronAuth');
 const { runBirthdayJob } = require('../jobs/birthdayJob');
 const { runWeeklyReminderJob } = require('../jobs/weeklyreminder');
 const { runBackupJob } = require('../jobs/backupJob');
+const { processPendingNotifications } = require('../services/notificationService');
 
-router.get('/run-all', async (req, res) => {
+router.get('/birthday', verifyCronAuth, async (req, res) => {
   try {
-    const activeJobs = await ScheduledJob.find({ isActive: true });
-    
-    for (const job of activeJobs) {
-      await runJobManually(job._id);
-    }
-    
-    // Run the manual scripts on Vercel
-    if (new Date().getDay() === 3) { // Run weekly reminder on Wednesdays
-       await runWeeklyReminderJob();
-    }
-    await runBirthdayJob(true); // Run birthday job daily
-    await runBackupJob(); // Run backup job
-
-    const { processPendingNotifications } = require('../services/notificationService');
-    await processPendingNotifications();
-    
-    res.json({ msg: 'Cron jobs executed successfully', jobsRun: activeJobs.length });
+    const isManual = !!req.user; // If triggered by user, it's manual
+    const result = await runBirthdayJob(isManual);
+    await processPendingNotifications(); // Drain notifications
+    res.json(result);
   } catch (err) {
-    console.error('Error running cron jobs:', err);
-    res.status(500).json({ msg: 'Failed to run cron jobs', error: err.message });
+    res.status(500).json({ msg: 'Failed to run birthday job', error: err.message });
+  }
+});
+
+router.get('/attendance', verifyCronAuth, async (req, res) => {
+  try {
+    const isManual = !!req.user;
+    const result = await runWeeklyReminderJob(isManual);
+    await processPendingNotifications();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to run attendance job', error: err.message });
+  }
+});
+
+router.get('/backup', verifyCronAuth, async (req, res) => {
+  try {
+    const isManual = !!req.user;
+    const result = await runBackupJob(isManual);
+    await processPendingNotifications();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ msg: 'Failed to run backup job', error: err.message });
   }
 });
 
