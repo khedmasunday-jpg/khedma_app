@@ -1,4 +1,4 @@
-const Log = require('./Log');
+
 
 /**
  * Structured logger for Splunk ingestion.
