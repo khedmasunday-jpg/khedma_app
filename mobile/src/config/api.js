@@ -7,6 +7,24 @@ import { getAuthToken, clearAuthToken } from './authSession';
 import * as RootNavigation from '../utils/RootNavigation';
 import { showGlobalAlert } from '../components/GlobalAlert';
 
+let cachedWebDeviceId = null;
+export const getDeviceId = () => {
+  if (Platform.OS === 'web') {
+    if (cachedWebDeviceId) return cachedWebDeviceId;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      let id = window.localStorage.getItem('khedma_web_device_id');
+      if (!id) {
+        id = 'web_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+        window.localStorage.setItem('khedma_web_device_id', id);
+      }
+      cachedWebDeviceId = id;
+      return id;
+    }
+    return 'unknown_web';
+  }
+  return Device.osInternalBuildId || Device.deviceName || 'unknown_mobile';
+};
+
 export const resolveHostFromConstants = () => {
   const m = Constants.manifest || {};
   const expoConfig = Constants.expoConfig || {};
@@ -100,7 +118,7 @@ axios.interceptors.request.use(
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     }
-    config.headers['x-device-id'] = Device.osInternalBuildId || Device.deviceName || 'unknown';
+    config.headers['x-device-id'] = getDeviceId();
     return config;
   },
   (error) => {

@@ -10,7 +10,7 @@ import { useLanguage } from '../utils/LanguageContext';
 import { useTheme } from '../utils/ThemeContext';
 import { logger } from '../utils/logger';
 import { setAuthToken, clearAuthToken } from '../config/authSession';
-import { getApiBase } from '../config/api';
+import { getApiBase, getDeviceId } from '../config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
@@ -43,7 +43,7 @@ export default function LoginScreen({ navigation }) {
   }, []);
 
   const handleLogin = async () => {
-    const deviceId = Device.osInternalBuildId || Device.deviceName || 'unknown';
+    const deviceId = getDeviceId();
     const base = getApiBase();
     const url = `${base}/auth/login`;
     try {
