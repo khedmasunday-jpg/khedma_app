@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { Platform, Alert } from 'react-native';
 import axios from 'axios';
+import * as Device from 'expo-device';
 import { logger } from '../utils/logger';
 import { getAuthToken, clearAuthToken } from './authSession';
 import * as RootNavigation from '../utils/RootNavigation';
@@ -99,6 +100,7 @@ axios.interceptors.request.use(
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     }
+    config.headers['x-device-id'] = Device.osInternalBuildId || Device.deviceName || 'unknown';
     return config;
   },
   (error) => {

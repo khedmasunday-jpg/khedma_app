@@ -118,7 +118,8 @@ router.post('/login', loginLimiter, [
       isActive: user.isActive,
       assignedlevel: user.assignedlevel,
       assignedclass: user.assignedclass,
-      isClassLeader: user.isClassLeader || false
+      isClassLeader: user.isClassLeader || false,
+      deviceId: deviceId
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });

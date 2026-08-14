@@ -16,6 +16,12 @@ async function verifyToken(req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    const deviceId = req.headers['x-device-id'] || 'unknown';
+    if (decoded.deviceId && decoded.deviceId !== deviceId) {
+      console.error(`❌ Auth Middleware - Token spoofing detected! Device mismatch: ${deviceId} != ${decoded.deviceId}`);
+      return res.status(401).json({ msg: 'Token restricted to another device. Please log in again.' });
+    }
+
     const isBlacklisted = await BlacklistedToken.findOne({ token });
     if (isBlacklisted) {
       return res.status(401).json({ msg: 'Token has been revoked. Please log in again.' });
