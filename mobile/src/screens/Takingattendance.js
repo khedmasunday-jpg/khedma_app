@@ -50,11 +50,14 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
     }
   };
 
-  const notify = (title, message) => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-      window.alert(`${title}\n\n${message}`);
+  const notify = (title, message, onPressOk) => {
+    if (Platform.OS === 'web') {
+      const { showGlobalAlert } = require('../components/GlobalAlert');
+      const buttons = onPressOk ? [{ text: isRtl ? 'حسناً' : 'OK', onPress: onPressOk }] : undefined;
+      showGlobalAlert(title, message, buttons);
     } else {
-      Alert.alert(title, message);
+      const buttons = onPressOk ? [{ text: isRtl ? 'حسناً' : 'OK', onPress: onPressOk }] : undefined;
+      Alert.alert(title, message, buttons);
     }
   };
 
@@ -140,7 +143,9 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
 
       await axios.post(`${API_URL}/attendance/${selectedClass}`, payload, { headers: { Authorization: token } });
 
-      notify(t('success'), t('attendanceRegistered'));
+      notify(t('success'), t('attendanceRegistered'), () => {
+        navigation.navigate('PostLogin');
+      });
       try {
         setLoading(true);
         const res = await axios.get(`${API_URL}/classes/${selectedClass}/students`, { headers: { Authorization: token } });
