@@ -62,7 +62,14 @@ try {
       const oldWinAlert = window.alert;
       window.alert = function (msg) {
         const { showGlobalAlert } = require('./src/components/GlobalAlert');
-        showGlobalAlert(arabicAlert.translate('Alert') || 'Alert', arabicAlert.translate(msg) || msg);
+        if (typeof msg === 'string' && msg.includes('\n\n')) {
+          const parts = msg.split('\n\n');
+          const title = arabicAlert.translate(parts[0]) || parts[0];
+          const message = arabicAlert.translate(parts.slice(1).join('\n\n')) || parts.slice(1).join('\n\n');
+          showGlobalAlert(title, message);
+        } else {
+          showGlobalAlert('', arabicAlert.translate(msg) || msg);
+        }
       };
     }
   } catch (e) {}
