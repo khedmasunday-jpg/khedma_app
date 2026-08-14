@@ -9,8 +9,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLanguage } from '../utils/LanguageContext';
 import { useTheme } from '../utils/ThemeContext';
 import { logger } from '../utils/logger';
-import { setAuthToken } from '../config/authSession';
+import { setAuthToken, clearAuthToken } from '../config/authSession';
 import { getApiBase } from '../config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -18,6 +19,28 @@ export default function LoginScreen({ navigation }) {
   const { t, locale, toggleLanguage } = useLanguage();
   const { theme, isDarkMode, toggleTheme } = useTheme();
   const styles = getStyles(theme, isDarkMode);
+
+  React.useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('khedma_token');
+        const user = await AsyncStorage.getItem('khedma_user');
+        if (token && user) {
+          const parsedUser = JSON.parse(user);
+          setAuthToken(token, parsedUser);
+          navigation.replace('PostLogin', { 
+            token, 
+            role: parsedUser.role,
+            fullName: parsedUser.fullName,
+            isClassLeader: parsedUser.isClassLeader || false
+          });
+        }
+      } catch (e) {}
+    };
+    if (Platform.OS !== 'web') {
+      checkToken();
+    }
+  }, []);
 
   const handleLogin = async () => {
     const deviceId = Device.osInternalBuildId || Device.deviceName || 'unknown';

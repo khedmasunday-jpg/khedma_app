@@ -1,5 +1,5 @@
-
-
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const TOKEN_KEY = 'khedma_token';
 const USER_KEY = 'khedma_user';
 
@@ -8,7 +8,7 @@ let cachedUser = null;
 
 function getStorage() {
   if (typeof window !== 'undefined') {
-    return window.sessionStorage || window.localStorage;
+    return window.localStorage || window.sessionStorage;
   }
   return null;
 }
@@ -19,9 +19,9 @@ export function setAuthToken(token, user = null) {
   if (storage && token) {
     try {
       storage.setItem(TOKEN_KEY, token);
-    } catch (e) {
-      
-    }
+    } catch (e) {}
+  } else if (Platform.OS !== 'web' && token) {
+    AsyncStorage.setItem(TOKEN_KEY, token).catch(()=>{});
   }
 
   if (user) {
@@ -29,9 +29,9 @@ export function setAuthToken(token, user = null) {
     if (storage) {
       try {
         storage.setItem(USER_KEY, JSON.stringify(user));
-      } catch (e) {
-        
-      }
+      } catch (e) {}
+    } else if (Platform.OS !== 'web') {
+      AsyncStorage.setItem(USER_KEY, JSON.stringify(user)).catch(()=>{});
     }
   }
 }
@@ -82,8 +82,14 @@ export function clearAuthToken() {
         window.localStorage.removeItem(TOKEN_KEY);
         window.localStorage.removeItem(USER_KEY);
       }
-    } catch (e) {
-      
-    }
+      if (window.sessionStorage) {
+        window.sessionStorage.removeItem(TOKEN_KEY);
+        window.sessionStorage.removeItem(USER_KEY);
+      }
+    } catch (e) {}
+  }
+  if (Platform.OS !== 'web') {
+    AsyncStorage.removeItem(TOKEN_KEY).catch(()=>{});
+    AsyncStorage.removeItem(USER_KEY).catch(()=>{});
   }
 }
