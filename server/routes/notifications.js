@@ -16,6 +16,15 @@ router.get('/all', verifyToken, authorizeRoles('admin', 'principal', 'co-princip
   }
 });
 
+router.delete('/clear-all', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), async (req, res) => {
+  try {
+    await Notification.deleteMany({});
+    res.json({ msg: 'All notifications cleared successfully' });
+  } catch (err) {
+    console.error('Failed to clear all notifications:', err);
+    res.status(500).json({ msg: 'Failed to clear all notifications' });
+  }
+});
 router.patch('/mark-read', verifyToken, async (req, res) => {
   await Notification.updateMany({ recipient: req.user.id, read: false }, { $set: { read: true } });
   res.json({ msg: 'Notifications marked as read' });

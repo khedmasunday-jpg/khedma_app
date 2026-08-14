@@ -76,7 +76,7 @@ export default function AdminAllNotificationsScreen({ route, navigation }) {cons
   const handleClearAll = () => {
     const performClear = async () => {
       try {
-        await axios.delete(`${API_URL}/notifications/clear`, {
+        await axios.delete(`${API_URL}/notifications/clear-all`, {
           headers: { Authorization: token }
         });
         setNotifications([]);
@@ -151,6 +151,11 @@ export default function AdminAllNotificationsScreen({ route, navigation }) {cons
       {}
       <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
         <Text style={styles.screenTitle}>{isRtl ? 'جميع الإشعارات للمشرف' : 'Admin All Notifications'}</Text>
+        {notifications.length > 0 && (
+          <TouchableOpacity style={styles.clearBtn} onPress={handleClearAll}>
+            <Text style={styles.clearBtnText}>{localT('clearAll')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {}
