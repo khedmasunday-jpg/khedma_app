@@ -251,7 +251,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: Platform.OS === 'web' ? 100 : 40,
+    paddingBottom: 24,
   },
   center: {
     paddingVertical: 60,

@@ -489,8 +489,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'web' ? 100 : 40,
-    paddingTop: Platform.OS === 'web' ? 20 : 0,
+    paddingBottom: 20,
     alignItems: 'center',
   },
   iconBtn: {
