@@ -17,6 +17,7 @@ const BUTTONS = [
   { labelKey: 'addStudents', label: 'اضافه المخدومين', maxRank: 3 },
   { labelKey: 'addStaff', label: 'اضافه خدام', minRank: 1, maxRank: 2, excludeRanks: [4] },
   { labelKey: 'activateDeactivate', label: 'activate / deactivate', minRank: 1, maxRank: 2, excludeRanks: [3,4] },
+  { labelKey: 'allNotifications', label: 'إشعارات النظام', minRank: 1, maxRank: 2, excludeRanks: [3,4] },
   { labelKey: 'editStaff', label: 'تعديل بينات الخدام', maxRank: 2 },
   { labelKey: 'editStudents', label: 'تعديل بينات المخدومين', maxRank: 3 },
   { labelKey: 'tayo', label: 'الطايو', minRank: 1 },
@@ -37,6 +38,7 @@ const BUTTON_ICONS = {
   'addStudents': { icon: 'person-add-outline', color: 'theme-text' },
   'addStaff': { icon: 'people-outline', color: 'theme-text' },
   'activateDeactivate': { icon: 'toggle-outline', color: 'theme-text' },
+  'allNotifications': { icon: 'list-circle-outline', color: '#3498db' },
   'editStaff': { icon: 'create-outline', color: 'theme-text' },
   'editStudents': { icon: 'pencil-outline', color: 'theme-text' },
   'tayo': { icon: 'star-outline', color: '#f39c12' },
@@ -227,6 +229,9 @@ export default function PostLoginScreen({ route, navigation }) {
         break;
       case 'activateDeactivate':
         navigation.navigate('ActivateDeactivateScreen', { role });
+        break;
+      case 'allNotifications':
+        navigation.navigate('AdminAllNotifications');
         break;
       case 'tayo':
         navigation.navigate('TayoScreen', { role });

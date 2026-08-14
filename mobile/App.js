@@ -42,6 +42,7 @@ import StaffListScreen from './src/screens/StaffListScreen';
 import ActivateDeactivateScreen from './src/screens/ActivateDeactivateScreen';
 import LogsScreen from './src/screens/LogsScreen';
 import NotificationCenterScreen from './src/screens/NotificationCenterScreen';
+import AdminAllNotificationsScreen from './src/screens/AdminAllNotificationsScreen';
 import ResetDBScreen from './src/screens/ResetDBScreen';
 import BirthdaysScreen from './src/screens/BirthdaysScreen';
 import TelegramTestScreen from './src/screens/TelegramTestScreen';
@@ -268,6 +269,11 @@ function AppNavigator() {
         name="NotificationCenter" 
         component={NotificationCenterScreen} 
         options={{ title: t('notifications') }}
+      />
+      <Stack.Screen 
+        name="AdminAllNotifications" 
+        component={AdminAllNotificationsScreen} 
+        options={{ title: locale === 'ar' ? 'إشعارات النظام' : 'All Notifications' }}
       />
       <Stack.Screen
         name="ResetDB"
