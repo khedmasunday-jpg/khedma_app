@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform, Linking } from 'react-native';
 import axios from 'axios';
 import { useLanguage } from '../utils/LanguageContext';
 import { logger } from '../utils/logger';
@@ -166,11 +166,23 @@ export default function ClassDisplayScreen({ route, navigation }) {const { theme
                 </View>
                 <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                   <Text style={styles.detailLabel}>{t('motherPhone')}:</Text>
-                  <Text style={styles.detailValue}>{student.mother_phonenumber}</Text>
+                  {student.mother_phonenumber ? (
+                    <TouchableOpacity onPress={() => Linking.openURL(`tel:${student.mother_phonenumber}`)}>
+                      <Text style={[styles.detailValue, { color: '#3498db', textDecorationLine: 'underline' }]}>{student.mother_phonenumber}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={styles.detailValue}>N/A</Text>
+                  )}
                 </View>
                 <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                   <Text style={styles.detailLabel}>{t('fatherPhone')}:</Text>
-                  <Text style={styles.detailValue}>{student.father_phonenumber || 'N/A'}</Text>
+                  {student.father_phonenumber ? (
+                    <TouchableOpacity onPress={() => Linking.openURL(`tel:${student.father_phonenumber}`)}>
+                      <Text style={[styles.detailValue, { color: '#3498db', textDecorationLine: 'underline' }]}>{student.father_phonenumber}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={styles.detailValue}>N/A</Text>
+                  )}
                 </View>
                 <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
                   <Text style={styles.detailLabel}>{t('birthdate')}:</Text>
