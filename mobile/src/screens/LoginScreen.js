@@ -1,7 +1,7 @@
 
 
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet, Platform } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, Alert, StyleSheet, Platform, DeviceEventEmitter } from 'react-native';
 import axios from 'axios';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
@@ -56,6 +56,8 @@ export default function LoginScreen({ navigation }) {
       logger.log("✅ Login response:", res.data);
 
       setAuthToken(res.data.token, res.data.user);
+      
+      DeviceEventEmitter.emit('onUserLogin');
 
       navigation.navigate('PostLogin', { 
         token: res.data.token, 

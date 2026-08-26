@@ -309,6 +309,7 @@ function AppNavigator() {
 }
 
 import { GlobalAlert } from './src/components/GlobalAlert';
+import FooterVerses from './src/components/FooterVerses';
 
 export default function App() {
   return (
@@ -328,6 +329,7 @@ export default function App() {
                   <NavigationContainer theme={MyTheme} ref={navigationRef}>
                     <AppNavigator />
                   </NavigationContainer>
+                  <FooterVerses />
                 </SafeAreaView>
               </View>
             </ImageBackground>
