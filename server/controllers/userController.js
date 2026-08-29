@@ -149,6 +149,7 @@ exports.addStaff = async (req, res) => {
       username,
       password,
       role,
+      gender,
       assignedclass,
       assignedlevel,
       phonenumber,
@@ -198,6 +199,7 @@ exports.addStaff = async (req, res) => {
       username: finalUsername,
       password: finalPassword,
       role,
+      gender,
       assignedclass,
       assignedlevel,
       phonenumber,
@@ -271,6 +273,7 @@ exports.updateUser = async (req, res) => {
 
     const allowedFields = [
       'fullName',
+      'gender',
       'address',
       'phonenumber',
       'telegramChatId',

@@ -36,6 +36,7 @@ const initialStaff = {
   username: '',
   password: '',
   role: '',
+  gender: 'Male',
   isActive: true,
   googleCode: '',
   address: '',
@@ -539,10 +540,33 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
           </View>
         </View>
 
-        {}
+        {/* Gender */}
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{locale === 'ar' ? 'النوع' : 'Gender'}</Text>
+          <View style={[styles.pickerContainer, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]}>
+            {Platform.OS === 'web' ? (
+              <select
+                value={staff.gender || 'Male'}
+                onChange={e => handleChange('gender', e.target.value)}
+                style={styles.webSelect}
+              >
+                <option value="Male">{locale === 'ar' ? 'خادم' : 'Male'}</option>
+                <option value="Female">{locale === 'ar' ? 'خادمة' : 'Female'}</option>
+              </select>
+            ) : (
+              <Picker 
+                selectedValue={staff.gender || 'Male'} 
+                onValueChange={val => handleChange('gender', val)}
+                style={styles.nativePicker}
+                dropdownIconColor="#2f4360"
+              >
+                <Picker.Item label={locale === 'ar' ? 'خادم' : 'Male'} value="Male" />
+                <Picker.Item label={locale === 'ar' ? 'خادمة' : 'Female'} value="Female" />
+              </Picker>
+            )}
+          </View>
+        </View>
 
-
-        {}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('telegramChatIdLabel')}</Text>
           <View style={styles.inputWrapper}>

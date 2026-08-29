@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema(
   password: { type: String, required: true },
   isActive: { type: Boolean, default: true },
   role: { type: String, required: true, enum: ['admin', 'principal', 'co-principal', 'teacher'] },
+  gender: { type: String, enum: ['Male', 'Female'], default: 'Male' },
   assignedlevel: { type: Number, enum: [1, 2, 3], required: function() { return this.role !== 'principal'; } },
   assignedclass: { type: String },
   isClassLeader: { type: Boolean, default: false },

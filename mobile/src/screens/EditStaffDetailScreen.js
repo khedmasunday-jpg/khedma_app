@@ -458,6 +458,37 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
             </View>
           )}
 
+          {/* Gender Field */}
+          <View style={styles.fieldRow}>
+            <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+              {isRtl ? 'النوع' : 'Gender'}
+            </Text>
+            <View style={[styles.inputWrapper, { backgroundColor: theme.inputBackground }]}>
+              {Platform.OS === 'web' ? (
+                <View style={styles.webSelectWrapper}>
+                  <select
+                    value={getSafeField('gender') || 'Male'}
+                    onChange={(e) => handleChange('gender', e.target.value)}
+                    style={styles.webSelect}
+                  >
+                    <option value="Male">{isRtl ? 'خادم' : 'Male'}</option>
+                    <option value="Female">{isRtl ? 'خادمة' : 'Female'}</option>
+                  </select>
+                  <Ionicons name="chevron-down-outline" size={16} color={theme.iconColor} style={{ position: 'absolute', right: 12 }} />
+                </View>
+              ) : (
+                <Picker 
+                  selectedValue={getSafeField('gender') || 'Male'} 
+                  onValueChange={val => handleChange('gender', val)}
+                  style={styles.nativePicker}
+                >
+                  <Picker.Item label={isRtl ? 'خادم' : 'Male'} value="Male" />
+                  <Picker.Item label={isRtl ? 'خادمة' : 'Female'} value="Female" />
+                </Picker>
+              )}
+            </View>
+          </View>
+
           {}
           {(getSafeField('role') === 'teacher' || getSafeField('role') === 'co-principal') && (
             <View style={styles.fieldRow}>
@@ -609,7 +640,6 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
               onPress={handleSave} 
               disabled={saving}
             >
-              <Ionicons name="checkmark-circle-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
               <Text style={styles.btnText}>
                 {saving ? (isRtl ? 'جاري الحفظ...' : 'Saving...') : (isRtl ? 'حفظ' : 'Save')}
               </Text>
@@ -630,7 +660,6 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                 }}
                 disabled={deleting}
               >
-                <Ionicons name="trash-outline" size={20} color="#ffffff" style={{ marginHorizontal: 6 }} />
                 <Text style={styles.btnText}>
                   {deleting ? (isRtl ? 'جاري الحذف...' : 'Deleting...') : (isRtl ? 'حذف الخادم' : 'Delete Staff')}
                 </Text>
