@@ -287,13 +287,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
           styles.toastContainer, 
           { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
         ]} pointerEvents="none">
-          <View style={[styles.toastHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <Ionicons name={customAlertTitle === successTitle ? "checkmark-circle" : "close-circle"} size={20} color={customAlertTitle === successTitle ? "#4caf50" : "#f44336"} />
-            <Text style={[styles.toastTitle, { color: theme.text }, isRtl ? { marginRight: 8 } : { marginLeft: 8 }]}>
-              {customAlertTitle}
-            </Text>
-          </View>
-          <Text style={[styles.toastMessage, { color: theme.text, textAlign: isRtl ? 'right' : 'left' }]}>
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
             {customAlertMessage}
           </Text>
         </Animated.View>
@@ -305,12 +299,12 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
   toastContainer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 50,
     alignSelf: 'center',
-    width: '90%',
-    maxWidth: 400,
-    borderRadius: 12,
-    padding: 16,
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -318,18 +312,13 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
     zIndex: 9999,
-  },
-  toastHeader: {
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6,
-  },
-  toastTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   toastMessage: {
     fontSize: 14,
     lineHeight: 20,
+    fontWeight: '500',
   },
   container: {
     flex: 1,
