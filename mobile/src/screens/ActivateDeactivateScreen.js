@@ -278,11 +278,6 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={[styles.modalHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-              <Ionicons 
-                name={customAlertTitle === successTitle ? 'checkmark-circle-outline' : 'information-circle-outline'} 
-                size={24} 
-                color={customAlertTitle === successTitle ? '#137333' : '#2f4360'} 
-              />
               <Text style={[styles.modalTitle, { color: theme.text }, isRtl ? { marginRight: 8 } : { marginLeft: 8 }]}>
                 {customAlertTitle}
               </Text>

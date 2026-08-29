@@ -742,11 +742,6 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
           <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.modalHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Ionicons 
-                  name={customAlertTitle.includes('نجاح') || customAlertTitle.includes('Success') || customAlertTitle.includes('تم') ? 'checkmark-circle-outline' : 'information-circle-outline'} 
-                  size={24} 
-                  color={theme.iconColor} 
-                />
                 <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{customAlertTitle}</Text>
               </View>
             </View>

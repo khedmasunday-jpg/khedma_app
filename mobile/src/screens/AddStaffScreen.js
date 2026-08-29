@@ -893,11 +893,6 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.modalHeader}>
-              <Ionicons 
-                name={customAlertTitle.includes('نجاح') || customAlertTitle.includes('Success') || customAlertTitle.includes('تم') ? 'checkmark-circle-outline' : 'information-circle-outline'} 
-                size={24} 
-                color={theme.iconColor} 
-              />
               <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{customAlertTitle}</Text>
             </View>
             <View style={styles.modalBody}>
