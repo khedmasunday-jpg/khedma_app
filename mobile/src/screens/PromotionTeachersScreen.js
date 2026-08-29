@@ -72,7 +72,7 @@ export default function PromotionTeachersScreen() {
   };
 
   const styles = StyleSheet.create({
-    container: { flex: 1, flexDirection: isAr ? 'row-reverse' : 'row', backgroundColor: theme.background },
+    container: { flex: 1, flexDirection: 'row', backgroundColor: theme.background },
     leftPane: {
       flex: 1,
       borderRightWidth: isAr ? 0 : 1,
@@ -112,12 +112,12 @@ export default function PromotionTeachersScreen() {
       fontSize: 16,
       fontWeight: '600',
       color: theme.text,
-      textAlign: isAr ? 'right' : 'left',
+      textAlign: 'left',
     },
     teacherRole: {
       fontSize: 12,
       color: theme.textMuted,
-      textAlign: isAr ? 'right' : 'left',
+      textAlign: 'left',
       marginTop: 4,
     },
     emptyRight: {
@@ -136,7 +136,7 @@ export default function PromotionTeachersScreen() {
       marginBottom: 12,
       borderWidth: 1,
       borderColor: theme.borderColor,
-      flexDirection: isAr ? 'row-reverse' : 'row',
+      flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
@@ -224,7 +224,7 @@ export default function PromotionTeachersScreen() {
           </View>
         ) : (
           <>
-            <Text style={[styles.headerText, { marginBottom: 16, textAlign: isAr ? 'right' : 'left' }]}>
+            <Text style={[styles.headerText, { marginBottom: 16, textAlign: 'left' }]}>
               {isAr ? `تعيين فصل لـ ${selectedTeacher.fullName || selectedTeacher.username}` : `Assign class for ${selectedTeacher.fullName || selectedTeacher.username}`}
             </Text>
             
@@ -240,7 +240,7 @@ export default function PromotionTeachersScreen() {
                     onPress={() => assignTeacherToClass(selectedTeacher, cls)}
                     disabled={isSelected || updating}
                   >
-                    <View style={{ alignItems: isAr ? 'flex-end' : 'flex-start' }}>
+                    <View style={{ alignItems: 'flex-start' }}>
                       <Text style={styles.className}>{cls.name}</Text>
                       <Text style={styles.classYear}>{getYearName(cls.level)}</Text>
                     </View>

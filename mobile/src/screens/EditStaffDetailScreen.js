@@ -279,7 +279,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
         <View style={styles.formContainer}>
           {editableFields.map(key => (
             <View key={key} style={styles.fieldRow}>
-              <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+              <Text style={[styles.label, { textAlign: 'left' }]}>
                 {getFieldLabel(key)}
               </Text>
               
@@ -293,7 +293,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                           style={{
                             position: 'absolute',
                             top: 0, left: 0, right: 0, bottom: 0,
-                            flexDirection: isRtl ? 'row-reverse' : 'row',
+                            flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             paddingHorizontal: 14,
@@ -332,7 +332,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                   ) : (
                     <>
                       <TouchableOpacity 
-                        style={[styles.btnPicker, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
+                        style={[styles.btnPicker, { flexDirection: 'row' }]} 
                         onPress={() => setShowCalendar(true)}
                       >
                         <Ionicons name="calendar-outline" size={18} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
@@ -369,7 +369,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       <TextInput
                         value={getSafeField(key) ? String(getSafeField(key)) : ''}
                         onChangeText={val => handleChange(key, val)}
-                        style={[styles.input, { flex: 1, borderWidth: 0, textAlign: isRtl ? 'right' : 'left' }]}
+                        style={[styles.input, { flex: 1, borderWidth: 0, textAlign: 'left' }]}
                         keyboardType="phone-pad"
                       />
                     </View>
@@ -384,7 +384,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       onChangeText={val => handleChange(key, val)}
                       placeholder={t('telegramChatIdPlaceholder')}
                       keyboardType="numeric"
-                      style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
+                      style={[styles.input, { textAlign: 'left' }]}
                     />
                     <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 3 }}>
                       💡 {t('telegramChatIdHint')}
@@ -394,7 +394,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                 <TextInput
                   value={getSafeField(key) ? String(getSafeField(key)) : ''}
                   onChangeText={val => handleChange(key, val)}
-                  style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
+                  style={[styles.input, { textAlign: 'left' }]}
                 />
                 )
               )}
@@ -404,7 +404,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
           {}
           {requesterRole === 'admin' && (
             <View style={styles.fieldRow}>
-              <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+              <Text style={[styles.label, { textAlign: 'left' }]}>
                 {getFieldLabel('role')}
               </Text>
               <View style={styles.pickerContainer}>
@@ -415,10 +415,10 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       onChange={(e) => handleChange('role', e.target.value)} 
                       style={{
                         ...styles.webSelect,
-                        textAlign: isRtl ? 'right' : 'left',
-                        direction: isRtl ? 'rtl' : 'ltr',
-                        paddingLeft: isRtl ? 35 : 14,
-                        paddingRight: isRtl ? 14 : 35,
+                        textAlign: 'left',
+                        direction: 'ltr',
+                        paddingLeft: 14,
+                        paddingRight: 35,
                       }}
                     >
                       <option value="">-- اختر المنصب --</option>
@@ -430,7 +430,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       name="chevron-down-outline" 
                       size={18} 
                       color={theme.iconColor} 
-                      style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
+                      style={{ position: 'absolute', right: 14, pointerEvents: 'none' }} 
                     />
                   </View>
                 ) : (
@@ -451,7 +451,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
 
           {/* Gender Field */}
           <View style={styles.fieldRow}>
-            <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+            <Text style={[styles.label, { textAlign: 'left' }]}>
               {isRtl ? 'النوع' : 'Gender'}
             </Text>
             <View style={[styles.inputWrapper, { backgroundColor: theme.inputBackground }]}>
@@ -483,7 +483,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
           {}
           {(getSafeField('role') === 'teacher' || getSafeField('role') === 'co-principal') && (
             <View style={styles.fieldRow}>
-              <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+              <Text style={[styles.label, { textAlign: 'left' }]}>
                 {getFieldLabel('assignedlevel')}
               </Text>
               <View style={styles.pickerContainer}>
@@ -510,10 +510,10 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                         onChange={(e) => handleChange('assignedlevel', e.target.value)} 
                         style={{
                           ...styles.webSelect,
-                          textAlign: isRtl ? 'right' : 'left',
-                          direction: isRtl ? 'rtl' : 'ltr',
-                          paddingLeft: isRtl ? 35 : 14,
-                          paddingRight: isRtl ? 14 : 35,
+                          textAlign: 'left',
+                          direction: 'ltr',
+                          paddingLeft: 14,
+                          paddingRight: 35,
                         }}
                       >
                         <option value="">{isRtl ? '-- اختر المرحلة --' : '-- select level --'}</option>
@@ -525,7 +525,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                         name="chevron-down-outline" 
                         size={18} 
                         color={theme.iconColor} 
-                        style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
+                        style={{ position: 'absolute', right: 14, pointerEvents: 'none' }} 
                       />
                     </View>
                   ) : (
@@ -548,7 +548,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
           {}
           {getSafeField('role') === 'teacher' && (
             <View style={styles.fieldRow}>
-              <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+              <Text style={[styles.label, { textAlign: 'left' }]}>
                 {getFieldLabel('assignedclass')}
               </Text>
               <View style={styles.pickerContainer}>
@@ -559,10 +559,10 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       onChange={(e) => handleChange('assignedclass', e.target.value)} 
                       style={{
                         ...styles.webSelect,
-                        textAlign: isRtl ? 'right' : 'left',
-                        direction: isRtl ? 'rtl' : 'ltr',
-                        paddingLeft: isRtl ? 35 : 14,
-                        paddingRight: isRtl ? 14 : 35,
+                        textAlign: 'left',
+                        direction: 'ltr',
+                        paddingLeft: 14,
+                        paddingRight: 35,
                       }}
                     >
                       <option value="">-- select class --</option>
@@ -574,7 +574,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                       name="chevron-down-outline" 
                       size={18} 
                       color={theme.iconColor} 
-                      style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
+                      style={{ position: 'absolute', right: 14, pointerEvents: 'none' }} 
                     />
                   </View>
                 ) : (
@@ -595,8 +595,8 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
 
           {}
           {getSafeField('role') === 'teacher' && (
-            <View style={[styles.fieldRow, { flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 }]}>
-              <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left', marginBottom: 0 }]}>
+            <View style={[styles.fieldRow, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 }]}>
+              <Text style={[styles.label, { textAlign: 'left', marginBottom: 0 }]}>
                 {isRtl ? 'أمين الفصل' : 'Class Leader'}
               </Text>
               <Switch
@@ -610,13 +610,13 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
 
           {}
           <View style={styles.fieldRow}>
-            <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+            <Text style={[styles.label, { textAlign: 'left' }]}>
               {getFieldLabel('password')}
             </Text>
             <TextInput
               value={newPassword}
               onChangeText={val => setNewPassword(val)}
-              style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: 'left' }]}
               secureTextEntry
               placeholder={isRtl ? "أدخل كلمة مرور جديدة لإعادة الضبط (اتركها فارغة للحفظ)" : "Enter new password to reset (leave empty to keep)"}
               placeholderTextColor="rgba(47, 67, 96, 0.4)"

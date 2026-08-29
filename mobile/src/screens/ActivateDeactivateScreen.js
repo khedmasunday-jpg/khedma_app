@@ -160,7 +160,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
-        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
@@ -200,10 +200,10 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
 
       {showSearch && (
         <View style={styles.searchContainer}>
-        <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          <Ionicons name="search-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+        <View style={[styles.searchInputWrapper, { flexDirection: 'row' }]}>
+          <Ionicons name="search-outline" size={20} color={theme.iconColor} style={{ marginRight: 8 }} />
           <TextInput
-            style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+            style={[styles.searchInput, { textAlign: 'left' }]}
             placeholder={searchPlaceholder}
             placeholderTextColor={theme.textMuted}
             value={searchQuery}
@@ -229,9 +229,9 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
           </View>
         ) : (
           filteredStaff.map(user => (
-            <View key={user._id} style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            <View key={user._id} style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { flexDirection: 'row' }]}>
               {}
-              <View style={isRtl ? { marginLeft: 12 } : { marginRight: 12 }}>
+              <View style={{ marginRight: 12 }}>
                 <View style={[styles.avatarCircle, { backgroundColor: getRoleColor(user.role) + '15' }]}>
                   <Ionicons name={getRoleIcon(user.role)} size={22} color={getRoleColor(user.role)} />
                 </View>
@@ -239,10 +239,10 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
 
               {}
               <View style={styles.cardMiddle}>
-                <Text style={[styles.nameText, { color: theme.text }, { textAlign: isRtl ? 'right' : 'left' }]}>
+                <Text style={[styles.nameText, { color: theme.text }, { textAlign: 'left' }]}>
                   {user.fullName}
                 </Text>
-                <View style={[styles.badgeRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.badgeRow, { flexDirection: 'row' }]}>
                   <View style={[styles.roleBadge, { backgroundColor: getRoleColor(user.role) + '15' }]}>
                     <Text style={[styles.roleBadgeText, { color: getRoleColor(user.role) }]}>
                       {getRoleName(user.role)}
@@ -257,7 +257,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
               </View>
 
               {}
-              <View style={isRtl ? { marginRight: 8 } : { marginLeft: 8 }}>
+              <View style={{ marginLeft: 8 }}>
                 {(user.role !== 'principal' || role === 'admin') && (
                   <TouchableOpacity 
                     style={[styles.toggleBtn, user.isActive ? styles.toggleBtnDeactivate : styles.toggleBtnActivate]} 
@@ -268,7 +268,7 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
                       name={user.isActive ? "close-circle-outline" : "checkmark-circle-outline"} 
                       size={16} 
                       color={theme.iconColor} 
-                      style={isRtl ? { marginLeft: 4 } : { marginRight: 4 }} 
+                      style={{ marginRight: 4 }} 
                     />
                     <Text style={styles.toggleBtnText}>
                       {user.isActive ? deactivateBtn : activateBtn}

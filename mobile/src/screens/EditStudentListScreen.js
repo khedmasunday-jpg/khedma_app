@@ -126,10 +126,10 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
-      <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.headerRow, { flexDirection: 'row' }]}>
         <View />
         
-        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
@@ -149,7 +149,7 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
                 name={selectionMode ? "close-circle-outline" : "checkmark-circle-outline"}
                 size={18}
                 color={theme.iconColor}
-                style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }}
+                style={{ marginRight: 6 }}
               />
               <Text style={styles.selectButtonText}>
                 {selectionMode 
@@ -163,10 +163,10 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
 
       {showSearch && (
         <View style={styles.searchContainer}>
-          <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <Ionicons name="search-outline" size={20} color="rgba(47, 67, 96, 0.5)" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+          <View style={[styles.searchInputWrapper, { flexDirection: 'row' }]}>
+            <Ionicons name="search-outline" size={20} color="rgba(47, 67, 96, 0.5)" style={{ marginRight: 8 }} />
             <TextInput
-              style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+              style={[styles.searchInput, { textAlign: 'left' }]}
               placeholder={t('searchStudent') || (isRtl ? 'بحث...' : 'Search...')}
               placeholderTextColor={theme.textMuted}
               value={searchQuery}
@@ -183,11 +183,11 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
 
       {showFilter && (
         <View style={styles.filterCard}>
-        <Text style={[styles.filterTitle, { textAlign: isRtl ? 'right' : 'left' }]}>
+        <Text style={[styles.filterTitle, { textAlign: 'left' }]}>
           {isRtl ? 'تصفية حسب الفصل:' : 'Filter by Class:'}
         </Text>
         
-        <View style={[styles.pickerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.pickerRow, { flexDirection: 'row' }]}>
           {}
           <View style={styles.pickerWrapper}>
             {Platform.OS === 'web' ? (
@@ -197,7 +197,7 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
                   setSelectedGrade(e.target.value);
                   setSelectedClass('');
                 }}
-                style={StyleSheet.flatten([styles.webSelect, { direction: isRtl ? 'rtl' : 'ltr' }])}
+                style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr' }])}
                 disabled={!!userLevel}
               >
                 {!userLevel && <option value="">{t('selectLevel')}</option>}
@@ -231,7 +231,7 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 disabled={!selectedGrade}
-                style={StyleSheet.flatten([styles.webSelect, { direction: isRtl ? 'rtl' : 'ltr' }])}
+                style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr' }])}
               >
                 <option value="">{t('selectClass')}</option>
                 {serverClasses
@@ -285,7 +285,7 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
                   }
                 }}
               >
-                <View style={[styles.cardSelectionWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.cardSelectionWrapper, { flexDirection: 'row' }]}>
                   {selectionMode && (
                     <View style={styles.checkboxContainer}>
                       <Ionicons 
@@ -297,8 +297,8 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
                   )}
                   
                   <View style={{ flex: 1 }}>
-                    <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                      <View style={[styles.infoWrapper, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+                    <View style={[styles.cardHeader, { flexDirection: 'row' }]}>
+                      <View style={[styles.infoWrapper, { alignItems: 'flex-start' }]}>
                         <Text style={styles.name}>{student.fullName}</Text>
                         <Text style={styles.level}>{t('gradeLevel')}: {student.classLevel}</Text>
                         <Text style={styles.classname}>{t('classDisplay')}: {student.classname}</Text>
@@ -321,14 +321,14 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
 
       {}
       {selectionMode && selectedStudentIds.size > 0 && (
-        <View style={[styles.floatingActionBar, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.floatingActionBar, { flexDirection: 'row' }]}>
           <Text style={styles.selectedCountText}>
             {isRtl 
               ? `تم تحديد ${selectedStudentIds.size} مخدوم` 
               : `${selectedStudentIds.size} selected`}
           </Text>
           <TouchableOpacity style={styles.deleteBulkButton} onPress={handleBulkDelete}>
-            <Ionicons name="trash-outline" size={18} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+            <Ionicons name="trash-outline" size={18} color={theme.iconColor} style={{ marginRight: 6 }} />
             <Text style={styles.deleteBulkButtonText}>
               {isRtl ? 'حذف المحدد' : 'Delete Selected'}
             </Text>

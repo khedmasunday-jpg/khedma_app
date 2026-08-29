@@ -84,8 +84,8 @@ export default function EditStaffListScreen({ route, navigation }) {const { them
       style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}
       onPress={() => navigation.navigate('EditStaffDetailScreen', { token, role, userId: item._id })}
     >
-      <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <View style={[styles.infoWrapper, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+      <View style={[styles.cardHeader, { flexDirection: 'row' }]}>
+        <View style={[styles.infoWrapper, { alignItems: 'flex-start' }]}>
           <Text style={styles.name}>{item.fullName}</Text>
           <Text style={styles.roleLabel}>{getLocalizedRole(item.role)}</Text>
         </View>
@@ -101,7 +101,7 @@ export default function EditStaffListScreen({ route, navigation }) {const { them
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
-        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
@@ -141,10 +141,10 @@ export default function EditStaffListScreen({ route, navigation }) {const { them
 
       {showSearch && (
         <View style={styles.searchContainer}>
-        <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          <Ionicons name="search-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+        <View style={[styles.searchInputWrapper, { flexDirection: 'row' }]}>
+          <Ionicons name="search-outline" size={20} color={theme.iconColor} style={{ marginRight: 8 }} />
           <TextInput
-            style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+            style={[styles.searchInput, { textAlign: 'left' }]}
             placeholder={searchPlaceholder}
             placeholderTextColor={theme.textMuted}
             value={searchQuery}

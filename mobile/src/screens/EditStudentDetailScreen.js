@@ -339,10 +339,10 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
 
         {}
         <View style={styles.summaryHeader}>
-          <Text style={[styles.level, { textAlign: isRtl ? 'right' : 'left' }]}>
+          <Text style={[styles.level, { textAlign: 'left' }]}>
             {t('gradeLevel')}: {student.classLevel || student.yearLevel}
           </Text>
-          <Text style={[styles.classnameText, { textAlign: isRtl ? 'right' : 'left' }]}>
+          <Text style={[styles.classnameText, { textAlign: 'left' }]}>
             {t('selectClass')}: {student.classname || ''}
           </Text>
         </View>
@@ -351,12 +351,12 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
         <View style={styles.formContainer}>
           {editableFields.map((key) => (
             <View key={key} style={styles.fieldRow}>
-              <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>
+              <Text style={[styles.label, { textAlign: 'left' }]}>
                 {getFieldLabel(key)}
               </Text>
 
               {key === "yearLevel" ? (
-                <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.inputWrapper, { flexDirection: 'row' }]}>
                   <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                   <View style={{ flex: 1 }}>
                     {Platform.OS === 'web' ? (
@@ -364,7 +364,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                         <select
                           value={student.yearLevel !== undefined ? String(student.yearLevel) : ""}
                           onChange={(e) => handleChange("yearLevel", e.target.value)}
-                          style={StyleSheet.flatten([styles.webSelect, { direction: isRtl ? 'rtl' : 'ltr', paddingLeft: isRtl ? 35 : 14, paddingRight: isRtl ? 14 : 35 }])}
+                          style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr', paddingLeft: 14, paddingRight: 35 }])}
                         >
                           <option value="">{t('selectLevel')}</option>
                           <option value="1">{t('level1')}</option>
@@ -375,7 +375,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                           name="chevron-down-outline" 
                           size={18} 
                           color={theme.iconColor} 
-                          style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
+                          style={{ position: 'absolute', right: 14, pointerEvents: 'none' }} 
                         />
                       </View>
                     ) : (
@@ -394,7 +394,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                   </View>
                 </View>
               ) : key === "classname" ? (
-                <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.inputWrapper, { flexDirection: 'row' }]}>
                   <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                   <View style={{ flex: 1 }}>
                     {student.yearLevel ? (
@@ -403,7 +403,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                           <select
                             value={student.classname || ""}
                             onChange={(e) => handleChange("classname", e.target.value)}
-                            style={StyleSheet.flatten([styles.webSelect, { direction: isRtl ? 'rtl' : 'ltr', paddingLeft: isRtl ? 35 : 14, paddingRight: isRtl ? 14 : 35 }])}
+                            style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr', paddingLeft: 14, paddingRight: 35 }])}
                           >
                             <option value="">{t('selectClass')}</option>
                             {(() => {
@@ -420,7 +420,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                             name="chevron-down-outline" 
                             size={18} 
                             color={theme.iconColor} 
-                            style={isRtl ? { position: 'absolute', left: 14, pointerEvents: 'none' } : { position: 'absolute', right: 14, pointerEvents: 'none' }} 
+                            style={{ position: 'absolute', right: 14, pointerEvents: 'none' }} 
                           />
                         </View>
                       ) : (
@@ -452,7 +452,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
               ) : key === "birthdate" ? (
                 <View style={{ marginBottom: 4 }}>
                   {Platform.OS === 'web' ? (
-                    <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                    <View style={[styles.inputWrapper, { flexDirection: 'row' }]}>
                       <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                       <View style={styles.webDateWrapper}>
                         <View 
@@ -460,7 +460,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                           style={{
                             position: 'absolute',
                             top: 0, left: 0, right: 0, bottom: 0,
-                            flexDirection: isRtl ? 'row-reverse' : 'row',
+                            flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             paddingHorizontal: 14,
@@ -491,10 +491,10 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                       </View>
                     </View>
                   ) : (
-                    <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                    <View style={[styles.inputWrapper, { flexDirection: 'row' }]}>
                       <Ionicons name={getFieldIcon(key)} size={20} color={theme.iconColor} style={styles.inputIcon} />
                       <TouchableOpacity 
-                        style={[styles.btnPicker, { flex: 1, flexDirection: isRtl ? 'row-reverse' : 'row', borderWidth: 0 }]} 
+                        style={[styles.btnPicker, { flex: 1, flexDirection: 'row', borderWidth: 0 }]} 
                         onPress={() => setShowCalendar(true)}
                       >
                         <Text style={styles.btnPickerText}>
@@ -518,7 +518,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                 </View>
               ) : (
                 <View>
-                  <View style={[styles.inputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                  <View style={[styles.inputWrapper, { flexDirection: 'row' }]}>
                     <TouchableOpacity
                       onPress={() => key.includes('phonenumber') ? pickContactPhone(key) : null}
                       style={styles.inputIcon}
@@ -529,7 +529,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                     <TextInput
                       value={student[key] ? String(student[key]) : ""}
                       onChangeText={(val) => handleChange(key, val)}
-                      style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
+                      style={[styles.input, { textAlign: 'left' }]}
                       keyboardType={key.includes("phonenumber") ? "phone-pad" : "default"}
                       autoCapitalize="none"
                     />
@@ -551,7 +551,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
               onPress={handleSave}
               disabled={saving || deleting}
             >
-              <Ionicons name="checkmark-done" size={20} color="#ffffff" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+              <Ionicons name="checkmark-done" size={20} color="#ffffff" style={{ marginRight: 8 }} />
               <Text style={styles.btnText}>{saving ? t('loading') : t('save')}</Text>
             </TouchableOpacity>
 
@@ -561,7 +561,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                 onPress={handleDelete}
                 disabled={saving || deleting}
               >
-                <Ionicons name="trash-outline" size={20} color="#ffffff" style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+                <Ionicons name="trash-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
                 <Text style={styles.btnText}>{deleting ? t('loading') : t('deleteLabel')}</Text>
               </TouchableOpacity>
             )}

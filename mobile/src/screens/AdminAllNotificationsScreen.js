@@ -144,7 +144,7 @@ export default function AdminAllNotificationsScreen({ route, navigation }) {cons
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
-      <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.headerRow, { flexDirection: 'row' }]}>
         <Text style={styles.screenTitle}>{isRtl ? 'جميع الإشعارات للمشرف' : 'Admin All Notifications'}</Text>
         {notifications.length > 0 && (
           <TouchableOpacity style={styles.clearBtn} onPress={handleClearAll}>
@@ -177,7 +177,7 @@ export default function AdminAllNotificationsScreen({ route, navigation }) {cons
             return (
               <View 
                 key={idx} 
-                style={[styles.notifCard, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}
+                style={[styles.notifCard, { flexDirection: 'row' }]}
               >
                 {}
                 <View style={[styles.iconBadge, { backgroundColor: iconInfo.bg }]}>
@@ -185,14 +185,14 @@ export default function AdminAllNotificationsScreen({ route, navigation }) {cons
                 </View>
 
                 {}
-                <View style={[styles.textBlock, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
-                  <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.textBlock, { alignItems: 'flex-start' }]}>
+                  <View style={[styles.cardHeader, { flexDirection: 'row' }]}>
                     <Text style={styles.notifType}>{getLocalizedType(notif.type)}</Text>
                   </View>
-                  <Text style={[styles.notifMsg, { textAlign: isRtl ? 'right' : 'left', fontWeight: 'bold' }]}>
+                  <Text style={[styles.notifMsg, { textAlign: 'left', fontWeight: 'bold' }]}>
                     {isRtl ? 'مُرسل إلى: ' : 'Sent to: '}{notif.recipient?.fullName || notif.recipient?.username || 'Unknown User'}
                   </Text>
-                  <Text style={[styles.notifMsg, { textAlign: isRtl ? 'right' : 'left', marginTop: 4 }]}>
+                  <Text style={[styles.notifMsg, { textAlign: 'left', marginTop: 4 }]}>
                     {notif.message}
                   </Text>
                   <Text style={styles.notifDate}>{formatNotifDate(notif.createdAt)}</Text>

@@ -145,18 +145,18 @@ export default function SwitchStudentsScreen({ navigation }) {
     bigButtonText: { fontSize: 18, fontWeight: 'bold', color: theme.primary, marginTop: 12 },
     
     splitContainer: { flex: 1, flexDirection: 'column' },
-    header: { padding: 16, flexDirection: isAr ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.headerBackground, borderBottomWidth: 1, borderBottomColor: theme.borderColor },
+    header: { padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.headerBackground, borderBottomWidth: 1, borderBottomColor: theme.borderColor },
     headerTitle: { fontSize: 18, fontWeight: 'bold', color: theme.text },
     backBtn: { padding: 8 },
     
     instructions: { padding: 12, textAlign: 'center', color: theme.textMuted, fontSize: 14 },
     
-    pairContainer: { flexDirection: isAr ? 'row-reverse' : 'row', flex: 1, padding: 10, gap: 10 },
+    pairContainer: { flexDirection: 'row', flex: 1, padding: 10, gap: 10 },
     classColumn: { flex: 1, backgroundColor: theme.cardBackground, borderRadius: 10, padding: 10, borderWidth: 1, borderColor: theme.borderColor },
     classTitle: { fontSize: 16, fontWeight: 'bold', color: theme.text, textAlign: 'center', marginBottom: 10 },
     
-    studentRow: { padding: 12, backgroundColor: theme.inputBackground, borderRadius: 8, marginBottom: 8, flexDirection: isAr ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center' },
-    studentName: { color: theme.text, fontSize: 14, flex: 1, textAlign: isAr ? 'right' : 'left' },
+    studentRow: { padding: 12, backgroundColor: theme.inputBackground, borderRadius: 8, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    studentName: { color: theme.text, fontSize: 14, flex: 1, textAlign: 'left' },
     
     saveBtn: { margin: 16, backgroundColor: theme.primary, padding: 16, borderRadius: 12, alignItems: 'center' },
     saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },

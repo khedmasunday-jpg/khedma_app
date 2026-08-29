@@ -109,7 +109,7 @@ export default function PromotionScreen({ navigation }) {
       fontSize: 14,
       color: theme.textMuted,
       lineHeight: 22,
-      textAlign: isAr ? 'right' : 'left',
+      textAlign: 'left',
       marginBottom: 20,
     },
     bold: {
@@ -135,12 +135,12 @@ export default function PromotionScreen({ navigation }) {
       fontSize: 16,
       fontWeight: 'bold',
       color: '#fff',
-      textAlign: isAr ? 'right' : 'left',
+      textAlign: 'left',
     },
     buttonSubtitle: {
       fontSize: 12,
       color: 'rgba(255,255,255,0.8)',
-      textAlign: isAr ? 'right' : 'left',
+      textAlign: 'left',
       marginTop: 2,
     },
   });

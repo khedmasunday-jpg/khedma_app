@@ -332,7 +332,7 @@ export default function PostLoginScreen({ route, navigation }) {
           <Text style={[styles.roleLabel, { color: theme.textMuted }]}>{getLocalizedRole(role).toUpperCase()}</Text>
         </View>
         
-        <View style={[styles.gridContainer, { flexDirection: locale === 'ar' ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.gridContainer, { flexDirection: 'row' }]}>
           {availableButtons.map((btn, idx) => {
             const iconInfo = BUTTON_ICONS[btn.labelKey] || { icon: 'apps-outline', color: theme.text };
             const isNotification = btn.labelKey === 'notifications';
@@ -397,7 +397,7 @@ export default function PostLoginScreen({ route, navigation }) {
                 keyboardType="numeric"
                 autoCapitalize="none"
               />
-              <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: -6, marginBottom: 10, textAlign: locale === 'ar' ? 'right' : 'left' }}>
+              <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: -6, marginBottom: 10, textAlign: 'left' }}>
                 💡 {t('telegramChatIdHint')}
               </Text>
 

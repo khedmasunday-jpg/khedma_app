@@ -399,7 +399,7 @@ export default function TelegramTestScreen({ route, navigation }) {const { theme
           {}
           <Text style={styles.inputLabel}>{isRtl ? 'رقم التليفون' : 'Phone Number'}</Text>
           <TextInput
-            style={[styles.input, { textAlign: isRtl ? 'right' : 'left' }]}
+            style={[styles.input, { textAlign: 'left' }]}
             value={phoneNumber}
             onChangeText={setPhoneNumber}
             placeholder="e.g. 201000000000"
@@ -410,7 +410,7 @@ export default function TelegramTestScreen({ route, navigation }) {const { theme
           {}
           <Text style={styles.inputLabel}>{isRtl ? 'نص الرسالة' : 'Message Body'}</Text>
           <TextInput
-            style={[styles.textArea, { textAlign: isRtl ? 'right' : 'left' }]}
+            style={[styles.textArea, { textAlign: 'left' }]}
             value={message}
             onChangeText={setMessage}
             placeholder={isRtl ? 'اكتب الرسالة التجريبية هنا...' : 'Type your test message here...'}

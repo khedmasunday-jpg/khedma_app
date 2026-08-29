@@ -497,13 +497,13 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
       <View style={styles.formCard}>
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('fullNameLabel')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('fullNameLabel')}</Text>
           <View style={styles.inputWrapper}>
             <Ionicons name="person-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.fullName} 
               onChangeText={val => handleChange('fullName', val)} 
-              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              style={[styles.input, { textAlign: 'left' }]} 
               placeholder={t('fullNameLabel')}
               placeholderTextColor={theme.textMuted}
             />
@@ -512,7 +512,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
         
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('roleLabel')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('roleLabel')}</Text>
           <View style={styles.pickerWrapper}>
             <Ionicons name="ribbon-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform && Platform.OS === 'web' ? (
@@ -549,7 +549,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
 
         {/* Gender */}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{locale === 'ar' ? 'النوع' : 'Gender'}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{locale === 'ar' ? 'النوع' : 'Gender'}</Text>
           <View style={[styles.pickerContainer, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]}>
             {Platform.OS === 'web' ? (
               <select
@@ -575,14 +575,14 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('telegramChatIdLabel')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('telegramChatIdLabel')}</Text>
           <View style={styles.inputWrapper}>
             <Ionicons name="paper-plane-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.telegramChatId} 
               onChangeText={val => handleChange('telegramChatId', val)} 
               keyboardType="numeric"
-              style={[styles.input, { flex: 1, textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              style={[styles.input, { flex: 1, textAlign: 'left' }]} 
               placeholder={t('telegramChatIdPlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
@@ -594,7 +594,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
         
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('birthdate')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('birthdate')}</Text>
           <View style={styles.pickerWrapper}>
             <Ionicons name="calendar-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform.OS === 'web' ? (
@@ -664,7 +664,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
           <>
             {}
             <View style={styles.inputGroup}>
-              <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gradeLevel')}</Text>
+              <Text style={[styles.label, { textAlign: 'left' }]}>{t('gradeLevel')}</Text>
               <View style={styles.pickerWrapper}>
                 <Ionicons name="school-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
                 {(() => {
@@ -724,7 +724,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
             {staff.role === 'teacher' && (
               <>
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('selectClass')}</Text>
+                  <Text style={[styles.label, { textAlign: 'left' }]}>{t('selectClass')}</Text>
                   <View style={styles.pickerWrapper}>
                     <Ionicons name="people-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
                     {staff.assignedlevel ? (
@@ -768,7 +768,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
                 {}
                 <View style={[styles.inputGroup, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#f0f0f0', marginTop: 10 }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Ionicons name="star-outline" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+                    <Ionicons name="star-outline" size={20} color={theme.iconColor} style={{ marginRight: 8 }} />
                     <Text style={[styles.label, { marginBottom: 0 }]}>
                       {locale === 'ar' ? 'أمين الفصل' : 'Class Leader'}
                     </Text>
@@ -792,13 +792,13 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
         
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('usernameLabel')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('usernameLabel')}</Text>
           <View style={styles.inputWrapper}>
             <Ionicons name="keypad-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.username} 
               onChangeText={val => handleChange('username', val)} 
-              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              style={[styles.input, { textAlign: 'left' }]} 
               placeholder={t('usernameLabel')}
               placeholderTextColor={theme.textMuted}
             />
@@ -813,14 +813,14 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
         
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('passwordLabel')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('passwordLabel')}</Text>
           <View style={styles.inputWrapper}>
             <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.password} 
               onChangeText={val => handleChange('password', val)} 
               secureTextEntry 
-              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]} 
+              style={[styles.input, { textAlign: 'left' }]} 
               placeholder={t('passwordLabel')}
               placeholderTextColor={theme.textMuted}
             />
@@ -862,7 +862,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
             <View style={styles.modalBody}>
               {generatedCreds && generatedCreds.length > 1 ? (
                 <View style={{ width: '100%' }}>
-                  <Text style={[styles.credInstruction, { textAlign: isRtl ? 'right' : 'left' }]}>
+                  <Text style={[styles.credInstruction, { textAlign: 'left' }]}>
                     {isRtl 
                       ? 'تم إنشاء الحسابات التالية بنجاح. يمكنك نسخها بالكامل أدناه:' 
                       : 'The following accounts were created successfully. You can copy them in bulk below:'}

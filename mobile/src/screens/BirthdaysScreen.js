@@ -71,8 +71,8 @@ export default function BirthdaysScreen({ route }) {const { theme, isDarkMode } 
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       {items.map((it) => (
         <View key={String(it.id)} style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
-          <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <View style={[styles.infoWrapper, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+          <View style={[styles.cardHeader, { flexDirection: 'row' }]}>
+            <View style={[styles.infoWrapper, { alignItems: 'flex-start' }]}>
               <Text style={styles.name}>{it.name}</Text>
               <Text style={styles.meta}>
                 {it.type === 'staff'
@@ -86,10 +86,10 @@ export default function BirthdaysScreen({ route }) {const { theme, isDarkMode } 
             </View>
           </View>
 
-          <View style={[styles.dateRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.dateRow, { flexDirection: 'row' }]}>
             <Ionicons name="calendar-outline" size={16} color="rgba(36, 54, 79, 0.6)" style={{ marginHorizontal: 4 }} />
             <Text style={styles.date}>{formatDateDDMMYYYY(it.birthdate)}</Text>
-            <Text style={[styles.relative, { marginLeft: isRtl ? 0 : 8, marginRight: isRtl ? 8 : 0 }]}>
+            <Text style={[styles.relative, { marginLeft: 8, marginRight: 0 }]}>
               ({it.relative})
             </Text>
           </View>

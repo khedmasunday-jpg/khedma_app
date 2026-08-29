@@ -491,13 +491,13 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
       <View style={styles.formCard}>
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('studentName')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('studentName')}</Text>
           <View style={styles.inputWrapper}>
             <Ionicons name="person-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput
               value={student.fullName}
               onChangeText={(v) => handleChange('fullName', v)}
-              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: 'left' }]}
               placeholder={t('studentName')}
               placeholderTextColor={theme.textMuted}
             />
@@ -509,7 +509,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('gradeLevel')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('gradeLevel')}</Text>
           <View style={styles.pickerWrapper}>
             <Ionicons name="school-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform.OS === 'web' ? (
@@ -519,7 +519,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
                   const val = e.target.value || '';
                   handleChange('classLevel', val);
                 }}
-                style={StyleSheet.flatten([styles.webSelect, { direction: locale === 'ar' ? 'rtl' : 'ltr' }])}
+                style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr' }])}
               >
                 <option value="">{t('selectLevel')}</option>
                 <option value="1">{t('level1')}</option>
@@ -544,7 +544,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('selectClass')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('selectClass')}</Text>
           <View style={styles.pickerWrapper}>
             <Ionicons name="people-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {student.classLevel ? (
@@ -552,7 +552,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
                 <select
                   value={student.classname}
                   onChange={(e) => handleChange('classname', e.target.value)}
-                  style={StyleSheet.flatten([styles.webSelect, { direction: locale === 'ar' ? 'rtl' : 'ltr' }])}
+                  style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr' }])}
                 >
                   <option value="">{t('selectClass')}</option>
                   {serverClasses
@@ -586,7 +586,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('motherPhone')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('motherPhone')}</Text>
           <View style={styles.inputWrapper}>
             <TouchableOpacity
               onPress={() => pickContactPhone('mother_phonenumber')}
@@ -599,7 +599,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               value={student.mother_phonenumber}
               onChangeText={(v) => handleChange('mother_phonenumber', v)}
               keyboardType="phone-pad"
-              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: 'left' }]}
               placeholder={t('phonePlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
@@ -611,7 +611,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('fatherPhone')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('fatherPhone')}</Text>
           <View style={styles.inputWrapper}>
             <TouchableOpacity
               onPress={() => pickContactPhone('father_phonenumber')}
@@ -624,7 +624,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               value={student.father_phonenumber}
               onChangeText={(v) => handleChange('father_phonenumber', v)}
               keyboardType="phone-pad"
-              style={[styles.input, { textAlign: locale === 'ar' ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: 'left' }]}
               placeholder={t('phonePlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
@@ -636,7 +636,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
         {}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{t('birthdate')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('birthdate')}</Text>
           <View style={styles.pickerWrapper}>
             <Ionicons name="calendar-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             {Platform.OS === 'web' ? (

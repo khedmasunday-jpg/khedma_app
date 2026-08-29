@@ -144,14 +144,14 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
-      <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.headerRow, { flexDirection: 'row' }]}>
         <Text style={styles.screenTitle}>{t('notifications')}</Text>
         {notifications.length > 0 && (
           <TouchableOpacity 
-            style={[styles.clearBtn, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
+            style={[styles.clearBtn, { flexDirection: 'row' }]} 
             onPress={handleClearAll}
           >
-            <Ionicons name="trash-outline" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 4 } : { marginRight: 4 }} />
+            <Ionicons name="trash-outline" size={16} color={theme.iconColor} style={{ marginRight: 4 }} />
             <Text style={styles.clearBtnText}>{localT('clearAll')}</Text>
           </TouchableOpacity>
         )}
@@ -181,7 +181,7 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
             return (
               <View 
                 key={idx} 
-                style={[styles.notifCard, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}
+                style={[styles.notifCard, { flexDirection: 'row' }]}
               >
                 {}
                 <View style={[styles.iconBadge, { backgroundColor: iconInfo.bg }]}>
@@ -189,11 +189,11 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
                 </View>
 
                 {}
-                <View style={[styles.textBlock, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
-                  <View style={[styles.cardHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.textBlock, { alignItems: 'flex-start' }]}>
+                  <View style={[styles.cardHeader, { flexDirection: 'row' }]}>
                     <Text style={styles.notifType}>{getLocalizedType(notif.type)}</Text>
                   </View>
-                  <Text style={[styles.notifMsg, { textAlign: isRtl ? 'right' : 'left' }]}>
+                  <Text style={[styles.notifMsg, { textAlign: 'left' }]}>
                     {notif.message}
                   </Text>
                   <Text style={styles.notifDate}>{formatNotifDate(notif.createdAt)}</Text>

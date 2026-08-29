@@ -347,9 +347,9 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
         >
           {}
           <View style={styles.headerCard}>
-            <View style={[styles.headerRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            <View style={[styles.headerRow, { flexDirection: 'row' }]}>
               <Ionicons name="school" size={28} color={theme.iconColor} />
-              <View style={[styles.headerTextContainer, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+              <View style={[styles.headerTextContainer, { alignItems: 'flex-start' }]}>
                 <Text style={[styles.headerTitle, { color: theme.text }, { color: theme.text }]}>
                   {localT('assignTo')} {teacher.fullName}
                 </Text>
@@ -363,7 +363,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
           {}
           {isCoPrincipal && (
             <View style={styles.adminCard}>
-              <View style={[styles.adminHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+              <View style={[styles.adminHeader, { flexDirection: 'row' }]}>
                 <Ionicons name="construct-outline" size={20} color={theme.iconColor} />
                 <Text style={styles.adminTitle}>{localT('adminActions')}</Text>
               </View>
@@ -371,18 +371,18 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
               <View style={styles.adminButtonsGrid}>
                 {assignedStudents.length > 0 && (
                   <TouchableOpacity style={[styles.adminBtn, styles.btnRedOutline]} onPress={removeStudents}>
-                    <Ionicons name="person-remove-outline" size={16} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                    <Ionicons name="person-remove-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
                     <Text style={styles.btnTextRed}>{localT('unassignAll')}</Text>
                   </TouchableOpacity>
                 )}
 
                 <TouchableOpacity style={[styles.adminBtn, styles.btnOrangeOutline]} onPress={confirmAndResetClass}>
-                  <Ionicons name="refresh-outline" size={16} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="refresh-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
                   <Text style={styles.btnTextOrange}>{localT('resetClass')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.adminBtn, styles.btnDarkRedOutline]} onPress={confirmAndResetAll}>
-                  <Ionicons name="alert-circle-outline" size={16} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="alert-circle-outline" size={16} color="#ffffff" style={{ marginRight: 6 }} />
                   <Text style={styles.btnTextDarkRed}>{localT('masterReset')}</Text>
                 </TouchableOpacity>
               </View>
@@ -390,7 +390,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
               {}
               {assignedSelectedCount > 0 && (
                 <TouchableOpacity style={[styles.adminBtn, styles.btnRemoveSelected, { marginTop: 12 }]} onPress={removeSelected}>
-                  <Ionicons name="trash-outline" size={18} color="#ffffff" style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+                  <Ionicons name="trash-outline" size={18} color="#ffffff" style={{ marginRight: 6 }} />
                   <Text style={styles.btnTextWhite}>
                     {isRtl 
                       ? `إزالة ${assignedSelectedCount} من المخدومين الموزعين` 
@@ -403,15 +403,15 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
           )}
 
           {}
-          <Text style={[styles.sectionTitle, { textAlign: isRtl ? 'right' : 'left' }]}>
+          <Text style={[styles.sectionTitle, { textAlign: 'left' }]}>
             {localT('availableTitle')}
           </Text>
 
           {}
-          <View style={[styles.searchWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.searchWrapper, { flexDirection: 'row' }]}>
             <Ionicons name="search-outline" size={20} color={theme.iconColor} style={styles.searchIcon} />
             <TextInput
-              style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+              style={[styles.searchInput, { textAlign: 'left' }]}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder={localT('searchPlaceholder')}
@@ -426,8 +426,8 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
 
           {}
           {selected.length > 0 && (
-            <View style={[styles.selectionBadge, { alignSelf: isRtl ? 'flex-end' : 'flex-start', flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-              <Ionicons name="checkmark-circle" size={16} color={theme.iconColor} style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} />
+            <View style={[styles.selectionBadge, { alignSelf: 'flex-start', flexDirection: 'row' }]}>
+              <Ionicons name="checkmark-circle" size={16} color={theme.iconColor} style={{ marginRight: 6 }} />
               <Text style={styles.selectionBadgeText}>
                 {selected.length} {localT('selectedCount')} ({newSelectedCount} {isRtl ? 'جديد' : 'new'}, {assignedSelectedCount} {isRtl ? 'موزع' : 'assigned'})
               </Text>
@@ -457,13 +457,13 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
                     activeOpacity={0.7}
                     style={[
                       styles.studentCard,
-                      { flexDirection: isRtl ? 'row-reverse' : 'row' },
+                      { flexDirection: 'row' },
                       isSelected && styles.studentCardSelected,
                       isCurrentlyAssigned && styles.studentCardAssigned,
                     ]}
                     onPress={() => toggleSelect(id)}
                   >
-                    <View style={[styles.studentInfoRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                    <View style={[styles.studentInfoRow, { flexDirection: 'row' }]}>
                       <View style={[styles.avatarIcon, isSelected && styles.avatarSelected]}>
                         <Ionicons 
                           name={isSelected ? "checkmark-circle" : "person"} 
@@ -472,7 +472,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
                         />
                       </View>
                       
-                      <View style={[styles.studentTextWrapper, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+                      <View style={[styles.studentTextWrapper, { alignItems: 'flex-start' }]}>
                         <Text style={[styles.studentName, isSelected && styles.studentTextSelected]}>
                           {student.fullName}
                         </Text>
@@ -501,7 +501,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
         {newSelectedCount > 0 && (
           <View style={styles.footerPanel}>
             <TouchableOpacity style={styles.btnAssign} onPress={assign}>
-              <Ionicons name="checkmark-done" size={20} color={theme.iconColor} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+              <Ionicons name="checkmark-done" size={20} color={theme.iconColor} style={{ marginRight: 8 }} />
               <Text style={styles.btnAssignText}>
                 {isRtl 
                   ? `حفظ توزيع ${newSelectedCount} مخدوم(ين) جدد` 

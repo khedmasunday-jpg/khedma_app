@@ -326,8 +326,8 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
     >
       {}
       {}
-      <View style={[styles.headerContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+      <View style={[styles.headerContainer, { flexDirection: 'row' }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color={theme.iconColor} />
           </TouchableOpacity>
@@ -335,10 +335,10 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
             <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color={theme.iconColor} />
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.liveBtn, isLive ? styles.liveBtnActive : styles.liveBtnInactive, { flexDirection: isRtl ? 'row-reverse' : 'row' }]} 
+            style={[styles.liveBtn, isLive ? styles.liveBtnActive : styles.liveBtnInactive, { flexDirection: 'row' }]} 
             onPress={() => setIsLive(!isLive)}
           >
-            <View style={[styles.liveDot, isLive ? styles.liveDotActive : styles.liveDotInactive, isRtl ? { marginLeft: 6 } : { marginRight: 6 }]} />
+            <View style={[styles.liveDot, isLive ? styles.liveDotActive : styles.liveDotInactive, { marginRight: 6 }]} />
             <Text style={[styles.liveBtnText, isLive ? styles.liveBtnTextActive : styles.liveBtnTextInactive]}>
               {isRtl ? 'تحديث مباشر' : 'Live Update'}
             </Text>
@@ -347,10 +347,10 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
       </View>
 
       {showSearch && (
-        <View style={[styles.searchContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.searchContainer, { flexDirection: 'row' }]}>
           <Ionicons name="search-outline" size={20} color={theme.iconColor} style={styles.searchIcon} />
           <TextInput
-            style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+            style={[styles.searchInput, { textAlign: 'left' }]}
             placeholder={t('search')}
             placeholderTextColor={theme.textMuted}
             value={searchQuery}
@@ -366,7 +366,7 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
 
       {showFilter && (
         <View>
-          <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.filterContainer, { flexDirection: 'row' }]}>
             {filterPills.map((pill) => {
               const isActive = selectedFilter === pill.id;
               const count = counts[pill.id] || 0;
@@ -377,14 +377,14 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                   style={[
                     styles.filterPill,
                     isActive ? styles.filterPillActive : styles.filterPillInactive,
-                    { flexDirection: isRtl ? 'row-reverse' : 'row' }
+                    { flexDirection: 'row' }
                   ]}
                 >
                   <Ionicons 
                     name={pill.icon} 
                     size={16} 
                     color={isActive ? '#fff' : '#2f4360'} 
-                    style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
+                    style={{ marginRight: 6 }} 
                   />
                   <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
                     {t(pill.labelKey)} ({count})
@@ -393,7 +393,7 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
               );
             })}
           </View>
-          <View style={[styles.filterContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.filterContainer, { flexDirection: 'row' }]}>
             {timeFilters.map((tFilter) => {
               const isActive = selectedTimeFilter === tFilter.id;
               return (
@@ -403,14 +403,14 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                   style={[
                     styles.filterPill,
                     isActive ? styles.filterPillActive : styles.filterPillInactive,
-                    { flexDirection: isRtl ? 'row-reverse' : 'row' }
+                    { flexDirection: 'row' }
                   ]}
                 >
                   <Ionicons 
                     name={tFilter.id === 'custom' ? 'calendar-outline' : 'time-outline'} 
                     size={16} 
                     color={isActive ? '#fff' : '#2f4360'} 
-                    style={isRtl ? { marginLeft: 6 } : { marginRight: 6 }} 
+                    style={{ marginRight: 6 }} 
                   />
                   <Text style={[styles.filterPillText, isActive ? styles.filterPillTextActive : styles.filterPillTextInactive]}>
                     {t(tFilter.labelKey)}
@@ -420,8 +420,8 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
             })}
           </View>
           {selectedTimeFilter === 'custom' && (
-            <View style={[styles.customDateContainer, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-              <View style={[styles.customDateWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            <View style={[styles.customDateContainer, { flexDirection: 'row' }]}>
+              <View style={[styles.customDateWrapper, { flexDirection: 'row' }]}>
                 <Text style={styles.customDateLabel}>{isRtl ? 'من:' : 'From:'}</Text>
                 {Platform.OS === 'web' ? (
                   <input
@@ -440,7 +440,7 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                   />
                 )}
               </View>
-              <View style={[styles.customDateWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+              <View style={[styles.customDateWrapper, { flexDirection: 'row' }]}>
                 <Text style={styles.customDateLabel}>{isRtl ? 'إلى:' : 'To:'}</Text>
                 {Platform.OS === 'web' ? (
                   <input
@@ -496,14 +496,14 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
               const ip = log.ip || log.ipAddress || log.clientIp || log.requestIp || log.remoteAddr || log.actorIp || null;
 
               return (
-                <View key={idx} style={[styles.logCard, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View key={idx} style={[styles.logCard, { flexDirection: 'row' }]}>
                   {}
                   <View style={[styles.badgeContainer, { backgroundColor: meta.bg }]}>
                     <Ionicons name={meta.icon} size={22} color={meta.color} />
                   </View>
 
                   {}
-                  <View style={[styles.cardContent, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+                  <View style={[styles.cardContent, { alignItems: 'flex-start' }]}>
                     {}
                     <Text style={styles.actionTitle}>
                       {translateAction(log.actionDescription || log.action, isRtl)}
@@ -531,20 +531,20 @@ export default function LogsScreen({ route }) {const { theme, isDarkMode } = use
                     {}
                     {log.details ? (
                       <View style={[styles.detailsBox, { alignSelf: 'stretch' }]}>
-                        <Text style={[styles.detailsText, { textAlign: isRtl ? 'right' : 'left' }]}>
+                        <Text style={[styles.detailsText, { textAlign: 'left' }]}>
                           {log.details}
                         </Text>
                       </View>
                     ) : null}
 
                     {}
-                    <View style={[styles.cardFooter, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                      <View style={[styles.footerItem, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                    <View style={[styles.cardFooter, { flexDirection: 'row' }]}>
+                      <View style={[styles.footerItem, { flexDirection: 'row' }]}>
                         <Ionicons name="time-outline" size={13} color={isDarkMode ? "#ffffff" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
                         <Text style={styles.footerText}>{formatLogTimestamp(log.timestamp)}</Text>
                       </View>
                       {ip ? (
-                        <View style={[styles.footerItem, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                        <View style={[styles.footerItem, { flexDirection: 'row' }]}>
                           <Ionicons name="globe-outline" size={13} color={isDarkMode ? "#ffffff" : "rgba(47, 67, 96, 0.5)"} style={{ marginHorizontal: 2 }} />
                           <Text style={styles.footerText}>{ip}</Text>
                         </View>

@@ -167,7 +167,7 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {/* Class Selector */}
-      <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>{t('selectClass')}</Text>
+      <Text style={[styles.label, { textAlign: 'left' }]}>{t('selectClass')}</Text>
       <ScrollView horizontal style={styles.dropdown} showsHorizontalScrollIndicator={false}>
         {classes.map(cls => (
           <TouchableOpacity
@@ -196,8 +196,8 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
           students.map(s => {
             const isPresent = attendance[s._id] === 'present';
             return (
-              <View key={s._id} style={[styles.studentCard, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-                <View style={[styles.studentInfo, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+              <View key={s._id} style={[styles.studentCard, { flexDirection: 'row' }]}>
+                <View style={[styles.studentInfo, { alignItems: 'flex-start' }]}>
                   <Text style={styles.studentName}>{s.fullName}</Text>
                   <Text style={styles.statsText}>
                     {t('totalAttendance')}: {s.totalAttendance || 0}
@@ -230,8 +230,8 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
 
       {}
       <View style={styles.controlPanel}>
-        <Text style={[styles.dateLabel, { textAlign: isRtl ? 'right' : 'left' }]}>{t('attendanceDate')}</Text>
-        <View style={[styles.dateSelectorRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <Text style={[styles.dateLabel, { textAlign: 'left' }]}>{t('attendanceDate')}</Text>
+        <View style={[styles.dateSelectorRow, { flexDirection: 'row' }]}>
           <Ionicons name="calendar-outline" size={20} color={theme.iconColor} style={{ marginHorizontal: 8 }} />
           {Platform.OS === 'web' ? (
             <View style={{ flex: 1, position: 'relative', minHeight: 40, justifyContent: 'center' }}>
@@ -291,7 +291,7 @@ export default function AttendanceScreen({ route, navigation }) {const { theme, 
         </View>
 
         {}
-        <View style={[styles.bulkActionsRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.bulkActionsRow, { flexDirection: 'row' }]}>
           <TouchableOpacity style={[styles.bulkBtn, styles.btnPresent]} onPress={() => setAll('present')}>
             <Ionicons name="checkmark-done" size={18} color="#ffffff" style={{ marginHorizontal: 4 }} />
             <Text style={styles.bulkBtnText}>{t('allPresent')}</Text>

@@ -154,8 +154,8 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
 
   const renderStudentCard = (s, isPresent) => (
     <View key={s._id} style={styles.studentCard}>
-      <View style={[styles.studentHeaderRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-        <Text style={[styles.studentName, { textAlign: isRtl ? 'right' : 'left' }]}>
+      <View style={[styles.studentHeaderRow, { flexDirection: 'row' }]}>
+        <Text style={[styles.studentName, { textAlign: 'left' }]}>
           {s.fullName}
         </Text>
         <View style={[styles.statusBadge, isPresent ? styles.badgePresent : styles.badgeAbsent]}>
@@ -171,7 +171,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
         </View>
       </View>
       
-      <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.detailRow, { flexDirection: 'row' }]}>
         <Text style={styles.detailLabel}>{t('lastAttendance')}:</Text>
         <Text style={styles.detailValue}>
           {s.lastAttendanceDate ? formatDate(s.lastAttendanceDate) : t('never')}
@@ -184,7 +184,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
       <View style={styles.headerPanel}>
-        <Text style={[styles.title, { color: theme.text }, { textAlign: isRtl ? 'right' : 'left' }]}>
+        <Text style={[styles.title, { color: theme.text }, { textAlign: 'left' }]}>
           {currentClassName || t('selectClass')}
         </Text>
         
@@ -206,8 +206,8 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
         )}
 
         {}
-        <View style={[styles.dateRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-          <View style={[styles.dateInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.dateRow, { flexDirection: 'row' }]}>
+          <View style={[styles.dateInputWrapper, { flexDirection: 'row' }]}>
             <Ionicons name="calendar-outline" size={18} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
             {Platform.OS === 'web' ? (
               <>
@@ -288,7 +288,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
           <View>
             {presentStudents.length > 0 && (
               <View style={styles.sectionContainer}>
-                <View style={[styles.sectionHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.sectionHeader, { flexDirection: 'row' }]}>
                   <Text style={styles.sectionTitle}>{isRtl ? 'الحاضرون' : 'Present'} ({presentStudents.length})</Text>
                 </View>
                 {presentStudents.map(s => renderStudentCard(s, true))}
@@ -297,7 +297,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
 
             {absentStudents.length > 0 && (
               <View style={styles.sectionContainer}>
-                <View style={[styles.sectionHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.sectionHeader, { flexDirection: 'row' }]}>
                   <Text style={styles.sectionTitle}>{isRtl ? 'الغائبون' : 'Absent'} ({absentStudents.length})</Text>
                 </View>
                 {absentStudents.map(s => renderStudentCard(s, false))}

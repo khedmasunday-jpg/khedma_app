@@ -92,7 +92,7 @@ export default function AssignStudentsScreen1({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
-        <View style={{ flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity style={styles.iconButton} onPress={() => setShowSearch(!showSearch)}>
             <Ionicons name="search-outline" size={20} color={theme.iconColor || theme.text} />
           </TouchableOpacity>
@@ -119,10 +119,10 @@ export default function AssignStudentsScreen1({ navigation, route }) {
 
       {showSearch && (
         <View style={styles.searchContainer}>
-          <View style={[styles.searchInputWrapper, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-            <Ionicons name="search-outline" size={20} color={theme.iconColor || theme.text} style={isRtl ? { marginLeft: 8 } : { marginRight: 8 }} />
+          <View style={[styles.searchInputWrapper, { flexDirection: 'row' }]}>
+            <Ionicons name="search-outline" size={20} color={theme.iconColor || theme.text} style={{ marginRight: 8 }} />
             <TextInput
-              style={[styles.searchInput, { textAlign: isRtl ? 'right' : 'left' }]}
+              style={[styles.searchInput, { textAlign: 'left' }]}
               placeholder={searchPlaceholder}
               placeholderTextColor={theme.textMuted || '#999'}
               value={searchQuery}

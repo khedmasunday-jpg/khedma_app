@@ -96,7 +96,7 @@ export default function ClassDisplayScreen({ route, navigation }) {const { theme
   return (
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
-      <Text style={[styles.label, { textAlign: isRtl ? 'right' : 'left' }]}>{t('selectClass')}</Text>
+      <Text style={[styles.label, { textAlign: 'left' }]}>{t('selectClass')}</Text>
       <ScrollView horizontal style={styles.dropdown} showsHorizontalScrollIndicator={false}>
         {(Array.isArray(classes) ? classes : []).map(cls => (
           <TouchableOpacity
@@ -146,10 +146,10 @@ export default function ClassDisplayScreen({ route, navigation }) {const { theme
           <View key={student._id} style={styles.studentCard}>
             {}
             <TouchableOpacity
-              style={[styles.studentHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}
+              style={[styles.studentHeader, { flexDirection: 'row' }]}
               onPress={() => toggleStudentDetails(student._id)}
             >
-              <View style={[styles.studentInfo, { alignItems: isRtl ? 'flex-end' : 'flex-start' }]}>
+              <View style={[styles.studentInfo, { alignItems: 'flex-start' }]}>
                 <Text style={styles.studentName}>{student.fullName}</Text>
               </View>
               <Text style={styles.expandIcon}>
@@ -160,11 +160,11 @@ export default function ClassDisplayScreen({ route, navigation }) {const { theme
             {}
             {expandedStudent === student._id && (
               <View style={styles.studentDetails}>
-                <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.detailRow, { flexDirection: 'row' }]}>
                   <Text style={styles.detailLabel}>{t('gradeLevel')}:</Text>
                   <Text style={styles.detailValue}>{student.classLevel}</Text>
                 </View>
-                <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.detailRow, { flexDirection: 'row' }]}>
                   <Text style={styles.detailLabel}>{t('motherPhone')}:</Text>
                   {student.mother_phonenumber ? (
                     <TouchableOpacity onPress={() => Linking.openURL(`tel:${student.mother_phonenumber}`)}>
@@ -174,7 +174,7 @@ export default function ClassDisplayScreen({ route, navigation }) {const { theme
                     <Text style={styles.detailValue}>N/A</Text>
                   )}
                 </View>
-                <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.detailRow, { flexDirection: 'row' }]}>
                   <Text style={styles.detailLabel}>{t('fatherPhone')}:</Text>
                   {student.father_phonenumber ? (
                     <TouchableOpacity onPress={() => Linking.openURL(`tel:${student.father_phonenumber}`)}>
@@ -184,11 +184,11 @@ export default function ClassDisplayScreen({ route, navigation }) {const { theme
                     <Text style={styles.detailValue}>N/A</Text>
                   )}
                 </View>
-                <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.detailRow, { flexDirection: 'row' }]}>
                   <Text style={styles.detailLabel}>{t('birthdate')}:</Text>
                   <Text style={styles.detailValue}>{student.birthdate ? formatDate(student.birthdate) : ''}</Text>
                 </View>
-                <View style={[styles.detailRow, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+                <View style={[styles.detailRow, { flexDirection: 'row' }]}>
                   <Text style={styles.detailLabel}>{t('lastAttendance')}:</Text>
                   <Text style={styles.detailValue}>{student.lastAttendanceDate ? formatDate(student.lastAttendanceDate) : t('never')}</Text>
                 </View>
