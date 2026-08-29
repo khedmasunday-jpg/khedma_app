@@ -291,7 +291,7 @@ export default function PostLoginScreen({ route, navigation }) {
           horizontal 
           showsHorizontalScrollIndicator={false} 
           style={{ width: '100%', marginBottom: 10, flexGrow: 0 }}
-          contentContainerStyle={{ flexDirection: locale === 'ar' ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'flex-end', paddingVertical: 10, flexGrow: 1 }}
+          contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingVertical: 10, flexGrow: 1 }}
         >
           {role !== 'admin' && (
             <TouchableOpacity style={[styles.iconBtn, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]} onPress={() => handleButtonPress('notifications')}>
