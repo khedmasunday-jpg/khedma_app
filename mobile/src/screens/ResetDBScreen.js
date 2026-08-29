@@ -30,11 +30,7 @@ export default function ResetDBScreen({ route, navigation }) {const { theme, isD
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 
   const notify = (title, message) => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.alert(`${title}\n\n${message}`);
-    } else {
-      Alert.alert(title, message);
-    }
+    Alert.alert(title, message);
   };
 
   const confirmAndResetCounters = () => {

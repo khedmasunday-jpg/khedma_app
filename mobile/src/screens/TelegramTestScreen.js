@@ -185,9 +185,19 @@ export default function TelegramTestScreen({ route, navigation }) {const { theme
       ? `هل أنت تأكد من إرسال هذا التعميم لجميع الخدام (${staffList.length} خادم)؟`
       : `Are you sure you want to broadcast this message to all staff members (${staffList.length} members)?`;
 
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      if (!window.confirm(confirmMsg)) return;
-    }
+    const confirmed = await new Promise(resolve => {
+      Alert.alert(
+        isRtl ? 'تأكيد الإرسال' : 'Confirm Broadcast',
+        confirmMsg,
+        [
+          { text: isRtl ? 'إلغاء' : 'Cancel', style: 'cancel', onPress: () => resolve(false) },
+          { text: isRtl ? 'إرسال' : 'Send', onPress: () => resolve(true) }
+        ],
+        { cancelable: false }
+      );
+    });
+
+    if (!confirmed) return;
 
     setBroadcastLoading(true);
     try {

@@ -86,19 +86,14 @@ export default function AdminAllNotificationsScreen({ route, navigation }) {cons
       }
     };
 
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(localT('confirmClearMsg'));
-      if (confirmed) performClear();
-    } else {
-      Alert.alert(
-        localT('confirmClearTitle'),
-        localT('confirmClearMsg'),
-        [
-          { text: t('cancel'), style: 'cancel' },
-          { text: localT('clearAll'), style: 'destructive', onPress: performClear }
-        ]
-      );
-    }
+    Alert.alert(
+      localT('confirmClearTitle'),
+      localT('confirmClearMsg'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        { text: localT('clearAll'), style: 'destructive', onPress: performClear }
+      ]
+    );
   };
 
   useEffect(() => {

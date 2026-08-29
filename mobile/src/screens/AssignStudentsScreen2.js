@@ -98,12 +98,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
   };
 
   const showAlert = (title, message, onOk = null) => {
-    if (Platform.OS === "web") {
-      window.alert(`${title}\n\n${message}`);
-      if (onOk) onOk();
-    } else {
-      Alert.alert(title, message, [{ text: t('ok'), onPress: onOk }]);
-    }
+    Alert.alert(title, message, [{ text: t('ok'), onPress: onOk }]);
   };
 
   const client = createApiClient(token);
@@ -196,19 +191,14 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
 
   const confirmAndResetClass = () => {
     logger.log('confirmAndResetClass called');
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(localT('confirmResetClass'));
-      if (confirmed) resetClass();
-    } else {
-      Alert.alert(
-        localT('resetClassTitle'),
-        localT('confirmResetClass'),
-        [
-          { text: t('cancel'), style: 'cancel' },
-          { text: localT('resetClass'), style: 'destructive', onPress: resetClass }
-        ]
-      );
-    }
+    Alert.alert(
+      localT('resetClassTitle'),
+      localT('confirmResetClass'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        { text: localT('resetClass'), style: 'destructive', onPress: resetClass }
+      ]
+    );
   };
 
   const resetClass = async () => {
@@ -226,19 +216,14 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
   };
 
   const confirmAndResetAll = () => {
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(localT('confirmMasterReset'));
-      if (confirmed) resetAll();
-    } else {
-      Alert.alert(
-        localT('resetAllTitle'),
-        localT('confirmMasterReset'),
-        [
-          { text: t('cancel'), style: 'cancel' },
-          { text: localT('masterReset'), style: 'destructive', onPress: resetAll }
-        ]
-      );
-    }
+    Alert.alert(
+      localT('resetAllTitle'),
+      localT('confirmMasterReset'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        { text: localT('masterReset'), style: 'destructive', onPress: resetAll }
+      ]
+    );
   };
 
   const resetAll = async () => {

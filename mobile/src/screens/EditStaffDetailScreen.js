@@ -219,21 +219,12 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
       const res = await axios.delete(url, { headers: { Authorization: `Bearer ${token}` } });
       logger.log('✅ Delete response:', res.status, res.data);
 
-      if (Platform.OS !== 'web') {
-        Alert.alert(t('success'), t('deleteStaffSuccess'), [
-          { text: t('ok'), onPress: () => navigation.goBack() }
-        ]);
-      } else {
-        window.alert(t('deleteStaffSuccess'));
-        navigation.goBack();
-      }
+      Alert.alert(t('success'), t('deleteStaffSuccess'), [
+        { text: t('ok'), onPress: () => navigation.goBack() }
+      ]);
     } catch (err) {
       logger.error('❌ Delete failed:', err?.response?.data || err.message);
-      if (Platform.OS !== 'web') {
-        Alert.alert(t('error'), err?.response?.data?.msg || t('deleteStaffFailure'));
-      } else {
-        window.alert(t('deleteStaffFailure'));
-      }
+      Alert.alert(t('error'), err?.response?.data?.msg || t('deleteStaffFailure'));
     }
     setDeleting(false);
   };

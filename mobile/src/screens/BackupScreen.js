@@ -51,11 +51,7 @@ export default function BackupScreen({ route, navigation }) {const { theme, isDa
   }, []);
 
   const notify = (title, msg) => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.alert(`${title}\n\n${msg}`);
-    } else {
-      Alert.alert(title, msg);
-    }
+    Alert.alert(title, msg);
   };
 
   const confirmAndRunBackup = () => {
@@ -64,21 +60,15 @@ export default function BackupScreen({ route, navigation }) {const { theme, isDa
       ? 'هل أنت تأكد من تطبيق النسخ الاحتياطي لقاعدة البيانات الآن؟'
       : 'Are you sure you want to run a database backup now?';
 
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      if (window.confirm(`${title}\n\n${message}`)) {
-        doRunBackup();
-      }
-    } else {
-      Alert.alert(
-        title,
-        message,
-        [
-          { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
-          { text: isAr ? 'بدء النسخ' : 'Start', onPress: () => doRunBackup() }
-        ],
-        { cancelable: true }
-      );
-    }
+    Alert.alert(
+      title,
+      message,
+      [
+        { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
+        { text: isAr ? 'بدء النسخ' : 'Start', onPress: () => doRunBackup() }
+      ],
+      { cancelable: true }
+    );
   };
 
   const doRunBackup = async () => {
@@ -144,33 +134,48 @@ export default function BackupScreen({ route, navigation }) {const { theme, isDa
         ? `هل أنت تأكد من استعادة كافة بيانات وقواعد واستعادة حسابات الخدام والمخدومين من ملف النسخة الاحتياطية "${asset.name}"؟`
         : `Are you sure you want to restore all user accounts, students, classes, and logs from backup file "${asset.name}"?`;
 
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        if (!window.confirm(confirmMsg)) return;
-      }
+      const executeRestore = async () => {
+        setRestoringBackup(true);
+        try {
+          const res = await client.post('/backup/restore', jsonData);
+          if (res.data && res.data.success) {
+            const details = res.data.details || {};
+            notify(
+              isAr ? 'تمت استعادة البيانات والحسابات بنجاح! 🚀' : 'Restore Successful! 🚀',
+              isAr
+                ? `تمت استعادة كافة البيانات وحسابات الخدام بنجاح!\nالمجموعات المستعادة: ${details.restoredCollectionsCount || 0}\nإجمالي المستندات: ${details.restoredDocsCount || 0}`
+                : `Database and accounts successfully restored!\nCollections Restored: ${details.restoredCollectionsCount || 0}\nDocuments Restored: ${details.restoredDocsCount || 0}`
+            );
+            fetchStatus();
+          } else {
+            notify(isAr ? 'خطأ' : 'Error', res.data?.msg || 'Failed to restore backup');
+          }
+        } catch (err) {
+          logger.error('Restore backup error:', err);
+          notify(
+            isAr ? 'خطأ' : 'Error',
+            err.response?.data?.msg || err.message || (isAr ? 'فشل إجراء استعادة النسخة الاحتياطية' : 'Failed to restore JSON backup file')
+          );
+        } finally {
+          setRestoringBackup(false);
+        }
+      };
 
-      setRestoringBackup(true);
-      const res = await client.post('/backup/restore', jsonData);
-
-      if (res.data && res.data.success) {
-        const details = res.data.details || {};
-        notify(
-          isAr ? 'تمت استعادة البيانات والحسابات بنجاح! 🚀' : 'Restore Successful! 🚀',
-          isAr
-            ? `تمت استعادة كافة البيانات وحسابات الخدام بنجاح!\nالمجموعات المستعادة: ${details.restoredCollectionsCount || 0}\nإجمالي المستندات: ${details.restoredDocsCount || 0}`
-            : `Database and accounts successfully restored!\nCollections Restored: ${details.restoredCollectionsCount || 0}\nDocuments Restored: ${details.restoredDocsCount || 0}`
-        );
-        fetchStatus();
-      } else {
-        notify(isAr ? 'خطأ' : 'Error', res.data?.msg || 'Failed to restore backup');
-      }
+      Alert.alert(
+        isAr ? 'تأكيد الاستعادة' : 'Confirm Restore',
+        confirmMsg,
+        [
+          { text: isAr ? 'إلغاء' : 'Cancel', style: 'cancel' },
+          { text: isAr ? 'استعادة' : 'Restore', onPress: executeRestore }
+        ],
+        { cancelable: true }
+      );
     } catch (err) {
-      logger.error('Restore backup error:', err);
+      logger.error('File picker error:', err);
       notify(
         isAr ? 'خطأ' : 'Error',
-        err.response?.data?.msg || err.message || (isAr ? 'فشل إجراء استعادة النسخة الاحتياطية' : 'Failed to restore JSON backup file')
+        err.message || (isAr ? 'فشل قراءة الملف' : 'Failed to read file')
       );
-    } finally {
-      setRestoringBackup(false);
     }
   };
 

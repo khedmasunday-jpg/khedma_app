@@ -38,11 +38,7 @@ export default function AttendanceSheetScreen({ route, navigation }) {const { th
   const isRtl = locale === 'ar';
 
   const notify = (title, message) => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.alert) {
-      window.alert(`${title}\n\n${message}`);
-    } else {
-      Alert.alert(title, message);
-    }
+    Alert.alert(title, message);
   };
 
   useEffect(() => {

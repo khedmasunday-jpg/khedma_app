@@ -100,21 +100,13 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
           },
           data: { ids: Array.from(selectedStudentIds) }
         });
-        if (Platform.OS === 'web') {
-          window.alert(isRtl ? 'تم حذف المخدومين بنجاح.' : 'Students deleted successfully.');
-        } else {
-          Alert.alert(isRtl ? 'تم بنجاح' : 'Success', isRtl ? 'تم حذف المخدومين بنجاح.' : 'Students deleted successfully.');
-        }
+        Alert.alert(isRtl ? 'تم بنجاح' : 'Success', isRtl ? 'تم حذف المخدومين بنجاح.' : 'Students deleted successfully.');
         setSelectionMode(false);
         setSelectedStudentIds(new Set());
         fetchStudents();
       } catch (err) {
         logger.error('Error bulk deleting students:', err);
-        if (Platform.OS === 'web') {
-          window.alert(isRtl ? 'فشل حذف المخدومين' : 'Failed to delete students');
-        } else {
-          Alert.alert(t('error'), isRtl ? 'فشل حذف المخدومين' : 'Failed to delete students');
-        }
+        Alert.alert(t('error'), isRtl ? 'فشل حذف المخدومين' : 'Failed to delete students');
       } finally {
         setLoading(false);
       }

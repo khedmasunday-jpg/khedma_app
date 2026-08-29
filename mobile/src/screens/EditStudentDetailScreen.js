@@ -49,12 +49,7 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
   const canDelete = userRole === "principal" || userRole === "admin";
 
   const showAlert = (title, message, onOk = null) => {
-    if (Platform.OS === "web") {
-      window.alert(`${title}\n\n${message}`);
-      if (onOk) onOk();
-    } else {
-      Alert.alert(title, message, [{ text: "OK", onPress: onOk }]);
-    }
+    Alert.alert(title, message, [{ text: "OK", onPress: onOk }]);
   };
 
   const [contactPickerVisible, setContactPickerVisible] = useState(false);
