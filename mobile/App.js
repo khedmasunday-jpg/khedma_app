@@ -326,9 +326,11 @@ export default function App() {
             >
               <View style={{ flex: 1 }}>
                 <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom', 'left', 'right']}>
-                  <NavigationContainer theme={MyTheme} ref={navigationRef}>
-                    <AppNavigator />
-                  </NavigationContainer>
+                  <View style={{ flex: 1 }}>
+                    <NavigationContainer theme={MyTheme} ref={navigationRef}>
+                      <AppNavigator />
+                    </NavigationContainer>
+                  </View>
                   <FooterVerses />
                 </SafeAreaView>
               </View>
@@ -345,7 +347,7 @@ const styles = StyleSheet.create({
   rootView: {
     flex: 1,
     width: '100%',
-    minHeight: Platform.OS === 'web' ? '100vh' : '100%',
+    minHeight: Platform.OS === 'web' ? '100dvh' : '100%',
   },
   backgroundImage: {
     flex: 1,
