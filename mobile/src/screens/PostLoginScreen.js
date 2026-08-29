@@ -23,7 +23,7 @@ const BUTTONS = [
   { labelKey: 'tayo', label: 'الطايو', minRank: 1 },
   { labelKey: 'logs', label: 'Logs', exactRank: 1 },
   { labelKey: 'reset', label: 'Reset', exactRank: 1 },
-  { labelKey: 'whatsappTest', label: 'Telegram Test', exactRank: 1 },
+  { labelKey: 'telegramTest', label: 'Telegram Test', exactRank: 1 },
   { labelKey: 'backupData', label: 'النسخ الاحتياطي', exactRank: 1 },
   { labelKey: 'promotion', label: 'الترقيه للعام الجديد', exactRank: 1 },
   { labelKey: 'rssLinks', label: 'RSS Links', minRank: 1 },
@@ -44,7 +44,7 @@ const BUTTON_ICONS = {
   'tayo': { icon: 'star-outline', color: '#f39c12' },
   'logs': { icon: 'document-text-outline', color: 'theme-text' },
   'reset': { icon: 'refresh-circle-outline', color: 'theme-text' },
-  'whatsappTest': { icon: 'paper-plane', color: '#25D366' },
+  'telegramTest': { icon: 'paper-plane', color: '#0088cc' },
   'backupData': { icon: 'cloud-upload-outline', color: '#27ae60' },
   'importData': { icon: 'cloud-download-outline', color: 'theme-text' },
   'promotion': { icon: 'trending-up-outline', color: '#8e44ad' },
@@ -242,7 +242,7 @@ export default function PostLoginScreen({ route, navigation }) {
       case 'reset':
         navigation.navigate('ResetDB');
         break;
-      case 'whatsappTest':
+      case 'telegramTest':
         navigation.navigate('TelegramTestScreen');
         break;
       case 'backupData':
