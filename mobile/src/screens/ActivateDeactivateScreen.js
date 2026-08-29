@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -7,6 +7,7 @@ import {
   ActivityIndicator, 
   TouchableOpacity, 
   TextInput, 
+  Animated,
   Modal, 
   Platform 
 } from 'react-native';
@@ -48,10 +49,17 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
   const successTitle = isRtl ? 'تم بنجاح' : 'Success';
   const errorTitle = isRtl ? 'خطأ' : 'Error';
 
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
   const showAlert = (title, message) => {
     setCustomAlertTitle(title);
     setCustomAlertMessage(message || '');
     setCustomAlertVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => setCustomAlertVisible(false));
   };
 
   const fetchStaff = async () => {
@@ -274,35 +282,55 @@ export default function ActivateDeactivateScreen({ route, navigation }) {const {
       </ScrollView>
 
       {}
-      <Modal visible={customAlertVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
-            <View style={[styles.modalHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
-              <Text style={[styles.modalTitle, { color: theme.text }, isRtl ? { marginRight: 8 } : { marginLeft: 8 }]}>
-                {customAlertTitle}
-              </Text>
-            </View>
-            <View style={styles.modalBody}>
-              <Text style={[styles.modalBodyText, { color: theme.text }, { textAlign: isRtl ? 'right' : 'left' }]}>
-                {customAlertMessage}
-              </Text>
-            </View>
-            <View style={[styles.modalFooter, { justifyContent: isRtl ? 'flex-start' : 'flex-end' }]}>
-              <TouchableOpacity 
-                style={styles.modalPrimaryBtn} 
-                onPress={() => setCustomAlertVisible(false)}
-              >
-                <Text style={styles.modalPrimaryBtnText}>{isRtl ? 'حسناً' : 'OK'}</Text>
-              </TouchableOpacity>
-            </View>
+      {customAlertVisible && (
+        <Animated.View style={[
+          styles.toastContainer, 
+          { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+        ]} pointerEvents="none">
+          <View style={[styles.toastHeader, { flexDirection: isRtl ? 'row-reverse' : 'row' }]}>
+            <Ionicons name={customAlertTitle === successTitle ? "checkmark-circle" : "close-circle"} size={20} color={customAlertTitle === successTitle ? "#4caf50" : "#f44336"} />
+            <Text style={[styles.toastTitle, { color: theme.text }, isRtl ? { marginRight: 8 } : { marginLeft: 8 }]}>
+              {customAlertTitle}
+            </Text>
           </View>
-        </View>
-      </Modal>
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: isRtl ? 'right' : 'left' }]}>
+            {customAlertMessage}
+          </Text>
+        </Animated.View>
+      )}
     </View>
   );
 }
 
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  toastContainer: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    width: '90%',
+    maxWidth: 400,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+  },
+  toastHeader: {
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  toastTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.background,
