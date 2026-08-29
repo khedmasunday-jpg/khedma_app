@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Animated,
   TextInput,
   ScrollView,
   Alert,
@@ -75,10 +73,17 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
   const [customAlertTitle, setCustomAlertTitle] = useState('');
   const [customAlertMessage, setCustomAlertMessage] = useState('');
 
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
   const showAlert = (title, message) => {
     setCustomAlertTitle(title);
     setCustomAlertMessage(message || '');
     setCustomAlertVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => setCustomAlertVisible(false));
   };
 
   useEffect(() => {
@@ -737,33 +742,44 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
       </Modal>
 
       {}
-      <Modal visible={customAlertVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
-            <View style={styles.modalHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{customAlertTitle}</Text>
-              </View>
-            </View>
-            <View style={{ marginBottom: 16 }}>
-              <Text style={{ fontSize: 15, color: theme.text, lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
-            </View>
-            <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={styles.modalPrimaryBtn} 
-                onPress={() => setCustomAlertVisible(false)}
-              >
-                <Text style={styles.modalPrimaryBtnText}>{t('ok')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {customAlertVisible && (
+        <Animated.View style={[
+          styles.toastContainer, 
+          { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+        ]} pointerEvents="none">
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
+            {customAlertMessage}
+          </Text>
+        </Animated.View>
+      )}
     </ScrollView>
   );
 }
 
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  toastContainer: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
   container: {
     backgroundColor: '#f8f5ee',
   },

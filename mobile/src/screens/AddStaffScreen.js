@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, Alert, Modal, TouchableOpacity, Platform, StyleSheet, Switch } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, Animated, TextInput, ScrollView, Alert, Modal, TouchableOpacity, Platform, StyleSheet, Switch } from 'react-native';
 import axios from 'axios';
 import { logger } from '../utils/logger';
 import { API_URL } from '../config/api';
@@ -91,10 +91,17 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
   const [customAlertTitle, setCustomAlertTitle] = useState('');
   const [customAlertMessage, setCustomAlertMessage] = useState('');
 
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
   const showAlert = (title, message) => {
     setCustomAlertTitle(title);
     setCustomAlertMessage(message || '');
     setCustomAlertVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => setCustomAlertVisible(false));
   };
 
   const pickContactForStaff = async () => {
@@ -913,26 +920,16 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
       </Modal>
 
       {}
-      <Modal visible={customAlertVisible} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }, { backgroundColor: theme.cardBackground }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: theme.text }, { color: theme.text }]}>{customAlertTitle}</Text>
-            </View>
-            <View style={styles.modalBody}>
-              <Text style={{ fontSize: 15, color: theme.text, lineHeight: 22, textAlign: locale === 'ar' ? 'right' : 'left' }}>{customAlertMessage}</Text>
-            </View>
-            <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={styles.modalPrimaryBtn} 
-                onPress={() => setCustomAlertVisible(false)}
-              >
-                <Text style={styles.modalPrimaryBtnText}>{t('ok')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {customAlertVisible && (
+        <Animated.View style={[
+          styles.toastContainer, 
+          { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+        ]} pointerEvents="none">
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
+            {customAlertMessage}
+          </Text>
+        </Animated.View>
+      )}
 
       {}
       <Modal visible={contactPickerVisible} animationType="slide" transparent>
@@ -982,6 +979,29 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
 }
 
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  toastContainer: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
   container: {
     backgroundColor: '#f8f5ee',
   },

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity, Text, Alert, Platform, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, ScrollView, Animated, StyleSheet, TouchableOpacity, Text, Alert, Platform, Modal, TextInput } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -73,10 +73,17 @@ export default function PostLoginScreen({ route, navigation }) {
   const [customAlertTitle, setCustomAlertTitle] = useState('');
   const [customAlertMessage, setCustomAlertMessage] = useState('');
   
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
   const showCustomAlert = (title, message) => {
     setCustomAlertTitle(title);
     setCustomAlertMessage(message);
     setCustomAlertVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => setCustomAlertVisible(false));
   };
 
   const [currentUsername, setCurrentUsername] = useState('');
@@ -452,33 +459,16 @@ export default function PostLoginScreen({ route, navigation }) {
           </View>
         </Modal>
 
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={customAlertVisible}
-          onRequestClose={() => setCustomAlertVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }]}>
-              <Text style={[styles.modalTitle, { color: customAlertTitle.includes('⚠️') ? '#d9534f' : theme.text, marginBottom: 15 }]}>
-                {customAlertTitle}
-              </Text>
-              
-              <Text style={{ fontSize: 16, color: theme.text, textAlign: 'center', marginBottom: 25, lineHeight: 24, fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }) }}>
-                {customAlertMessage}
-              </Text>
-
-              <TouchableOpacity
-                style={[styles.modalBtn, { backgroundColor: '#2f4360' }]}
-                onPress={() => setCustomAlertVisible(false)}
-              >
-                <Text style={styles.saveBtnText}>
-                  {locale === 'ar' ? 'حسناً' : 'OK'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+      {customAlertVisible && (
+        <Animated.View style={[
+          styles.toastContainer, 
+          { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+        ]} pointerEvents="none">
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
+            {customAlertMessage}
+          </Text>
+        </Animated.View>
+      )}
       </View>
       </ScrollView>
     </View>
@@ -486,6 +476,29 @@ export default function PostLoginScreen({ route, navigation }) {
 }
 
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  toastContainer: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
