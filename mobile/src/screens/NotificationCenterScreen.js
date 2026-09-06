@@ -145,7 +145,6 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
       <View style={[styles.headerRow, { flexDirection: 'row' }]}>
-        <Text style={styles.screenTitle}>{t('notifications')}</Text>
         {notifications.length > 0 && (
           <TouchableOpacity 
             style={[styles.clearBtn, { flexDirection: 'row' }]} 
@@ -172,8 +171,6 @@ export default function NotificationCenterScreen({ route, navigation }) {const {
             <View style={styles.emptyIconCircle}>
               <Ionicons name="notifications-off-outline" size={48} color="rgba(47, 67, 96, 0.25)" />
             </View>
-            <Text style={styles.emptyTitle}>{localT('noNotifications')}</Text>
-            <Text style={styles.emptySubtitle}>{localT('noNotificationsSub')}</Text>
           </View>
         ) : (
           notifications.map((notif, idx) => {
