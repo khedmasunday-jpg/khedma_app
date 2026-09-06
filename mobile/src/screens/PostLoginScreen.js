@@ -11,7 +11,6 @@ import { logger } from '../utils/logger';
 
 const BUTTONS = [
   { labelKey: 'takeAttendance', label: 'تسجيل حضور', minRank: 2 },
-  { labelKey: 'birthdays', label: 'اعياد الميلاد', minRank: 2, excludeRanks: [4] },
   { labelKey: 'classDisplay', label: 'عرض الفصل', minRank: 2 },
   { labelKey: 'editVisitation', label: 'تعديل خدام الافتقاد', exactRank: 3 },
   { labelKey: 'addStudents', label: 'اضافه المخدومين', maxRank: 3 },
