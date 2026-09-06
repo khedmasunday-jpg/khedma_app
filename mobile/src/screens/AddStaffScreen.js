@@ -547,120 +547,26 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
           </View>
         </View>
 
-        {/* Gender */}
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: 'left' }]}>{locale === 'ar' ? 'النوع' : 'Gender'}</Text>
-          <View style={[styles.pickerContainer, { backgroundColor: theme.inputBackground, borderColor: theme.borderColor }]}>
-            {Platform.OS === 'web' ? (
-              <select
-                value={staff.gender || 'Male'}
-                onChange={e => handleChange('gender', e.target.value)}
-                style={styles.webSelect}
-              >
-                <option value="Male">{locale === 'ar' ? 'خادم' : 'Male'}</option>
-                <option value="Female">{locale === 'ar' ? 'خادمة' : 'Female'}</option>
-              </select>
-            ) : (
-              <Picker 
-                selectedValue={staff.gender || 'Male'} 
-                onValueChange={val => handleChange('gender', val)}
-                style={styles.nativePicker}
-                dropdownIconColor="#2f4360"
-              >
-                <Picker.Item label={locale === 'ar' ? 'خادم' : 'Male'} value="Male" />
-                <Picker.Item label={locale === 'ar' ? 'خادمة' : 'Female'} value="Female" />
-              </Picker>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: 'left' }]}>{t('telegramChatIdLabel')}</Text>
+          <Text style={[styles.label, { textAlign: 'left' }]}>معرف التليجرام (Telegram Chat ID)</Text>
           <View style={styles.inputWrapper}>
             <Ionicons name="paper-plane-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
             <TextInput 
               value={staff.telegramChatId} 
               onChangeText={val => handleChange('telegramChatId', val)} 
               keyboardType="numeric"
-              style={[styles.input, { flex: 1, textAlign: 'left' }]} 
-              placeholder={t('telegramChatIdPlaceholder')}
+              style={[styles.input, { flex: 1, textAlign: 'right' }]} 
+              placeholder="مثال: 123456789"
               placeholderTextColor={theme.textMuted}
             />
           </View>
           <Text style={styles.contactHint}>
-            💡 {t('telegramChatIdHint')}
+            💡 للحصول عليه أرسل /start لبوت التليجرام
           </Text>
         </View>
         
-        {}
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: 'left' }]}>{t('birthdate')}</Text>
-          <View style={styles.pickerWrapper}>
-            <Ionicons name="calendar-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
-            {Platform.OS === 'web' ? (
-              <>
-                <View style={{ flex: 1, minHeight: 40, justifyContent: 'center', paddingLeft: 12 }} pointerEvents="none">
-                  <Text style={{ color: staff.birthdate ? theme.text : theme.textMuted, fontSize: 15 }}>
-                    {staff.birthdate ? formatDateDDMMYYYY(staff.birthdate) : 'dd/mm/yyyy'}
-                  </Text>
-                </View>
-                <input
-                  type="date"
-                  value={staff.birthdate ? staff.birthdate.split('T')[0] : ''}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v) {
-                      const d = new Date(v);
-                      d.setFullYear(PICKER_YEAR);
-                      handleChange('birthdate', d.toISOString());
-                    } else {
-                      handleChange('birthdate', '');
-                    }
-                  }}
-                  onClick={(e) => {
-                    try { e.target.showPicker(); } catch (err) {}
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    opacity: 0,
-                    cursor: 'pointer',
-                    zIndex: 2,
-                  }}
-                />
-              </>
-            ) : (
-              <TouchableOpacity
-                style={styles.nativeDatePickerBtn}
-                onPress={() => setShowCalendar(true)}
-              >
-                <Text style={styles.datePickerBtnText}>
-                  {staff.birthdate ? formatDateNoYear(staff.birthdate) : t('pickBirthdate')}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          {DateTimePickerModal && (
-            <DateTimePickerModal
-              isVisible={showCalendar}
-              mode="date"
-              date={toPickerDateObj(staff.birthdate)}
-              onConfirm={(date) => { setShowCalendar(false); handleChange('birthdate', toStoredIsoWithPickerYear(date)); }}
-              onCancel={() => setShowCalendar(false)}
-            />
-          )}
-        </View>
-        
-        {}
-        {!staff.role ? (
-          <View style={styles.promptBox}>
-            <Ionicons name="information-circle-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
-            <Text style={styles.promptText}>{t('chooseRoleFirstPrompt')}</Text>
-          </View>
-        ) : (staff.role === 'teacher' || staff.role === 'co-principal') ? (
+        {/* Role-dependent inputs */}
+        {!staff.role ? null : (staff.role === 'teacher' || staff.role === 'co-principal') ? (
           <>
             {}
             <View style={styles.inputGroup}>

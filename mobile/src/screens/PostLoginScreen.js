@@ -385,20 +385,20 @@ export default function PostLoginScreen({ route, navigation }) {
                 autoCapitalize="none"
               />
 
-              <Text style={[styles.inputLabel, { color: theme.text }]}>
-                {t('telegramChatIdLabel')}
+              <Text style={[styles.inputLabel, { color: theme.text, textAlign: 'left' }]}>
+                معرف التليجرام (Telegram Chat ID)
               </Text>
               <TextInput
-                style={[styles.textInput, { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.borderColor }]}
+                style={[styles.textInput, { backgroundColor: theme.inputBackground, color: theme.text, borderColor: theme.borderColor, textAlign: 'right' }]}
                 value={telegramChatId}
                 onChangeText={setTelegramChatId}
-                placeholder={t('telegramChatIdPlaceholder')}
+                placeholder="مثال: 123456789"
                 placeholderTextColor={theme.textMuted}
                 keyboardType="numeric"
                 autoCapitalize="none"
               />
               <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: -6, marginBottom: 10, textAlign: 'left' }}>
-                💡 {t('telegramChatIdHint')}
+                💡 للحصول عليه أرسل /start لبوت التليجرام
               </Text>
 
               <Text style={[styles.inputLabel, { color: theme.text }]}>

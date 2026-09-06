@@ -236,7 +236,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
   );
 
   const canDelete = (requesterRole === 'admin' || requesterRole === 'principal') && user;
-  const editableFields = ['fullName', 'username', 'telegramChatId', 'birthdate'];
+  const editableFields = ['fullName', 'username', 'telegramChatId'];
   
   const classTranslations = {
     'فصل السيرافيم': 'classSeraphim',
@@ -258,7 +258,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
       case 'fullName': return t('fullNameLabel');
       case 'username': return t('usernameLabel');
       case 'phonenumber': return t('phoneLabel');
-      case 'telegramChatId': return t('telegramChatIdLabel');
+      case 'telegramChatId': return "معرف التليجرام (Telegram Chat ID)";
       case 'birthdate': return t('birthdate');
       case 'role': return t('roleLabel');
       case 'assignedlevel': return t('gradeLevel');
@@ -382,20 +382,20 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                     <TextInput
                       value={getSafeField(key) ? String(getSafeField(key)) : ''}
                       onChangeText={val => handleChange(key, val)}
-                      placeholder={t('telegramChatIdPlaceholder')}
+                      placeholder="مثال: 123456789"
                       keyboardType="numeric"
-                      style={[styles.input, { textAlign: 'left' }]}
+                      style={[styles.input, { textAlign: 'right' }]}
                     />
                     <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 3 }}>
-                      💡 {t('telegramChatIdHint')}
+                      💡 للحصول عليه أرسل /start لبوت التليجرام
                     </Text>
                   </View>
                 ) : (
-                <TextInput
-                  value={getSafeField(key) ? String(getSafeField(key)) : ''}
-                  onChangeText={val => handleChange(key, val)}
-                  style={[styles.input, { textAlign: 'right' }]}
-                />
+                  <TextInput
+                    value={getSafeField(key) ? String(getSafeField(key)) : ''}
+                    onChangeText={val => handleChange(key, val)}
+                    style={[styles.input, { textAlign: 'right' }]}
+                  />
                 )
               )}
             </View>
@@ -448,37 +448,6 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
               </View>
             </View>
           )}
-
-          {/* Gender Field */}
-          <View style={styles.fieldRow}>
-            <Text style={[styles.label, { textAlign: 'left' }]}>
-              {isRtl ? 'النوع' : 'Gender'}
-            </Text>
-            <View style={[styles.inputWrapper, { backgroundColor: theme.inputBackground }]}>
-              {Platform.OS === 'web' ? (
-                <View style={styles.webSelectWrapper}>
-                  <select
-                    value={getSafeField('gender') || 'Male'}
-                    onChange={(e) => handleChange('gender', e.target.value)}
-                    style={styles.webSelect}
-                  >
-                    <option value="Male">{isRtl ? 'خادم' : 'Male'}</option>
-                    <option value="Female">{isRtl ? 'خادمة' : 'Female'}</option>
-                  </select>
-                  <Ionicons name="chevron-down-outline" size={16} color={theme.iconColor} style={{ position: 'absolute', right: 12 }} />
-                </View>
-              ) : (
-                <Picker 
-                  selectedValue={getSafeField('gender') || 'Male'} 
-                  onValueChange={val => handleChange('gender', val)}
-                  style={styles.nativePicker}
-                >
-                  <Picker.Item label={isRtl ? 'خادم' : 'Male'} value="Male" />
-                  <Picker.Item label={isRtl ? 'خادمة' : 'Female'} value="Female" />
-                </Picker>
-              )}
-            </View>
-          </View>
 
           {}
           {(getSafeField('role') === 'teacher' || getSafeField('role') === 'co-principal') && (
