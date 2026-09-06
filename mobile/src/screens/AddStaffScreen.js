@@ -503,7 +503,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
             <TextInput 
               value={staff.fullName} 
               onChangeText={val => handleChange('fullName', val)} 
-              style={[styles.input, { textAlign: 'left' }]} 
+              style={[styles.input, { textAlign: 'right' }]} 
               placeholder={t('fullNameLabel')}
               placeholderTextColor={theme.textMuted}
             />

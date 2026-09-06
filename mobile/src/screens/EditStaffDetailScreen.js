@@ -394,7 +394,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                 <TextInput
                   value={getSafeField(key) ? String(getSafeField(key)) : ''}
                   onChangeText={val => handleChange(key, val)}
-                  style={[styles.input, { textAlign: 'left' }]}
+                  style={[styles.input, { textAlign: 'right' }]}
                 />
                 )
               )}
