@@ -61,11 +61,11 @@ router.get('/co-principal/teachers', verifyToken, authorizeRoles('co-principal')
     const allTeachers = await User.find({ 
       role: 'teacher', 
       isActive: true 
-    }).select('_id fullName assignedclass');    
+    }).select('_id fullName fullName_enc username assignedclass role');    
     
     const allClasses = await Class.find().populate({
       path: 'teacher',
-      select: 'fullName _id role assignedclass'
+      select: 'fullName fullName_enc username _id role assignedclass'
     });
     const yearClasses = allClasses.filter(c => targetLevels.includes(c.level));    
     

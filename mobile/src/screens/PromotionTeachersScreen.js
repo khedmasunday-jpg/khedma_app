@@ -28,11 +28,11 @@ export default function PromotionTeachersScreen() {
     try {
       setLoading(true);
       const [usersRes, classesRes] = await Promise.all([
-        Axios.get(`${API_URL}/users`, { headers: { Authorization: token } }),
+        Axios.get(`${API_URL}/users/staff-safe`, { headers: { Authorization: token } }),
         Axios.get(`${API_URL}/classes`, { headers: { Authorization: token } })
       ]);
       
-      const staff = usersRes.data.filter(u => u.role === 'teacher' || u.role === 'co-principal');
+      const staff = usersRes.data;
       setTeachers(staff);
       setClasses(classesRes.data);
     } catch (err) {
