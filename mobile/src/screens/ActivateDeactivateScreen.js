@@ -374,11 +374,11 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     padding: 16,
   },
   card: {
-    alignItems: 'center',
-    backgroundColor: theme.cardBackground,
-    borderRadius: 12,
     padding: 14,
     marginBottom: 12,
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -404,15 +404,19 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   cardMiddle: {
     flex: 1,
     justifyContent: 'center',
+    flexShrink: 1,
   },
   nameText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: theme.text,
-    marginBottom: 4,
+    marginBottom: 6,
+    flexWrap: 'wrap',
   },
   badgeRow: {
     alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 6,
   },
   roleBadge: {
@@ -449,10 +453,9 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 8,
-    minWidth: 95,
   },
   toggleBtnActivate: {
     backgroundColor: '#137333',
