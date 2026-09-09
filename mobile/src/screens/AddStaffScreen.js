@@ -1191,8 +1191,8 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     backgroundColor: theme.cardBackground,
     borderRadius: 16,
     padding: 24,
-    width: '85%',
-    maxWidth: 400,
+    width: '100%',
+    maxWidth: 600,
   },
   modalHeader: {
     flexDirection: 'row',
