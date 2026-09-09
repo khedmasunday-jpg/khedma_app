@@ -834,12 +834,12 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.secondaryButton} onPress={handleAddOne}>
             <Ionicons name="add-circle-outline" size={20} color={theme.iconColor} style={{ marginRight: 6 }} />
-            <Text style={styles.secondaryButtonText}>{t('addToQueue')}</Text>
+            <Text style={styles.secondaryButtonText} adjustsFontSizeToFit numberOfLines={1}>{t('addToQueue')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.primaryButton} onPress={handleSubmit}>
             <Ionicons name="cloud-upload-outline" size={20} color="#ffffff" style={{ marginRight: 6 }} />
-            <Text style={styles.primaryButtonText}>{t('submitAll')}</Text>
+            <Text style={styles.primaryButtonText} adjustsFontSizeToFit numberOfLines={1}>{t('submitAll')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -1148,6 +1148,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 8,
   },
   primaryButtonText: {
+    flexShrink: 1,
     color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 15,
@@ -1164,6 +1165,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     borderRadius: 8,
   },
   secondaryButtonText: {
+    flexShrink: 1,
     color: theme.text,
     fontWeight: 'bold',
     fontSize: 15,

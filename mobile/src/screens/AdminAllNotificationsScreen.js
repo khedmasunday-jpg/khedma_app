@@ -145,7 +145,7 @@ export default function AdminAllNotificationsScreen({ route, navigation }) {cons
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       {}
       <View style={[styles.headerRow, { flexDirection: 'row' }]}>
-        <Text style={styles.screenTitle}>{isRtl ? 'جميع الإشعارات للمشرف' : 'Admin All Notifications'}</Text>
+        <Text style={styles.screenTitle} adjustsFontSizeToFit numberOfLines={1}>{isRtl ? 'جميع الإشعارات للمشرف' : 'Admin All Notifications'}</Text>
         {notifications.length > 0 && (
           <TouchableOpacity style={styles.clearBtn} onPress={handleClearAll}>
             <Text style={styles.clearBtnText}>{localT('clearAll')}</Text>
@@ -223,6 +223,7 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontWeight: 'bold',
     color: theme.text,
     fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
+    flexShrink: 1,
   },
   clearBtn: {
     alignItems: 'center',
