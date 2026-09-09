@@ -97,13 +97,13 @@ function AppNavigator() {
       <TouchableOpacity
         onPress={onPress}
         style={{
-          marginLeft: 15,
-          width: 44,
-          height: 44,
+          marginLeft: 10,
+          width: 38,
+          height: 38,
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor: theme.inputBackground,
-          borderRadius: 24,
+          borderRadius: 19,
           borderWidth: 1,
           borderColor: theme.borderColor,
           ...Platform.select({
@@ -113,7 +113,7 @@ function AppNavigator() {
           }),
         }}
       >
-        <Ionicons name="arrow-back-outline" size={22} color={theme.iconColor} />
+        <Ionicons name={locale === 'ar' ? "arrow-forward" : "arrow-back"} size={20} color={theme.iconColor} />
       </TouchableOpacity>
     );
   };
@@ -131,6 +131,7 @@ function AppNavigator() {
         headerTitleStyle: {
           fontFamily: Platform.select({ ios: 'Georgia', android: 'serif', web: 'Georgia, serif' }),
           fontWeight: 'bold',
+          fontSize: 16,
         },
         headerTitleAlign: 'center',
         headerBackVisible: false,
@@ -141,16 +142,16 @@ function AppNavigator() {
           />
         ),
         headerRight: () => (
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15, gap: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10, gap: 8 }}>
             <TouchableOpacity 
               onPress={toggleTheme} 
               style={{ 
-                width: 44,
-                height: 44,
+                width: 38,
+                height: 38,
                 justifyContent: 'center',
                 alignItems: 'center',
                 backgroundColor: theme.inputBackground, 
-                borderRadius: 24,
+                borderRadius: 19,
                 borderWidth: 1,
                 borderColor: theme.borderColor,
                 ...Platform.select({
@@ -160,17 +161,17 @@ function AppNavigator() {
                 }),
               }}
             >
-              <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={22} color={theme.iconColor} />
+              <Ionicons name={isDarkMode ? "sunny-outline" : "moon-outline"} size={20} color={theme.iconColor} />
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={toggleLanguage} 
               style={{ 
-                width: 44,
-                height: 44,
+                width: 38,
+                height: 38,
                 justifyContent: 'center',
                 alignItems: 'center',
                 backgroundColor: theme.inputBackground, 
-                borderRadius: 24,
+                borderRadius: 19,
                 borderWidth: 1,
                 borderColor: theme.borderColor,
                 ...Platform.select({
@@ -180,7 +181,7 @@ function AppNavigator() {
                 }),
               }}
             >
-              <Ionicons name="globe-outline" size={22} color={theme.iconColor} />
+              <Ionicons name="globe-outline" size={20} color={theme.iconColor} />
             </TouchableOpacity>
           </View>
         ),
