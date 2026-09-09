@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
-  View, Text, TextInput, ScrollView,
+  View, Text, TextInput, ScrollView, Animated,
   StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableOpacity, Switch, Modal, FlatList
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -47,6 +47,23 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
   const [contactPickerVisible, setContactPickerVisible] = useState(false);
   const [contactsList, setContactsList] = useState([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
+
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  const showToast = (message, callback) => {
+    setToastMessage(message);
+    setToastVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(1500),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => {
+      setToastVisible(false);
+      if (callback) callback();
+    });
+  };
 
   const showAlert = (title, message) => Alert.alert(title, message);
 
@@ -201,7 +218,10 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
       }
 
       try { setOrigBirthdate(getSafeField('birthdate') || null); } catch (e) {}
-      Alert.alert(t('success'), t('editStaffSuccess'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
+      const msg = locale === 'ar' ? 'تم تعديل الخادم بنجاح' : 'Staff edited successfully';
+      showToast(msg, () => {
+        navigation.goBack();
+      });
     } catch (err) {
       const msg = err.response?.data?.msg || t('editStaffFailure');
       Alert.alert(t('error'), msg);
@@ -236,7 +256,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
   );
 
   const canDelete = (requesterRole === 'admin' || requesterRole === 'principal') && user;
-  const editableFields = ['fullName', 'username', 'telegramChatId'];
+  const editableFields = ['fullName', 'phonenumber', 'birthdate', 'username', 'telegramChatId'];
   
   const classTranslations = {
     'فصل السيرافيم': 'classSeraphim',
@@ -669,11 +689,44 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
           </View>
         </View>
       </Modal>
+      {toastVisible && (
+        <Animated.View style={[
+          styles.toastContainer,
+          { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+        ]} pointerEvents="none">
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
+            {toastMessage}
+          </Text>
+        </Animated.View>
+      )}
     </>
   );
 }
 
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  toastContainer: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
   container: { 
     flex: 1, 
     backgroundColor: 'transparent' 

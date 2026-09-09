@@ -509,8 +509,99 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
             />
           </View>
         </View>
-        
-        {}
+
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('phoneLabel')}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.borderColor, borderRadius: 10, backgroundColor: theme.cardBackground, overflow: 'hidden', height: 45 }}>
+            <TouchableOpacity
+              onPress={pickContactForStaff}
+              style={{ paddingHorizontal: 12, paddingVertical: 10, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderRightColor: 'rgba(47,67,96,0.15)' }}
+              activeOpacity={0.6}
+            >
+              <Ionicons name="call-outline" size={20} color={theme.iconColor} />
+            </TouchableOpacity>
+            <TextInput
+              value={staff.phonenumber}
+              onChangeText={val => handleChange('phonenumber', val)}
+              style={[styles.input, { flex: 1, borderWidth: 0, height: 45, textAlign: 'left', outlineStyle: 'none' }]}
+              keyboardType="phone-pad"
+            />
+          </View>
+          <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 3 }}>
+            {locale === 'ar' ? '📞 اضغط على أيقونة الهاتف لاستيراد رقم' : '📞 Tap the phone icon to pick from contacts'}
+          </Text>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, { textAlign: 'left' }]}>{t('birthdate')}</Text>
+          <View style={{ marginBottom: 4 }}>
+            {Platform.OS === 'web' ? (
+              <View style={styles.webDateWrapper}>
+                <View 
+                  pointerEvents="none" 
+                  style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 14,
+                    zIndex: 1
+                  }}
+                >
+                  <Text style={{ color: theme.text, fontSize: 15 }}>
+                    {staff.birthdate ? formatDateDDMMYYYY(staff.birthdate) : 'dd/mm/yyyy'}
+                  </Text>
+                  <Ionicons name="calendar-outline" size={18} color={theme.iconColor} />
+                </View>
+                <input
+                  type="date"
+                  value={staff.birthdate ? staff.birthdate.split('T')[0] : ''}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v) {
+                      const d = new Date(v);
+                      d.setFullYear(2000);
+                      handleChange('birthdate', d.toISOString());
+                    } else {
+                      handleChange('birthdate', '');
+                    }
+                  }}
+                  onClick={(e) => {
+                    try { e.target.showPicker(); } catch (err) {}
+                  }}
+                  style={styles.webDateInput}
+                />
+              </View>
+            ) : (
+              <>
+                <TouchableOpacity 
+                  style={[styles.btnPicker, { flexDirection: 'row' }]} 
+                  onPress={() => setShowCalendar(true)}
+                >
+                  <Ionicons name="calendar-outline" size={18} color={theme.iconColor} style={{ marginHorizontal: 6 }} />
+                  <Text style={styles.btnPickerText}>
+                    {staff.birthdate ? `${t('birthdate')}: ${formatDateDDMMYYYY(staff.birthdate)}` : (locale === 'ar' ? 'اختر تاريخ الميلاد' : 'Pick birthdate')}
+                  </Text>
+                </TouchableOpacity>
+                {DateTimePickerModal && (
+                  <DateTimePickerModal
+                    isVisible={showCalendar}
+                    mode="date"
+                    date={staff.birthdate ? new Date(staff.birthdate) : new Date()}
+                    onConfirm={(date) => {
+                      setShowCalendar(false);
+                      const d = new Date(date);
+                      d.setFullYear(2000);
+                      handleChange('birthdate', d.toISOString());
+                    }}
+                    onCancel={() => setShowCalendar(false)}
+                  />
+                )}
+              </>
+            )}
+          </View>
+        </View>
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: 'left' }]}>{t('roleLabel')}</Text>
           <View style={styles.pickerWrapper}>
