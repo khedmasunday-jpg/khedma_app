@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
   Modal,
-  FlatList
+  FlatList,
+  Animated
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
@@ -50,6 +51,23 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
 
   const showAlert = (title, message, onOk = null) => {
     Alert.alert(title, message, [{ text: "OK", onPress: onOk }]);
+  };
+
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  const showToast = (message, callback) => {
+    setToastMessage(message);
+    setToastVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(1500),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => {
+      setToastVisible(false);
+      if (callback) callback();
+    });
   };
 
   const [contactPickerVisible, setContactPickerVisible] = useState(false);
@@ -220,9 +238,10 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      showAlert(t('success'), locale === 'ar' ? 'تم حفظ التعديل بنجاح.' : 'Student details updated successfully.', () =>
-        navigation.goBack()
-      );
+      const successMsg = locale === 'ar' ? 'تم حفظ التعديل بنجاح.' : 'Student details updated successfully.';
+      showToast(successMsg, () => {
+        navigation.goBack();
+      });
     } catch (err) {
       logger.error("❌ Save error:", err.response?.data || err.message);
       showAlert(t('error'), locale === 'ar' ? 'فشل حفظ التعديل' : 'Failed to save student data.');
@@ -621,11 +640,44 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
         </View>
       </View>
     </Modal>
+    {toastVisible && (
+      <Animated.View style={[
+        styles.toastContainer,
+        { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+      ]} pointerEvents="none">
+        <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
+          {toastMessage}
+        </Text>
+      </Animated.View>
+    )}
     </View>
   );
 }
 
 const getStyles = (theme, isDarkMode) => StyleSheet.create({
+  toastContainer: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
   container: { 
     flex: 1, 
     backgroundColor: 'transparent' 
