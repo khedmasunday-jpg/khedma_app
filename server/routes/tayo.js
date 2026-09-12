@@ -4,7 +4,7 @@ const { verifyToken, authorizeRoles } = require('../middleware/auth');
 const Student = require('../models/Student');
 const TayoLog = require('../models/TayoLog');
 
-router.get('/students', verifyToken, authorizeRoles('admin', 'principal', 'co-principal', 'teacher'), async (req, res) => {
+router.get('/students', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal', 'teacher'), async (req, res) => {
   try {
     const docs = await Student.find({});
     const result = docs.map(doc => {
@@ -25,7 +25,7 @@ router.get('/students', verifyToken, authorizeRoles('admin', 'principal', 'co-pr
   }
 });
 
-router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'co-principal', 'teacher'), async (req, res) => {
+router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal', 'teacher'), async (req, res) => {
   try {
     const { studentId, amount, reason } = req.body;
     if (!studentId || amount === undefined) {
@@ -60,7 +60,7 @@ router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'c
   }
 });
 
-router.get('/logs', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), async (req, res) => {
+router.get('/logs', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), async (req, res) => {
   try {
     const logs = await TayoLog.find({})
       .populate('givenBy', 'fullName_enc role username')

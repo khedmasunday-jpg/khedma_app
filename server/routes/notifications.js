@@ -3,7 +3,7 @@ const router = express.Router();
 const Notification = require('../models/Notification');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
 
-router.get('/all', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), async (req, res) => {
+router.get('/all', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), async (req, res) => {
   try {
     const notifications = await Notification.find({})
       .populate('recipient', 'fullName username')
@@ -16,7 +16,7 @@ router.get('/all', verifyToken, authorizeRoles('admin', 'principal', 'co-princip
   }
 });
 
-router.delete('/clear-all', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), async (req, res) => {
+router.delete('/clear-all', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), async (req, res) => {
   try {
     await Notification.deleteMany({});
     res.json({ msg: 'All notifications cleared successfully' });

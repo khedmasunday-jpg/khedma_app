@@ -619,6 +619,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               >
                 <option value="">-- اختر المنصب --</option>
                 {requesterRole === 'admin' && stats.principalCount === 0 && <option value="principal">أمين الخدمة</option>}
+                {(requesterRole === 'admin' || requesterRole === 'principal') && <option value="assistant-principal">أمين مساعد</option>}
                 {stats.coPrincipalCount < 3 && (requesterRole === 'admin' || requesterRole === 'principal') && <option value="co-principal">أمين مرحلة</option>}
                 <option value="teacher">خادم فصل</option>
               </select>
@@ -631,6 +632,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               >
                 <Picker.Item label="-- اختر المنصب --" value="" />
                 {requesterRole === 'admin' && stats.principalCount === 0 && <Picker.Item label="أمين الخدمة" value="principal" />}
+                {(requesterRole === 'admin' || requesterRole === 'principal') && <Picker.Item label="أمين مساعد" value="assistant-principal" />}
                 {stats.coPrincipalCount < 3 && (requesterRole === 'admin' || requesterRole === 'principal') && <Picker.Item label="أمين مرحلة" value="co-principal" />}
                 <Picker.Item label="خادم فصل" value="teacher" />
               </Picker>

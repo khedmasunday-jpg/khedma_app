@@ -12,14 +12,14 @@ import { logger } from '../utils/logger';
 
 const BUTTONS = [
   { labelKey: 'takeAttendance', label: 'تسجيل حضور', minRank: 2 },
-  { labelKey: 'birthdays', label: 'اعياد الميلاد', minRank: 2, excludeRanks: [4] },
+  { labelKey: 'birthdays', label: 'اعياد الميلاد', minRank: 2, excludeRanks: [2.5, 4] },
   { labelKey: 'classDisplay', label: 'عرض الفصل', minRank: 2 },
   { labelKey: 'editVisitation', label: 'تعديل خدام الافتقاد', exactRank: 3 },
   { labelKey: 'addStudents', label: 'اضافه المخدومين', maxRank: 3 },
-  { labelKey: 'addStaff', label: 'اضافه خدام', minRank: 1, maxRank: 2, excludeRanks: [4] },
+  { labelKey: 'addStaff', label: 'اضافه خدام', minRank: 1, maxRank: 2.5, excludeRanks: [4] },
   { labelKey: 'activateDeactivate', label: 'activate / deactivate', minRank: 1, maxRank: 2, excludeRanks: [3,4] },
-  { labelKey: 'allNotifications', label: 'إشعارات النظام', minRank: 1, maxRank: 2, excludeRanks: [3,4] },
-  { labelKey: 'editStaff', label: 'تعديل بينات الخدام', maxRank: 2 },
+  { labelKey: 'allNotifications', label: 'إشعارات النظام', minRank: 1, maxRank: 2.5, excludeRanks: [3,4] },
+  { labelKey: 'editStaff', label: 'تعديل بينات الخدام', maxRank: 2.5 },
   { labelKey: 'editStudents', label: 'تعديل بينات المخدومين', maxRank: 3 },
   { labelKey: 'tayo', label: 'الطايو', minRank: 1 },
   { labelKey: 'logs', label: 'Logs', exactRank: 1 },
@@ -55,6 +55,7 @@ const BUTTON_ICONS = {
 const roleToRank = {
   admin: 1,
   principal: 2,
+  'assistant-principal': 2.5,
   'co-principal': 3,
   teacher: 4,
 };
@@ -285,6 +286,7 @@ export default function PostLoginScreen({ route, navigation }) {
     switch (r) {
       case 'admin': return t('roleAdmin');
       case 'principal': return t('rolePrincipal');
+      case 'assistant-principal': return t('roleAssistantPrincipal');
       case 'co-principal': return t('roleCoPrincipal');
       case 'teacher': return t('roleTeacher');
       default: return r;

@@ -89,8 +89,8 @@ router.delete('/', verifyToken, authorizeRoles('admin'), async (req, res) => {
 });
 
 router.get('/staff-safe', verifyToken, userController.getStaffSafeData);
-router.get('/staff', verifyToken, authorizeRoles('admin', 'principal'), userController.getStaffFullData);
-router.post('/staff', verifyToken, authorizeRoles('admin', 'principal'), userController.addStaff);
+router.get('/staff', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal'), userController.getStaffFullData);
+router.post('/staff', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal'), userController.addStaff);
 router.get('/staff-stats', verifyToken, userController.getStaffStats);
 
 router.get('/me', verifyToken, async (req, res) => {
@@ -207,7 +207,7 @@ router.get('/logs/all', verifyToken, authorizeRoles('admin'), async (req, res) =
   }
 });
 
-router.delete('/:id', verifyToken, authorizeRoles('admin', 'principal'), async (req, res) => {
+router.delete('/:id', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
@@ -338,14 +338,15 @@ router.patch('/me/update-credentials', verifyToken, async (req, res) => {
   }
 });
 
-router.patch('/:id/credentials', verifyToken, authorizeRoles('admin', 'principal'), async (req, res) => {
+router.patch('/:id/credentials', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal'), async (req, res) => {
   try {
     const { username, password } = req.body;
     
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    if (req.user.role === 'principal' && (user.role === 'admin' || user.role === 'principal')) {      return res.status(403).json({ msg: 'Principals cannot change credentials of admins or principals' });
+    if ((req.user.role === 'principal' || req.user.role === 'assistant-principal') && (user.role === 'admin' || user.role === 'principal' || (req.user.role === 'assistant-principal' && user.role === 'assistant-principal'))) {
+      return res.status(403).json({ msg: 'You do not have permission to change these credentials' });
     }
 
     if (username) user.username = username;

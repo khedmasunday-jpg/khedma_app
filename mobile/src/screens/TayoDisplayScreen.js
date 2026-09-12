@@ -139,7 +139,7 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
     <View style={[styles.container, { backgroundColor: theme.background }, { backgroundColor: theme.background }]}>
       <View style={[styles.headerRow, { justifyContent: 'flex-end' }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {(role === 'admin' || role === 'co-principal' || role === 'principal') && (
+          {(role === 'admin' || role === 'co-principal' || role === 'principal' || role === 'assistant-principal') && (
             <TouchableOpacity style={styles.iconButton} onPress={fetchGlobalLogs}>
               <Ionicons name="receipt-outline" size={20} color={theme.iconColor} />
             </TouchableOpacity>

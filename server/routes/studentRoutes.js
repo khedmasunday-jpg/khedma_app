@@ -107,19 +107,19 @@ router.post('/', verifyToken, [
   return studentController.bulkAddStudents(req, res, next);
 });
 
-router.delete('/:id', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), studentController.deleteStudent);
-router.delete('/', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), studentController.bulkDeleteStudents);
+router.delete('/:id', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), studentController.deleteStudent);
+router.delete('/', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), studentController.bulkDeleteStudents);
 
-router.post('/add', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), [ body('student').exists() ], (req, res, next) => {
+router.post('/add', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), [ body('student').exists() ], (req, res, next) => {
   const errors = validationResult(req); if (!errors.isEmpty()) return res.status(400).json({ msg: 'Invalid input', errors: errors.array() });
   return studentController.addStudent(req, res, next);
 });
-router.post('/promote', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), studentController.promoteTeacher);
-router.post('/assign', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), studentController.assignStudents);
-router.post('/change-assignment', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), studentController.changeAssignment);
+router.post('/promote', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), studentController.promoteTeacher);
+router.post('/assign', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), studentController.assignStudents);
+router.post('/change-assignment', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), studentController.changeAssignment);
 
-router.get('/export-graduates', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), studentController.exportGraduates);
-router.delete('/delete-graduates', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), studentController.deleteGraduates);
+router.get('/export-graduates', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), studentController.exportGraduates);
+router.delete('/delete-graduates', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), studentController.deleteGraduates);
 
 router.get('/data', verifyToken, studentController.getStudentData);
 router.get('/search', verifyToken, studentController.searchStudents);

@@ -94,7 +94,7 @@ function AppNavigator() {
   const CustomBackButton = ({ onPress, canGoBack }) => {
     if (!canGoBack) return null;
     return (
-      <TouchableOpacity
+      <TouchableOpacity 
         onPress={onPress}
         style={{
           marginLeft: 10,
@@ -136,10 +136,12 @@ function AppNavigator() {
         headerTitleAlign: 'center',
         headerBackVisible: false,
         headerLeft: ({ canGoBack }) => (
-          <CustomBackButton
-            canGoBack={canGoBack}
-            onPress={() => navigation.goBack()}
-          />
+          <View style={{ width: 94, alignItems: 'flex-start' }}>
+            <CustomBackButton
+              canGoBack={canGoBack}
+              onPress={() => navigation.goBack()}
+            />
+          </View>
         ),
         headerRight: () => (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10, gap: 8 }}>

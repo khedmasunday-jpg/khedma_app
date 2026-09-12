@@ -126,7 +126,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
       let meAssignedLevel = null;
       try {
         const meRes = await client.get('/auth/me');
-        setIsCoPrincipal(meRes.data.role === 'co-principal' || meRes.data.role === 'admin' || meRes.data.role === 'principal' || meRes.data.isClassLeader === true);
+        setIsCoPrincipal(meRes.data.role === 'co-principal' || meRes.data.role === 'assistant-principal' || meRes.data.role === 'admin' || meRes.data.role === 'principal' || meRes.data.isClassLeader === true);
         meAssignedLevel = meRes.data.assignedlevel;
         logger.log('Auth check - role:', meRes.data.role, 'isCoPrincipal will be:', meRes.data.role === 'co-principal');
       } catch (e) {
