@@ -283,6 +283,10 @@ router.patch('/:id/role', verifyToken, authorizeRoles('admin', 'principal', 'ass
       const principalCount = allUsers.filter(u => u.role === 'principal').length;
       if (principalCount >= 1) return res.status(400).json({ msg: 'A principal already exists' });
     }
+    if (role === 'assistant-principal') {
+      const apCount = allUsers.filter(u => u.role === 'assistant-principal').length;
+      if (apCount >= 1) return res.status(400).json({ msg: 'An assistant principal already exists' });
+    }
     if (role === 'co-principal') {
         const coPrincipalCount = allUsers.filter(u => u.role === 'co-principal').length;
         if (coPrincipalCount >= 3) return res.status(400).json({ msg: 'Maximum number of co-principals reached' });

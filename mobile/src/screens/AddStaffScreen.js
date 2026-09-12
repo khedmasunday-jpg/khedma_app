@@ -515,43 +515,32 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
           <Text style={[styles.label, { textAlign: 'left' }]}>{t('birthdate')}</Text>
           <View style={{ marginBottom: 4 }}>
             {Platform.OS === 'web' ? (
-              <View style={styles.webDateWrapper}>
-                <View 
-                  pointerEvents="none" 
-                  style={{
-                    position: 'absolute',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingHorizontal: 14,
-                    zIndex: 1
-                  }}
-                >
-                  <Text style={{ color: theme.text, fontSize: 15 }}>
-                    {staff.birthdate ? formatDateDDMMYYYY(staff.birthdate) : 'dd/mm/yyyy'}
-                  </Text>
-                  <Ionicons name="calendar-outline" size={18} color={theme.iconColor} />
-                </View>
-                <input
-                  type="date"
-                  value={staff.birthdate ? staff.birthdate.split('T')[0] : ''}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v) {
-                      const d = new Date(v);
-                      d.setFullYear(2000);
-                      handleChange('birthdate', d.toISOString());
-                    } else {
-                      handleChange('birthdate', '');
-                    }
-                  }}
-                  onClick={(e) => {
-                    try { e.target.showPicker(); } catch (err) {}
-                  }}
-                  style={styles.webDateInput}
-                />
-              </View>
+              <input
+                type="date"
+                value={staff.birthdate ? staff.birthdate.split('T')[0] : ''}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v) {
+                    const [year, month, day] = v.split('-');
+                    const d = new Date(2000, Number(month) - 1, Number(day), 12, 0, 0);
+                    handleChange('birthdate', d.toISOString());
+                  } else {
+                    handleChange('birthdate', '');
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  height: 45,
+                  padding: '10px 14px',
+                  fontSize: '15px',
+                  border: `1px solid ${theme.borderColor}`,
+                  borderRadius: '10px',
+                  backgroundColor: theme.cardBackground,
+                  color: theme.text,
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
             ) : (
               <>
                 <TouchableOpacity 
@@ -598,7 +587,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               >
                 <option value="">-- اختر المنصب --</option>
                 {requesterRole === 'admin' && stats.principalCount === 0 && <option value="principal">أمين الخدمة</option>}
-                {(requesterRole === 'admin' || requesterRole === 'principal') && <option value="assistant-principal">أمين مساعد</option>}
+                {(requesterRole === 'admin' || requesterRole === 'principal') && stats.assistantPrincipalCount === 0 && <option value="assistant-principal">أمين مساعد</option>}
                 {stats.coPrincipalCount < 3 && (requesterRole === 'admin' || requesterRole === 'principal') && <option value="co-principal">أمين مرحلة</option>}
                 <option value="teacher">خادم فصل</option>
               </select>
@@ -611,7 +600,7 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
               >
                 <Picker.Item label="-- اختر المنصب --" value="" />
                 {requesterRole === 'admin' && stats.principalCount === 0 && <Picker.Item label="أمين الخدمة" value="principal" />}
-                {(requesterRole === 'admin' || requesterRole === 'principal') && <Picker.Item label="أمين مساعد" value="assistant-principal" />}
+                {(requesterRole === 'admin' || requesterRole === 'principal') && stats.assistantPrincipalCount === 0 && <Picker.Item label="أمين مساعد" value="assistant-principal" />}
                 {stats.coPrincipalCount < 3 && (requesterRole === 'admin' || requesterRole === 'principal') && <Picker.Item label="أمين مرحلة" value="co-principal" />}
                 <Picker.Item label="خادم فصل" value="teacher" />
               </Picker>

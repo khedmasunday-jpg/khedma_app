@@ -72,16 +72,18 @@ function generateRandomPassword(length = 10) {
 
 exports.getStaffStats = async (req, res) => {
   try {
-    if (!['admin', 'principal'].includes(req.user.role)) return res.status(403).json({ msg: 'Access denied' });
+    if (!['admin', 'principal', 'assistant-principal'].includes(req.user.role)) return res.status(403).json({ msg: 'Access denied' });
     
     const allUsers = await User.find({});
     const pCount = allUsers.filter(u => u.role === 'principal').length;
+    const apCount = allUsers.filter(u => u.role === 'assistant-principal').length;
     const activeCoPrincipals = allUsers.filter(u => u.role === 'co-principal' && u.isActive);
     const coCount = activeCoPrincipals.length;
     const assignedLevels = activeCoPrincipals.map(u => u.assignedlevel).filter(val => val !== undefined && val !== null);
 
     res.json({ 
       principalCount: pCount, 
+      assistantPrincipalCount: apCount,
       coPrincipalCount: coCount,
       assignedCoPrincipalLevels: assignedLevels
     });
@@ -141,7 +143,7 @@ exports.getStaffFullData = async (req, res) => {
 exports.addStaff = async (req, res) => {
   try {
     const requesterRole = req.user.role;
-    if (!['admin', 'principal'].includes(requesterRole)) {
+    if (!['admin', 'principal', 'assistant-principal'].includes(requesterRole)) {
       return res.status(403).json({ msg: 'Unauthorized access' });
     }
     const {
@@ -168,6 +170,12 @@ exports.addStaff = async (req, res) => {
       const allUsers = await User.find({}).select('role');
       const pCount = allUsers.filter(u => u.role === 'principal').length;
       if (pCount >= 1) return res.status(400).json({ msg: 'A principal already exists' });
+    }
+
+    if (role === 'assistant-principal') {
+      const allUsers = await User.find({}).select('role');
+      const apCount = allUsers.filter(u => u.role === 'assistant-principal').length;
+      if (apCount >= 1) return res.status(400).json({ msg: 'An assistant principal already exists' });
     }
 
     if (role === 'co-principal') {

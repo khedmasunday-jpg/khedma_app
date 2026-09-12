@@ -307,47 +307,32 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                 <View style={{ marginBottom: 4 }}>
                   {Platform.OS === 'web' ? (
                     <>
-                      <View style={styles.webDateWrapper}>
-                        <View 
-                          pointerEvents="none" 
-                          style={{
-                            position: 'absolute',
-                            top: 0, left: 0, right: 0, bottom: 0,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            paddingHorizontal: 14,
-                            zIndex: 1
-                          }}
-                        >
-                          <Text style={{ color: theme.text, fontSize: 15 }}>
-                            {getSafeField('birthdate') ? formatDateDDMMYYYY(getSafeField('birthdate')) : 'dd/mm/yyyy'}
-                          </Text>
-                          <Ionicons 
-                            name="calendar-outline" 
-                            size={18} 
-                            color={theme.iconColor} 
-                          />
-                        </View>
-                        <input
-                          type="date"
-                          value={getSafeField('birthdate') ? getSafeField('birthdate').split('T')[0] : ''}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            if (v) {
-                              const d = new Date(v);
-                              d.setFullYear(PICKER_YEAR);
-                              handleChange('birthdate', d.toISOString());
-                            } else {
-                              handleChange('birthdate', '');
-                            }
-                          }}
-                          onClick={(e) => {
-                            try { e.target.showPicker(); } catch (err) {}
-                          }}
-                          style={styles.webDateInput}
-                        />
-                      </View>
+                      <input
+                        type="date"
+                        value={getSafeField('birthdate') ? getSafeField('birthdate').split('T')[0] : ''}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v) {
+                            const [year, month, day] = v.split('-');
+                            const d = new Date(PICKER_YEAR, Number(month) - 1, Number(day), 12, 0, 0);
+                            handleChange('birthdate', d.toISOString());
+                          } else {
+                            handleChange('birthdate', '');
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          height: 45,
+                          padding: '10px 14px',
+                          fontSize: '15px',
+                          border: `1px solid ${theme.borderColor}`,
+                          borderRadius: '10px',
+                          backgroundColor: theme.cardBackground,
+                          color: theme.text,
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
                     </>
                   ) : (
                     <>
@@ -443,7 +428,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                     >
                       <option value="">-- اختر المنصب --</option>
                       {stats.principalCount === 0 && <option value="principal">امينه الخدمه</option>}
-                      <option value="assistant-principal">أمين مساعد</option>
+                      {stats.assistantPrincipalCount === 0 && <option value="assistant-principal">أمين مساعد</option>}
                       {stats.coPrincipalCount < 3 && <option value="co-principal">أمين مرحلة</option>}
                       <option value="teacher">خادم</option>
                     </select>
@@ -462,7 +447,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
                   >
                     <Picker.Item label="-- اختر المنصب --" value="" />
                     {stats.principalCount === 0 && <Picker.Item label="امينه الخدمه" value="principal" />}
-                    <Picker.Item label="أمين مساعد" value="assistant-principal" />
+                    {stats.assistantPrincipalCount === 0 && <Picker.Item label="أمين مساعد" value="assistant-principal" />}
                     {stats.coPrincipalCount < 3 && <Picker.Item label="أمين مرحلة" value="co-principal" />}
                     <Picker.Item label="خادم" value="teacher" />
                   </Picker>
