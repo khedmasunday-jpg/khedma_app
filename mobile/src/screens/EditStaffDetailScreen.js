@@ -199,7 +199,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
 
       await axios.patch(`${API_URL}/${userId}`, updates, { headers: { Authorization: `Bearer ${token}` } });
 
-      if (requesterRole === 'admin'|| requesterRole === 'principal') {
+      if (requesterRole === 'admin'|| requesterRole === 'principal' || requesterRole === 'assistant-principal') {
         const credPayload = {};
         const currentUsername = getSafeField('username');
         if (currentUsername && currentUsername !== origUsername) {
@@ -422,7 +422,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
           ))}
 
           {}
-          {requesterRole === 'admin' && (
+          {(requesterRole === 'admin' || requesterRole === 'principal' || requesterRole === 'assistant-principal') && (
             <View style={styles.fieldRow}>
               <Text style={[styles.label, { textAlign: 'left' }]}>
                 {getFieldLabel('role')}

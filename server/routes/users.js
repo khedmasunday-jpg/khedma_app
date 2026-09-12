@@ -262,10 +262,22 @@ router.get('/:id', verifyToken, async (req, res) => {
   }
 });
 
-router.patch('/:id/role', verifyToken, authorizeRoles('admin'), async (req, res) => {
+router.patch('/:id/role', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal'), async (req, res) => {
   try {
     const { role } = req.body;
     
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ msg: 'User not found' });
+
+    if (req.user.role === 'principal' || req.user.role === 'assistant-principal') {
+      if (targetUser.role === 'admin' || targetUser.role === 'principal' || (req.user.role === 'assistant-principal' && targetUser.role === 'assistant-principal')) {
+        return res.status(403).json({ msg: 'You do not have permission to change the role of this user' });
+      }
+      if (role === 'admin' || role === 'principal' || (req.user.role === 'assistant-principal' && role === 'assistant-principal')) {
+        return res.status(403).json({ msg: 'You do not have permission to promote a user to this role' });
+      }
+    }
+
     const allUsers = await User.find().select('role');
     if (role === 'principal') {
       const principalCount = allUsers.filter(u => u.role === 'principal').length;
