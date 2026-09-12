@@ -51,7 +51,7 @@ export default function EditStaffListScreen({ route, navigation }) {const { them
     setLoading(true);
     try {
       let res;
-      if (role === 'admin') {
+      if (role === 'admin' || role === 'principal' || role === 'assistant-principal') {
         res = await axios.get(`${API_URL}/users/staff`, { headers: { Authorization: `Bearer ${token}` } });
       } else {
         res = await axios.get(`${API_URL}/users/staff-safe`, { headers: { Authorization: `Bearer ${token}` } });

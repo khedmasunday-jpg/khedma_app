@@ -93,7 +93,7 @@ exports.getStaffStats = async (req, res) => {
 
 exports.getStaffSafeData = async (req, res) => {
   try {
-    if (req.user.role !== 'principal' && req.user.role !== 'admin') {
+    if (req.user.role !== 'principal' && req.user.role !== 'admin' && req.user.role !== 'assistant-principal') {
       return res.status(403).json({ msg: 'Unauthorized' });
     }
 

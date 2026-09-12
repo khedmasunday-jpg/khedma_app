@@ -510,27 +510,6 @@ export default function AddStaffScreen({ route, navigation }) {const { theme, is
           </View>
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, { textAlign: 'left' }]}>{t('phoneLabel')}</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: theme.borderColor, borderRadius: 10, backgroundColor: theme.cardBackground, overflow: 'hidden', height: 45 }}>
-            <TouchableOpacity
-              onPress={pickContactForStaff}
-              style={{ paddingHorizontal: 12, paddingVertical: 10, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderRightColor: 'rgba(47,67,96,0.15)' }}
-              activeOpacity={0.6}
-            >
-              <Ionicons name="call-outline" size={20} color={theme.iconColor} />
-            </TouchableOpacity>
-            <TextInput
-              value={staff.phonenumber}
-              onChangeText={val => handleChange('phonenumber', val)}
-              style={[styles.input, { flex: 1, borderWidth: 0, height: 45, textAlign: 'left', outlineStyle: 'none' }]}
-              keyboardType="phone-pad"
-            />
-          </View>
-          <Text style={{ fontSize: 11, color: theme.textMuted, marginTop: 3 }}>
-            {locale === 'ar' ? '📞 اضغط على أيقونة الهاتف لاستيراد رقم' : '📞 Tap the phone icon to pick from contacts'}
-          </Text>
-        </View>
 
         <View style={styles.inputGroup}>
           <Text style={[styles.label, { textAlign: 'left' }]}>{t('birthdate')}</Text>

@@ -256,7 +256,7 @@ export default function EditStaffDetailScreen({ route, navigation }) {const { th
   );
 
   const canDelete = (requesterRole === 'admin' || requesterRole === 'principal') && user;
-  const editableFields = ['fullName', 'phonenumber', 'birthdate', 'username', 'telegramChatId'];
+  const editableFields = ['fullName', 'birthdate', 'username', 'telegramChatId'];
   
   const classTranslations = {
     'فصل السيرافيم': 'classSeraphim',

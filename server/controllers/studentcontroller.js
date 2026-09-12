@@ -417,7 +417,7 @@ exports.getStudentData = async (req, res) => {
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
 
     let students;
-    if (user.role === 'admin' || user.role === 'principal') {
+    if (user.role === 'admin' || user.role === 'principal' || user.role === 'assistant-principal') {
       const docs = await Student.find({});
       students = docs
         .map(s => ({ doc: s, level: typeof s.getClassLevel === 'function' ? s.getClassLevel() : s.classLevel, name: typeof s.getClassname === 'function' ? s.getClassname() : s.classname }))
@@ -481,6 +481,7 @@ exports.editStudentData = async (req, res) => {
     if (!student) return res.status(404).json({ msg: 'Student not found' });
   if (user.role === 'admin' ||
     user.role === 'principal' ||
+    user.role === 'assistant-principal' ||
     (user.role === 'co-principal' && (typeof student.getClassLevel === 'function' ? student.getClassLevel() : student.classLevel) === user.assignedlevel) ||
     (user.role === 'teacher' && (() => {
       const cleanUserClass = (user.assignedclass || '').replace(/^فصل\s+/, '').trim();

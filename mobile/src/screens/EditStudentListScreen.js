@@ -137,7 +137,7 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
             <Ionicons name={showFilter ? "filter" : "filter-outline"} size={20} color={theme.iconColor} />
           </TouchableOpacity>
           
-          {(role === 'principal' || role === 'admin') && students.length > 0 && (
+          {(role === 'principal' || role === 'admin' || role === 'assistant-principal') && students.length > 0 && (
             <TouchableOpacity
               style={styles.selectButton}
               onPress={() => {
