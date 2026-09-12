@@ -164,9 +164,9 @@ export default function PostLoginScreen({ route, navigation }) {
         headers: { Authorization: token }
       });
 
-      Alert.alert(
+      showCustomAlert(
         locale === 'ar' ? 'تم بنجاح' : 'Success',
-        locale === 'ar' ? 'تم تحديث بيانات الملف الشخصي بنجاح.' : 'Profile updated successfully.'
+        locale === 'ar' ? 'تم تحديث البيانات بنجاح.' : 'Credentials updated.'
       );
       
       setCurrentUsername(newUsername);
