@@ -105,6 +105,11 @@ UserSchema.pre('save', function(next) {
   next();
 });
 
+UserSchema.methods.getFullName = function() {
+  const { decrypt } = require('../utils/crypto');
+  return this.fullName_enc ? decrypt(this.fullName_enc) : '';
+};
+
 UserSchema.methods.toJSON = function() {
   const obj = this.toObject({ virtuals: true, getters: true });
   delete obj.fullName_enc;

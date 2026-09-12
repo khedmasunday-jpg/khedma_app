@@ -113,6 +113,32 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
     }
   };
 
+  const undoTransaction = (logId) => {
+    Alert.alert(
+      locale === 'ar' ? 'تأكيد' : 'Confirm',
+      locale === 'ar' ? 'هل أنت متأكد من إلغاء هذا السجل؟' : 'Are you sure you want to undo this transaction?',
+      [
+        { text: locale === 'ar' ? 'إلغاء' : 'Cancel', style: 'cancel' },
+        { 
+          text: locale === 'ar' ? 'نعم' : 'Yes', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = getAuthToken();
+              await Axios.delete(`${API_URL}/tayo/transaction/${logId}`, { headers: { Authorization: token } });
+              fetchData();
+              fetchGlobalLogs();
+              if (selectedStudent) fetchStudentLogs(selectedStudent._id);
+            } catch (err) {
+              console.error(err);
+              Alert.alert(t('error'), 'Failed to undo transaction');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const submitDeduct = async () => {
     if (!amount || isNaN(amount) || parseInt(amount) <= 0) return Alert.alert(t('error'), t('invalidNumber'));
 
@@ -263,9 +289,19 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
                       <Text style={styles.logReason}>{item.reason}</Text>
                       <Text style={styles.logDate}>{new Date(item.date).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} • {item.givenBy?.fullName || item.givenBy?.username}</Text>
                     </View>
-                    <Text style={[styles.logAmount, { color: item.amount > 0 ? '#2ecc71' : '#e74c3c' }]}>
-                      {item.amount > 0 ? '+' : ''}{item.amount}
-                    </Text>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={[styles.logAmount, { color: item.amount > 0 ? '#2ecc71' : '#e74c3c' }]}>
+                        {item.amount > 0 ? '+' : ''}{item.amount}
+                      </Text>
+                      {(role === 'admin' || role === 'principal' || role === 'assistant-principal') && (
+                        <TouchableOpacity 
+                          onPress={() => undoTransaction(item._id)}
+                          style={{ marginTop: 8 }}
+                        >
+                          <Text style={{ color: '#e74c3c', fontSize: 12 }}>{locale === 'ar' ? 'إلغاء' : 'Undo'}</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </View>
                 )}
                 ListEmptyComponent={<Text style={{textAlign: 'center', marginTop: 20, color: '#7f8c8d'}}>{t('noLogs')}</Text>}
@@ -312,9 +348,19 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
                     <Text style={[styles.logReason, { fontSize: 13, marginTop: 2, color: theme.textMuted }]}>{item.reason}</Text>
                     <Text style={styles.logDate}>{new Date(item.date).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} • {item.givenBy?.fullName || item.givenBy?.username}</Text>
                   </View>
-                  <Text style={[styles.logAmount, { color: item.amount > 0 ? '#2ecc71' : '#e74c3c' }]}>
-                    {item.amount > 0 ? '+' : ''}{item.amount}
-                  </Text>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={[styles.logAmount, { color: item.amount > 0 ? '#2ecc71' : '#e74c3c' }]}>
+                      {item.amount > 0 ? '+' : ''}{item.amount}
+                    </Text>
+                    {(role === 'admin' || role === 'principal' || role === 'assistant-principal') && (
+                      <TouchableOpacity 
+                        onPress={() => undoTransaction(item._id)}
+                        style={{ marginTop: 8 }}
+                      >
+                        <Text style={{ color: '#e74c3c', fontSize: 12 }}>{locale === 'ar' ? 'إلغاء' : 'Undo'}</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               )}
               ListEmptyComponent={<Text style={{textAlign: 'center', marginTop: 20, color: '#7f8c8d'}}>{t('noLogs')}</Text>}

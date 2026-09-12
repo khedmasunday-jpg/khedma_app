@@ -25,6 +25,24 @@ router.get('/students', verifyToken, authorizeRoles('admin', 'principal', 'assis
   }
 });
 
+router.delete('/transaction/:id', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal'), async (req, res) => {
+  try {
+    const log = await TayoLog.findById(req.params.id);
+    if (!log) return res.status(404).json({ msg: 'Log not found' });
+    
+    const student = await Student.findById(log.student);
+    if (student) {
+      student.tayoBalance = (student.tayoBalance || 0) - log.amount;
+      await student.save();
+    }
+    await TayoLog.findByIdAndDelete(req.params.id);
+    res.json({ msg: 'Transaction reverted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'assistant-principal', 'co-principal', 'teacher'), async (req, res) => {
   try {
     const { studentId, amount, reason } = req.body;
@@ -66,8 +84,16 @@ router.get('/logs', verifyToken, authorizeRoles('admin', 'principal', 'assistant
       .populate('givenBy', 'fullName_enc role username')
       .populate('student', 'fullName_enc classname_enc classLevel_enc')
       .sort({ date: -1 })
-      .limit(100); // limit to recent 100 for performance
-    res.json(logs);
+      .limit(100); 
+
+    const mappedLogs = logs.map(log => {
+      const obj = log.toJSON();
+      if (log.givenBy) obj.givenBy.fullName = typeof log.givenBy.getFullName === 'function' ? log.givenBy.getFullName() : (log.givenBy.fullName || '');
+      if (log.student) obj.student.fullName = typeof log.student.getFullName === 'function' ? log.student.getFullName() : (log.student.fullName || '');
+      return obj;
+    });
+
+    res.json(mappedLogs);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server Error' });
@@ -79,7 +105,13 @@ router.get('/logs/:id', verifyToken, async (req, res) => {
     const logs = await TayoLog.find({ student: req.params.id })
       .populate('givenBy', 'fullName_enc role username')
       .sort({ date: -1 });
-    res.json(logs);
+
+    const mappedLogs = logs.map(log => {
+      const obj = log.toJSON();
+      if (log.givenBy) obj.givenBy.fullName = typeof log.givenBy.getFullName === 'function' ? log.givenBy.getFullName() : (log.givenBy.fullName || '');
+      return obj;
+    });
+    res.json(mappedLogs);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server Error' });
