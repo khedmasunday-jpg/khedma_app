@@ -352,9 +352,7 @@ export default function PostLoginScreen({ route, navigation }) {
                   )}
                 </View>
                 <Text style={[styles.buttonLabel, { color: theme.text }]}>
-                  {btn.labelKey === 'rssLinks' 
-                    ? (locale === 'ar' ? 'المنهج' : 'Syllabus/Books') 
-                    : t(btn.labelKey)}
+                  {t(btn.labelKey)}
                 </Text>
               </TouchableOpacity>
             );

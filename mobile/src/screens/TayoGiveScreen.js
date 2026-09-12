@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, FlatList, TextInput, Modal, Alert, KeyboardAvoidingView, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, FlatList, TextInput, Modal, Alert, KeyboardAvoidingView, ScrollView, ActivityIndicator, Animated } from 'react-native';
 import Axios from 'axios';
 import { API_URL } from '../config/api';
 import { getAuthToken } from '../config/authSession';
@@ -29,6 +29,22 @@ export default function TayoGiveScreen({ navigation }) {const { theme, isDarkMod
   const [reason, setReason] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  const showToast = (message) => {
+    setToastMessage(message);
+    setToastVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => {
+      setToastVisible(false);
+    });
+  };
 
   useEffect(() => {
     fetchStudents();
@@ -108,7 +124,7 @@ export default function TayoGiveScreen({ navigation }) {const { theme, isDarkMod
       
       invalidateCache('tayo/students');
       setModalVisible(false);
-      Alert.alert(t('success'), t('tayoAddedSuccess'));
+      showToast(t('tayoAddedSuccess'));
     } catch (err) {
       setStudents(previousStudents);
       Alert.alert(t('error'), t('tayoAddError'));
@@ -239,6 +255,20 @@ export default function TayoGiveScreen({ navigation }) {const { theme, isDarkMod
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {toastVisible && (
+        <Animated.View
+          style={[
+            styles.toastContainer,
+            { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
+            {toastMessage}
+          </Text>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -293,5 +323,28 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
   cancel: { backgroundColor: '#ebe6da' },
   cancelBtnText: { color: theme.text, fontWeight: 'bold', fontSize: 16 },
   save: { backgroundColor: theme.primary },
-  saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
+  saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  toastContainer: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500'
+  }
 });

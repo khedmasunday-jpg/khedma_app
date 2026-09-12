@@ -63,8 +63,8 @@ router.post('/transaction', verifyToken, authorizeRoles('admin', 'principal', 'c
 router.get('/logs', verifyToken, authorizeRoles('admin', 'principal', 'co-principal'), async (req, res) => {
   try {
     const logs = await TayoLog.find({})
-      .populate('givenBy', 'fullName role')
-      .populate('student', 'fullName classname classLevel')
+      .populate('givenBy', 'fullName_enc role username')
+      .populate('student', 'fullName_enc classname_enc classLevel_enc')
       .sort({ date: -1 })
       .limit(100); // limit to recent 100 for performance
     res.json(logs);
@@ -77,7 +77,7 @@ router.get('/logs', verifyToken, authorizeRoles('admin', 'principal', 'co-princi
 router.get('/logs/:id', verifyToken, async (req, res) => {
   try {
     const logs = await TayoLog.find({ student: req.params.id })
-      .populate('givenBy', 'name rank')
+      .populate('givenBy', 'fullName_enc role username')
       .sort({ date: -1 });
     res.json(logs);
   } catch (err) {

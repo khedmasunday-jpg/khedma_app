@@ -24,6 +24,8 @@ async function autoRegisterWebhook(host) {
   }
 }
 
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL === 'true' || !!process.env.VERCEL_URL;
+
 function initializeTelegram() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
@@ -34,10 +36,21 @@ function initializeTelegram() {
 
   try {
     if (!bot) {
-      bot = new TelegramBot(token, { polling: false });
+      if (isVercel) {
+        bot = new TelegramBot(token, { polling: false });
+        autoRegisterWebhook();
+      } else {
+        bot = new TelegramBot(token, { polling: true });
+        bot.on('message', (msg) => {
+          handleIncomingUpdate({ message: msg });
+        });
+        // Clear webhook so polling can work
+        axios.get(`https://api.telegram.org/bot${token}/deleteWebhook`).catch(err => {
+          console.error('Failed to delete webhook for polling:', err.message);
+        });
+      }
     }
     botStatus = 'connected';
-    autoRegisterWebhook();
     return true;
   } catch (err) {
     console.error('❌ [Telegram] Failed to initialize bot:', err.message);

@@ -191,7 +191,7 @@ export default function RssLinksScreen({ route, navigation }) {
                 onPress={() => setShowOtherLinks(!showOtherLinks)}
               >
                 <Text style={{ color: theme.primary, fontWeight: 'bold', fontSize: 16 }}>
-                  {locale === 'ar' ? 'مناهج اخري' : 'Other Resources'}
+                  {locale === 'ar' ? 'مناهج اخري' : 'Other Curricula'}
                 </Text>
               </TouchableOpacity>
               

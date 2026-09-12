@@ -113,7 +113,7 @@ function AppNavigator() {
           }),
         }}
       >
-        <Ionicons name={locale === 'ar' ? "arrow-forward" : "arrow-back"} size={20} color={theme.iconColor} />
+        <Ionicons name="arrow-back" size={20} color={theme.iconColor} />
       </TouchableOpacity>
     );
   };
@@ -211,7 +211,7 @@ function AppNavigator() {
       <Stack.Screen
         name="RssLinksScreen"
         component={RssLinksScreen}
-        options={{ title: 'RSS Links' }}
+        options={{ title: t('rssLinks') }}
       />
       <Stack.Screen 
         name="TakingAttendance" 
