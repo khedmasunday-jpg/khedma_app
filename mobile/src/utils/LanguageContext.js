@@ -15,7 +15,7 @@ export const translations = {
     takeAttendance: "Take Attendance",
     birthdays: "Birthdays",
     classDisplay: "Class Display",
-    editVisitation: "Edit Visitation",
+    editVisitation: "Edit khodam el 2ftkad",
     addStudents: "Add Students",
     addStaff: "Add Staff",
     activateDeactivate: "Activate / Deactivate",
