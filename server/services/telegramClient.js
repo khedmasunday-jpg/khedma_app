@@ -11,7 +11,7 @@ async function autoRegisterWebhook(host) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) return;
 
-  const targetHost = host || process.env.VERCEL_URL || 'khedma-app-one.vercel.app';
+  const targetHost = host || process.env.PRODUCTION_URL || 'khedma-app-one.vercel.app';
   let cleanHost = targetHost.replace(/^https?:\/\//, '').replace(/\/$/, '');
   const webhookUrl = `https://${cleanHost}/api/telegram/webhook`;
 
