@@ -6,6 +6,7 @@ import axios from 'axios';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useLanguage } from '../utils/LanguageContext';
 import { useTheme } from '../utils/ThemeContext';
 import { logger } from '../utils/logger';
@@ -102,7 +103,7 @@ export default function LoginScreen({ navigation }) {
       <View style={[styles.card, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
         <View style={styles.logoContainer}>
           <View style={[styles.logoWrap, { backgroundColor: isDarkMode ? '#1e293b' : 'rgba(255, 255, 255, 0.78)', borderColor: theme.borderColor }]}>
-            <Ionicons name="book-outline" size={48} color={theme.iconColor} />
+            <FontAwesome5 name="cross" size={48} color={theme.iconColor} />
           </View>
           <Text style={[styles.title, { color: theme.text }]}>{locale === 'ar' ? 'خدمه اولي تانيه تالته ابتدائي الاحد' : 'Khedma 1-2-3 Sunday'}</Text>
         </View>
