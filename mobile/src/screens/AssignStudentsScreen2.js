@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
@@ -11,6 +11,7 @@ import {
   Platform,
   TextInput,
   KeyboardAvoidingView,
+  Animated,
 } from 'react-native';
 import axios from 'axios';
 import { createApiClient } from '../config/api';
@@ -89,6 +90,22 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
   const [loading, setLoading] = useState(true);
   const [isCoPrincipal, setIsCoPrincipal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  const showToast = (message) => {
+    setToastMessage(message);
+    setToastVisible(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true })
+    ]).start(() => {
+      setToastVisible(false);
+    });
+  };
   
   const { t, locale } = useLanguage();
   const isRtl = locale === 'ar';
@@ -262,11 +279,12 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
   const removeStudents = async () => {
     try {
       logger.log('Unassigning all students from teacher:', teacher._id);
-      await client.post('/classes/co-principal/remove-students', {
+      const res = await client.post('/classes/co-principal/remove-students', {
         teacherId: teacher._id,
         allClasses: true,
       });
-      showAlert(t('success'), localT('unassignedSuccess'));
+      logger.log('Remove all response:', res.data);
+      showToast(localT('unassignedSuccess'));
       await loadStudents();
     } catch (err) {
       logger.error('Error unassigning students:', err);
@@ -293,7 +311,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
         teacherId: teacher._id,
         studentIds: toRemove,
       });
-      showAlert(t('success'), `${localT('removedSuccess')}: ${toRemove.length}`);
+      showToast(`${localT('removedSuccess')}: ${toRemove.length}`);
       setSelected(prev => prev.filter(id => !toRemove.includes(id)));
       await loadStudents();
     } catch (err) {
@@ -320,7 +338,7 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
         teacherId: teacher._id,
         studentIds: payloadIds,
       });
-      showAlert(t('success'), localT('assignedSuccess'));
+      showToast(localT('assignedSuccess'));
       await loadStudents();
     } catch (err) {
       logger.error('Error assigning students:', err);
@@ -512,6 +530,20 @@ export default function AssignStudentsScreen2({ route, navigation }) {const { th
           </View>
         )}
       </View>
+
+      {toastVisible && (
+        <Animated.View
+          style={[
+            styles.toastContainer,
+            { backgroundColor: theme.cardBackground, borderColor: theme.borderColor, opacity: toastOpacity }
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={[styles.toastMessage, { color: theme.text, textAlign: 'center' }]}>
+            {toastMessage}
+          </Text>
+        </Animated.View>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -792,4 +824,27 @@ const getStyles = (theme, isDarkMode) => StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  toastContainer: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    maxWidth: '90%',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  toastMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500'
+  }
 });
