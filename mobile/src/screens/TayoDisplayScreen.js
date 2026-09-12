@@ -286,8 +286,13 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
                       <Ionicons name={item.amount > 0 ? "arrow-up-circle" : "arrow-down-circle"} size={24} color={item.amount > 0 ? '#2ecc71' : '#e74c3c'} />
                     </View>
                     <View style={styles.logDetails}>
-                      <Text style={styles.logReason}>{item.reason}</Text>
-                      <Text style={styles.logDate}>{new Date(item.date).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} • {item.givenBy?.fullName || item.givenBy?.username}</Text>
+                      <Text style={[styles.logReason, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>{item.reason}</Text>
+                      <Text style={[styles.logDate, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>
+                        {locale === 'ar' 
+                          ? `${item.givenBy?.fullName || item.givenBy?.username} • ${new Date(item.date).toLocaleString('ar-EG')}`
+                          : `${new Date(item.date).toLocaleString('en-US')} • ${item.givenBy?.fullName || item.givenBy?.username}`
+                        }
+                      </Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
                       <Text style={[styles.logAmount, { color: item.amount > 0 ? '#2ecc71' : '#e74c3c' }]}>
@@ -342,11 +347,16 @@ export default function TayoDisplayScreen({ navigation }) {const { theme, isDark
                     <Ionicons name={item.amount > 0 ? "arrow-up-circle" : "arrow-down-circle"} size={24} color={item.amount > 0 ? '#2ecc71' : '#e74c3c'} />
                   </View>
                   <View style={styles.logDetails}>
-                    <Text style={styles.logReason}>
+                    <Text style={[styles.logReason, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>
                       {item.student?.fullName} ({item.student?.classname || '?'})
                     </Text>
-                    <Text style={[styles.logReason, { fontSize: 13, marginTop: 2, color: theme.textMuted }]}>{item.reason}</Text>
-                    <Text style={styles.logDate}>{new Date(item.date).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')} • {item.givenBy?.fullName || item.givenBy?.username}</Text>
+                    <Text style={[styles.logReason, { fontSize: 13, marginTop: 2, color: theme.textMuted, textAlign: locale === 'ar' ? 'right' : 'left' }]}>{item.reason}</Text>
+                    <Text style={[styles.logDate, { textAlign: locale === 'ar' ? 'right' : 'left' }]}>
+                      {locale === 'ar' 
+                        ? `${item.givenBy?.fullName || item.givenBy?.username} • ${new Date(item.date).toLocaleString('ar-EG')}`
+                        : `${new Date(item.date).toLocaleString('en-US')} • ${item.givenBy?.fullName || item.givenBy?.username}`
+                      }
+                    </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={[styles.logAmount, { color: item.amount > 0 ? '#2ecc71' : '#e74c3c' }]}>
