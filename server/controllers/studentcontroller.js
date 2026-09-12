@@ -65,7 +65,10 @@ exports.deleteStudent = async (req, res) => {
     }
 
     const Class = require('../models/Class');
+    const TayoLog = require('../models/TayoLog');
+    
     await Class.updateMany({ students: student._id }, { $pull: { students: student._id } });
+    await TayoLog.deleteMany({ student: student._id });
 
     await Student.findByIdAndDelete(req.params.id);
     await releaseId(student.id); 

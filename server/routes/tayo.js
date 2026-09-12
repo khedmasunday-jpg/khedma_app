@@ -86,7 +86,7 @@ router.get('/logs', verifyToken, authorizeRoles('admin', 'principal', 'assistant
       .sort({ date: -1 })
       .limit(100); 
 
-    const mappedLogs = logs.map(log => {
+    const mappedLogs = logs.filter(log => log.student).map(log => {
       const obj = log.toJSON();
       if (log.givenBy) obj.givenBy.fullName = typeof log.givenBy.getFullName === 'function' ? log.givenBy.getFullName() : (log.givenBy.fullName || '');
       if (log.student) obj.student.fullName = typeof log.student.getFullName === 'function' ? log.student.getFullName() : (log.student.fullName || '');
