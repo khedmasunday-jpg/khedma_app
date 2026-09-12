@@ -3,6 +3,7 @@ import { View, ScrollView, Animated, StyleSheet, TouchableOpacity, Text, Alert, 
 import { useFocusEffect } from '@react-navigation/native';
 import Axios from 'axios';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useLanguage } from '../utils/LanguageContext';
 import { useTheme } from '../utils/ThemeContext';
 import { API_URL } from '../config/api';
@@ -326,7 +327,7 @@ export default function PostLoginScreen({ route, navigation }) {
 
         <View style={styles.header}>
           <View style={[styles.logoWrap, { backgroundColor: theme.cardBackground, borderColor: theme.borderColor }]}>
-            <Ionicons name="book" size={32} color={theme.iconColor} />
+            <FontAwesome5 name="cross" size={32} color={theme.iconColor} />
           </View>
           <Text style={[styles.welcome, { color: theme.text }]}>{t('welcome')}، {fullName || role}</Text>
           <Text style={[styles.roleLabel, { color: theme.textMuted }]}>{getLocalizedRole(role).toUpperCase()}</Text>
