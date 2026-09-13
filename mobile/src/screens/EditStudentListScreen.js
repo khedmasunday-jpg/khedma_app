@@ -225,37 +225,53 @@ export default function EditStudentListScreen({ route, navigation }) {const { th
           </View>
 
           {}
-          <View style={styles.pickerWrapper}>
-            {Platform.OS === 'web' ? (
-              <select
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                disabled={!selectedGrade}
-                style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr' }])}
-              >
-                <option value="">{t('selectClass')}</option>
-                {serverClasses
-                  .filter((c) => c.year === Number(selectedGrade))
-                  .map((c) => (
-                    <option key={c._id} value={c.name}>{c.name}</option>
+          <View style={[styles.pickerWrapper, !selectedGrade && { opacity: 0.5 }]}>
+            <Ionicons name="people-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
+            {(() => {
+              const yearVal = selectedGrade;
+              let classOpts = [];
+              if (yearVal) {
+                classOpts = serverClasses
+                  .filter((c) => Number(c.year) === Number(yearVal))
+                  .map((c) => c.name);
+                  
+                if (classOpts.length === 0) {
+                  const fallback = {
+                    "1": ["فصل السيرافيم", "فصل الشاروبيم"],
+                    "2": ["الملاك رفائيل", "الملاك ميخائيل"],
+                    "3": ["الملاك سوريال", "الملاك غبريال"],
+                  };
+                  classOpts = fallback[String(yearVal)] || [];
+                }
+              }
+
+              return Platform.OS === 'web' ? (
+                <select
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  disabled={!selectedGrade}
+                  style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr' }])}
+                >
+                  <option value="">{t('selectClass')}</option>
+                  {classOpts.map((cName) => (
+                    <option key={cName} value={cName}>{cName}</option>
                   ))}
-              </select>
-            ) : (
-              <Picker
-                selectedValue={selectedClass}
-                onValueChange={(v) => setSelectedClass(v)}
-                enabled={!!selectedGrade}
-                style={styles.nativePicker}
-                dropdownIconColor="#2f4360"
-              >
-                <Picker.Item label={t('selectClass')} value="" />
-                {serverClasses
-                  .filter((c) => c.year === Number(selectedGrade))
-                  .map((c) => (
-                    <Picker.Item key={c._id} label={c.name} value={c.name} />
+                </select>
+              ) : (
+                <Picker
+                  selectedValue={selectedClass}
+                  onValueChange={(v) => setSelectedClass(v)}
+                  enabled={!!selectedGrade}
+                  style={styles.nativePicker}
+                  dropdownIconColor="#2f4360"
+                >
+                  <Picker.Item label={t('selectClass')} value="" />
+                  {classOpts.map((cName) => (
+                    <Picker.Item key={cName} label={cName} value={cName} />
                   ))}
-              </Picker>
-            )}
+                </Picker>
+              );
+            })()}
           </View>
         </View>
       </View>

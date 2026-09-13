@@ -547,19 +547,31 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
           <Text style={[styles.label, { textAlign: 'left' }]}>{t('selectClass')}</Text>
           <View style={styles.pickerWrapper}>
             <Ionicons name="people-outline" size={20} color={theme.iconColor} style={styles.inputIcon} />
-            {student.classLevel ? (
-              Platform.OS === 'web' ? (
+            {student.classLevel ? (() => {
+              const yearVal = student.classLevel;
+              let classOpts = serverClasses
+                .filter((c) => Number(c.year) === Number(yearVal))
+                .map((c) => c.name);
+                
+              if (classOpts.length === 0) {
+                const fallback = {
+                  "1": ["فصل السيرافيم", "فصل الشاروبيم"],
+                  "2": ["الملاك رفائيل", "الملاك ميخائيل"],
+                  "3": ["الملاك سوريال", "الملاك غبريال"],
+                };
+                classOpts = fallback[String(yearVal)] || [];
+              }
+
+              return Platform.OS === 'web' ? (
                 <select
                   value={student.classname}
                   onChange={(e) => handleChange('classname', e.target.value)}
                   style={StyleSheet.flatten([styles.webSelect, { direction: 'ltr' }])}
                 >
                   <option value="">{t('selectClass')}</option>
-                  {serverClasses
-                    .filter((c) => c.year === Number(student.classLevel))
-                    .map((c) => (
-                      <option key={c._id} value={c.name}>{c.name}</option>
-                    ))}
+                  {classOpts.map((cName) => (
+                    <option key={cName} value={cName}>{cName}</option>
+                  ))}
                 </select>
               ) : (
                 <Picker
@@ -569,14 +581,12 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
                   dropdownIconColor="#2f4360"
                 >
                   <Picker.Item label={t('selectClass')} value="" />
-                  {serverClasses
-                    .filter((c) => c.year === Number(student.classLevel))
-                    .map((c) => (
-                      <Picker.Item key={c._id} label={c.name} value={c.name} />
-                    ))}
+                  {classOpts.map((cName) => (
+                    <Picker.Item key={cName} label={cName} value={cName} />
+                  ))}
                 </Picker>
-              )
-            ) : (
+              );
+            })() : (
               <View style={styles.promptBoxInside}>
                 <Text style={styles.promptText}>{t('chooseLevelFirstPrompt')}</Text>
               </View>
