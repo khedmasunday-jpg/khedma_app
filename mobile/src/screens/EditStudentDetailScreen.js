@@ -615,11 +615,13 @@ export default function EditStudentDetailScreen({ route, navigation }) {const { 
                       <TouchableOpacity
                         key={i2}
                         onPress={() => {
-                          let num = p.number.replace(/\D/g, ''); 
+                          let num = p.number.replace(/[^\d+]/g, ''); 
                           if (num.startsWith('201') && num.length === 12) {
                             num = '0' + num.substring(2);
                           } else if (num.startsWith('00201') && num.length === 14) {
                             num = '0' + num.substring(4);
+                          } else if (num.startsWith('+201') && num.length === 13) {
+                            num = '0' + num.substring(3);
                           }
                           handleChange(contactPickerField, num);
                           setContactPickerVisible(false);

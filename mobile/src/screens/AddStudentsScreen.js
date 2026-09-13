@@ -188,8 +188,8 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
         const fullName = getVal(['اسم الطالب', 'الاسم بالكامل', 'الاسم', 'fullname', 'name', 'full name']);
         const classLevel = getVal(['السنة الدراسية', 'الصف', 'classlevel', 'grade', 'year', 'level']);
         const classname = getVal(['اسم الفصل', 'الفصل', 'classname', 'class name', 'class']);
-        const mother_phonenumber = String(getVal(['تليفون الأم', 'رقم الأم', 'mother phone', 'mother_phonenumber', 'motherphone'])).replace(/\D/g, '');
-        const father_phonenumber = String(getVal(['تليفون الأب', 'رقم الأب', 'father phone', 'father_phonenumber', 'fatherphone'])).replace(/\D/g, '');
+        const mother_phonenumber = String(getVal(['تليفون الأم', 'رقم الأم', 'mother phone', 'mother_phonenumber', 'motherphone'])).replace(/[^\d+]/g, '');
+        const father_phonenumber = String(getVal(['تليفون الأب', 'رقم الأب', 'father phone', 'father_phonenumber', 'fatherphone'])).replace(/[^\d+]/g, '');
         const birthdateRaw = getVal(['تاريخ الميلاد', 'birthdate', 'birth date', 'dob']);
 
         let birthdate = '';
@@ -336,9 +336,9 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
     const phoneFields = ['mother_phonenumber', 'father_phonenumber'];
     for (const field of phoneFields) {
-      if (student[field] && !/^\d+$/.test(student[field])) {
+      if (student[field] && !/^\+?\d+$/.test(student[field])) {
         const label = field === 'mother_phonenumber' ? t('motherPhone') : t('fatherPhone');
-        const msg = locale === 'ar' ? `${label} يجب أن يحتوي على أرقام فقط` : `${label} must contain digits only`;
+        const msg = locale === 'ar' ? `${label} يجب أن يحتوي على أرقام وعلامة + فقط` : `${label} must contain digits and + only`;
         setInlineMessage(msg);
         showAlert(locale === 'ar' ? 'خطأ' : 'Error', msg);
         return;
@@ -417,9 +417,9 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
 
         const phoneFields = ['mother_phonenumber', 'father_phonenumber'];
         for (const field of phoneFields) {
-          if (student[field] && !/^\d+$/.test(student[field])) {
+          if (student[field] && !/^\+?\d+$/.test(student[field])) {
             const label = field === 'mother_phonenumber' ? t('motherPhone') : t('fatherPhone');
-            const msg = locale === 'ar' ? `${label} يجب أن يحتوي على أرقام فقط` : `${label} must contain digits only`;
+            const msg = locale === 'ar' ? `${label} يجب أن يحتوي على أرقام وعلامة + فقط` : `${label} must contain digits and + only`;
             setInlineMessage(msg);
             showAlert(locale === 'ar' ? 'خطأ' : 'Error', msg);
             return;
@@ -614,7 +614,6 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               onChangeText={(v) => handleChange('mother_phonenumber', v)}
               keyboardType="phone-pad"
               style={[styles.input, { textAlign: 'left' }]}
-              placeholder={t('phonePlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
           </View>
@@ -639,7 +638,6 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
               onChangeText={(v) => handleChange('father_phonenumber', v)}
               keyboardType="phone-pad"
               style={[styles.input, { textAlign: 'left' }]}
-              placeholder={t('phonePlaceholder')}
               placeholderTextColor={theme.textMuted}
             />
           </View>
@@ -729,11 +727,13 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
                         <TouchableOpacity
                           key={i2}
                           onPress={() => {
-                            let num = p.number.replace(/\D/g, ''); 
+                            let num = p.number.replace(/[^\d+]/g, ''); 
                             if (num.startsWith('201') && num.length === 12) {
                               num = '0' + num.substring(2);
                             } else if (num.startsWith('00201') && num.length === 14) {
                               num = '0' + num.substring(4);
+                            } else if (num.startsWith('+201') && num.length === 13) {
+                              num = '0' + num.substring(3);
                             }
                             handleChange(contactPickerField, num);
                             setContactPickerVisible(false);
