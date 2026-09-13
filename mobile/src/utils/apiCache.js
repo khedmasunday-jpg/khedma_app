@@ -1,6 +1,7 @@
 
 import axios from 'axios';
 import { logger } from './logger';
+import { getDeviceId } from '../config/api';
 
 const memoryCache = new Map();
 const DEFAULT_TTL_MS = 3 * 60 * 1000; 
@@ -18,7 +19,13 @@ export async function fetchWithCache(url, config = {}, ttlMs = DEFAULT_TTL_MS) {
   }
 
   try {
-    const response = await axios.get(url, config);
+    const finalConfig = { ...config };
+    finalConfig.headers = {
+      ...finalConfig.headers,
+      'x-device-id': getDeviceId()
+    };
+    
+    const response = await axios.get(url, finalConfig);
     memoryCache.set(cacheKey, {
       timestamp: now,
       data: response.data,

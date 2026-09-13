@@ -115,6 +115,18 @@ export const API_URL = getApiBase();
 
 axios.defaults.timeout = 15000;
 
+axios.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken();
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    }
+    config.headers['x-device-id'] = getDeviceId();
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export function setupInterceptors(instance) {
   instance.interceptors.request.use(
     (config) => {

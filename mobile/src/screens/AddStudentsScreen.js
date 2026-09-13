@@ -14,7 +14,7 @@ import { View, Text, Animated,
 import { Picker } from '@react-native-picker/picker';
 import { loadContactsForPicker } from '../utils/contactPicker';
 import { logger } from '../utils/logger';
-import { API_URL } from '../config/api';
+import { API_URL, getDeviceId } from '../config/api';
 import { getAuthToken } from '../config/authSession';
 import { useLanguage } from '../utils/LanguageContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -91,7 +91,10 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
     (async () => {
       try {
         const res = await fetch(`${API_URL}/classes`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'x-device-id': getDeviceId()
+          },
         });
         if (!res.ok) {
           logger.error('Failed fetching classes', await res.text());
@@ -447,6 +450,7 @@ export default function AddStudentsScreen({ route, navigation }) {const { theme,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
+          'x-device-id': getDeviceId()
         },
         body: JSON.stringify(toSubmit),
       });
